@@ -30,7 +30,8 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "orkinosai-agent=main:main",
+            "orkinosai-agent=main",
         ],
     },
+    py_modules=["main"],
 )

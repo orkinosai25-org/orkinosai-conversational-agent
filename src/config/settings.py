@@ -105,9 +105,17 @@ class Settings(BaseModel):
 _settings: Optional[Settings] = None
 
 
+import threading
+
+_settings_lock = threading.Lock()
+
+
 def get_settings(config_path: str = "config.yaml") -> Settings:
-    """Get or create settings instance."""
+    """Get or create settings instance (thread-safe)."""
     global _settings
     if _settings is None:
-        _settings = Settings.from_yaml(config_path)
+        with _settings_lock:
+            # Double-check locking pattern
+            if _settings is None:
+                _settings = Settings.from_yaml(config_path)
     return _settings

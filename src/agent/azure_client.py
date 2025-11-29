@@ -70,10 +70,10 @@ class AzureAIClient:
                 "role": response.choices[0].message.role,
                 "finish_reason": response.choices[0].finish_reason,
                 "usage": {
-                    "prompt_tokens": response.usage.prompt_tokens,
-                    "completion_tokens": response.usage.completion_tokens,
-                    "total_tokens": response.usage.total_tokens
-                }
+                    "prompt_tokens": response.usage.prompt_tokens if response.usage else 0,
+                    "completion_tokens": response.usage.completion_tokens if response.usage else 0,
+                    "total_tokens": response.usage.total_tokens if response.usage else 0
+                } if response.usage else {}
             }
             
             logger.info(f"Generated completion with {result['usage']['total_tokens']} tokens")
