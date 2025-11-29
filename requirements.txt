@@ -1,0 +1,23 @@
+# Azure AI Services
+azure-ai-inference==1.0.0b5
+azure-identity==1.19.0
+azure-core==1.31.0
+
+# OpenAI SDK (for Azure OpenAI compatibility)
+openai==1.54.0
+
+# Environment management
+python-dotenv==1.0.1
+
+# Web framework for API endpoints
+flask==3.0.3
+flask-cors==5.0.0
+
+# Utilities
+requests==2.32.3
+pydantic==2.9.2
+pyyaml==6.0.2
+
+# Development and Testing
+pytest==8.3.3
+pytest-cov==6.0.0
