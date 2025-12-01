@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orkinosai Conversational Agent</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <div id="top-bar" class="panel top-bar">
+        <div class="brand">
+            <i class="fas fa-robot"></i>
+            <span>Orkinosai Agent</span>
+        </div>
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="togglePanel('left')">
+                <i class="fas fa-bars"></i> Menu
+            </button>
+            <button class="nav-btn" onclick="showPanel('training')">
+                <i class="fas fa-brain"></i> Training
+            </button>
+            <button class="nav-btn" onclick="showPanel('documents')">
+                <i class="fas fa-file-alt"></i> Documents
+            </button>
+        </div>
+        <div class="user-controls" id="user-controls">
+            <button class="nav-btn" onclick="showLogin()">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button class="nav-btn" onclick="showRegister()">
+                <i class="fas fa-user-plus"></i> Register
+            </button>
+        </div>
+        <div class="user-info" id="user-info" style="display: none;">
+            <span id="username-display"></span>
+            <button class="nav-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Left Side Panel -->
+    <div id="left-panel" class="panel side-panel left-panel">
+        <div class="panel-header">
+            <h3><i class="fas fa-comments"></i> Conversations</h3>
+            <button class="close-btn" onclick="togglePanel('left')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="panel-content">
+            <button class="action-btn" onclick="newConversation()">
+                <i class="fas fa-plus"></i> New Conversation
+            </button>
+            <div id="conversation-list" class="conversation-list">
+                <!-- Conversations will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div id="main-content" class="main-content">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="welcome-screen">
+            <div class="welcome-content">
+                <i class="fas fa-robot welcome-icon"></i>
+                <h1>Welcome to Orkinosai Conversational Agent</h1>
+                <p>Your AI-powered assistant for SaaS automation and operations</p>
+                <div class="feature-cards">
+                    <div class="feature-card">
+                        <i class="fas fa-brain"></i>
+                        <h3>Self-Learning</h3>
+                        <p>Train from web URLs and documents</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-cogs"></i>
+                        <h3>Automation</h3>
+                        <p>Automate onboarding and workflows</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-rocket"></i>
+                        <h3>Quick Setup</h3>
+                        <p>Get your SaaS live quickly</p>
+                    </div>
+                </div>
+                <button class="primary-btn" onclick="newConversation()">
+                    <i class="fas fa-comments"></i> Start Chatting
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Interface -->
+        <div id="chat-interface" class="chat-interface" style="display: none;">
+            <div class="chat-header">
+                <h3 id="conversation-title">Conversation</h3>
+                <div class="chat-actions">
+                    <button class="icon-btn" onclick="clearChat()" title="Clear conversation">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="icon-btn" onclick="togglePanel('right')" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="chat-input-container">
+                <textarea id="chat-input" class="chat-input" placeholder="Type your message here..." rows="3"></textarea>
+                <button id="send-btn" class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Auth Modals -->
+        <div id="login-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Login</h2>
+                    <button class="close-btn" onclick="closeModal('login-modal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="primary-btn">Login</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="register-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Register</h2>
+                    <button class="close-btn" onclick="closeModal('register-modal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="register-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="register-name">Full Name</label>
+                        <input type="text" id="register-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required minlength="8">
+                    </div>
+                    <button type="submit" class="primary-btn">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side Panel -->
+    <div id="right-panel" class="panel side-panel right-panel">
+        <div class="panel-header">
+            <h3><i class="fas fa-cog"></i> Settings</h3>
+            <button class="close-btn" onclick="togglePanel('right')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="panel-content">
+            <div class="settings-group">
+                <label for="temperature">Temperature</label>
+                <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                <span id="temperature-value">0.7</span>
+            </div>
+            <div class="settings-group">
+                <label for="max-tokens">Max Tokens</label>
+                <input type="number" id="max-tokens" min="100" max="4000" value="1000">
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Panel (Floating) -->
+    <div id="training-panel" class="floating-panel" style="display: none;">
+        <div class="panel-header">
+            <h3><i class="fas fa-brain"></i> Training</h3>
+            <button class="close-btn" onclick="closePanel('training-panel')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="panel-content">
+            <div class="training-section">
+                <h4>Learn from URL</h4>
+                <div class="form-group">
+                    <input type="url" id="training-url" placeholder="https://example.com">
+                    <button class="primary-btn" onclick="trainFromURL()">
+                        <i class="fas fa-link"></i> Learn from URL
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Panel (Floating) -->
+    <div id="documents-panel" class="floating-panel" style="display: none;">
+        <div class="panel-header">
+            <h3><i class="fas fa-file-alt"></i> Documents</h3>
+            <button class="close-btn" onclick="closePanel('documents-panel')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="panel-content">
+            <div class="upload-section">
+                <input type="file" id="document-upload" multiple accept=".pdf,.doc,.docx,.txt">
+                <button class="primary-btn" onclick="uploadDocuments()">
+                    <i class="fas fa-upload"></i> Upload Documents
+                    </button>
+            </div>
+            <div id="document-list" class="document-list">
+                <!-- Uploaded documents will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Status Bar -->
+    <div id="bottom-bar" class="panel bottom-bar">
+        <div class="status-info">
+            <span id="status-text">Ready</span>
+        </div>
+        <div class="status-indicators">
+            <span id="connection-status">
+                <i class="fas fa-circle status-online"></i> Connected
+            </span>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

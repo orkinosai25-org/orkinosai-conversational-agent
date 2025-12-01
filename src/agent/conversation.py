@@ -7,6 +7,7 @@ import uuid
 
 from src.config import Settings
 from .azure_client import AzureAIClient
+from .mock_client import MockAIClient
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,22 @@ class ConversationManager:
             settings: Application settings
         """
         self.settings = settings
-        self.azure_client = AzureAIClient(settings)
+        
+        # Try to initialize Azure client, fall back to mock if credentials missing
+        try:
+            if (settings.azure.openai.api_key and 
+                settings.azure.openai.api_key != "${AZURE_OPENAI_API_KEY}" and
+                settings.azure.openai.endpoint and 
+                settings.azure.openai.endpoint != "${AZURE_OPENAI_ENDPOINT}"):
+                self.azure_client = AzureAIClient(settings)
+                logger.info("Using Azure OpenAI client")
+            else:
+                self.azure_client = MockAIClient(settings)
+                logger.info("Using Mock AI client (demo mode)")
+        except Exception as e:
+            logger.warning(f"Failed to initialize Azure client, using mock: {str(e)}")
+            self.azure_client = MockAIClient(settings)
+        
         self.conversations: Dict[str, Conversation] = {}
         logger.info("Initialized conversation manager")
     

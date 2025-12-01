@@ -1,16 +1,27 @@
 # Orkinosai Conversational Agent
 
-An Azure AI-powered conversational agent with a RESTful API interface. This project provides a complete scaffolding for building conversational AI applications using Azure OpenAI Service.
+An Azure AI-powered conversational agent with a modern, Azure-style dockable UI and RESTful API interface. This project provides a complete scaffolding for building conversational AI applications using Azure OpenAI Service, designed to help startups and founders automate SaaS operations quickly.
 
 ## Features
 
-- 🤖 Azure OpenAI Service integration
+### Core Features
+- 🤖 Azure OpenAI Service integration (with demo mode)
 - 💬 Conversation management with history
 - 🔧 Flexible configuration via YAML and environment variables
 - 🌐 RESTful API endpoints
 - 📝 Comprehensive logging
 - 🔒 Secure credential management
 - 🎯 Type-safe with Pydantic models
+
+### New UI Features
+- 🎨 **Azure-style Dockable UI** - Modern interface inspired by Azure Portal and Copilot
+- 📱 **Responsive Design** - Works on desktop, tablet, and mobile
+- 👤 **User Authentication** - Built-in login and registration
+- 🧠 **URL Learning** - Train the agent by providing web URLs
+- 📄 **Document Upload** - Upload and process documents for training
+- ⚙️ **Dockable Panels** - Top bar, left/right sidebars, and floating panels
+- 💬 **Real-time Chat** - Interactive chat interface with message history
+- 🎛️ **Settings Panel** - Adjustable temperature and token limits
 
 ## Architecture
 
@@ -94,6 +105,23 @@ python main.py
 
 The server will start on `http://localhost:5000` by default.
 
+### Accessing the Web UI
+
+Open your browser and navigate to `http://localhost:5000` to access the modern Azure-style UI.
+
+**Demo Mode**: The application works in demo mode without Azure credentials, using a mock AI client for testing the interface. To enable full Azure OpenAI capabilities, configure your `.env` file with valid Azure credentials.
+
+#### UI Features:
+
+1. **Welcome Screen**: Overview of features with "Start Chatting" button
+2. **Chat Interface**: Real-time conversational interface with message history
+3. **Left Panel (Menu)**: Access conversation history and create new conversations
+4. **Right Panel (Settings)**: Adjust temperature and max tokens
+5. **Training Panel**: Learn from web URLs by entering the URL
+6. **Documents Panel**: Upload documents (PDF, DOC, DOCX, TXT) for training
+7. **Top Navigation**: Quick access to all features, login/register
+8. **Bottom Status Bar**: Connection status and system messages
+
 ### API Endpoints
 
 #### Health Check
@@ -151,6 +179,89 @@ POST /conversations/{conversation_id}/clear
 #### Delete Conversation
 ```bash
 DELETE /conversations/{conversation_id}
+```
+
+#### User Registration
+```bash
+POST /auth/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "secure-password"
+}
+```
+
+Response:
+```json
+{
+  "message": "User registered successfully",
+  "token": "auth-token",
+  "user": {
+    "id": "user-id",
+    "email": "john@example.com",
+    "name": "John Doe"
+  }
+}
+```
+
+#### User Login
+```bash
+POST /auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "secure-password"
+}
+```
+
+#### Train from URL
+```bash
+POST /training/url
+Content-Type: application/json
+
+{
+  "url": "https://example.com/documentation"
+}
+```
+
+Response:
+```json
+{
+  "message": "Successfully learned from URL: https://example.com/documentation",
+  "training_id": "training-id"
+}
+```
+
+#### Upload Documents
+```bash
+POST /training/documents
+Content-Type: multipart/form-data
+
+documents: [file1.pdf, file2.docx]
+```
+
+Response:
+```json
+{
+  "message": "Successfully uploaded 2 document(s)",
+  "documents": [
+    {"id": "doc-id-1", "name": "file1.pdf"},
+    {"id": "doc-id-2", "name": "file2.docx"}
+  ]
+}
+```
+
+#### Get Documents
+```bash
+GET /training/documents
+```
+
+#### Delete Document
+```bash
+DELETE /training/documents/{document_id}
 ```
 
 ## Project Structure

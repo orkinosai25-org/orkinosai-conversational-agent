@@ -1,14 +1,44 @@
-"""Flask application for the conversational agent API."""
+"""Flask application for the conversational agent API.
+
+SECURITY NOTICE: This implementation includes demo authentication and storage
+features for development and testing purposes only. DO NOT use in production
+without implementing proper security measures:
+
+1. Replace plain-text password storage with bcrypt hashing
+2. Replace UUID tokens with JWT tokens with expiration
+3. Replace in-memory storage with a proper database
+4. Add rate limiting for API endpoints
+5. Implement HTTPS/TLS in production
+6. Add CSRF protection
+7. Implement proper session management
+8. Add input validation and sanitization
+9. Use environment-specific configuration
+10. Add security headers (HSTS, CSP, etc.)
+
+See requirements.txt for security-related packages to add for production.
+"""
 
 import logging
-from flask import Flask, request, jsonify
+import os
+import uuid
+from pathlib import Path
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from typing import Dict, Any
+from werkzeug.utils import secure_filename
 
 from src.config import get_settings
 from src.agent import ConversationManager
 
 logger = logging.getLogger(__name__)
+
+# SECURITY WARNING: In-memory storage for DEMO ONLY
+# TODO: Replace with proper database (PostgreSQL, MongoDB, etc.) for production
+# TODO: Implement thread-safety for concurrent access
+# TODO: Add data persistence across server restarts
+users_db = {}
+documents_db = {}
+training_data_db = {}
 
 
 def create_app(config_path: str = "config.yaml") -> Flask:
@@ -20,7 +50,9 @@ def create_app(config_path: str = "config.yaml") -> Flask:
     Returns:
         Configured Flask application
     """
-    app = Flask(__name__)
+    app = Flask(__name__, 
+                template_folder='../../templates',
+                static_folder='../../static')
     
     # Load settings
     settings = get_settings(config_path)
@@ -36,6 +68,16 @@ def create_app(config_path: str = "config.yaml") -> Flask:
         level=getattr(logging, settings.logging.level),
         format=settings.logging.format
     )
+    
+    # Ensure upload directory exists
+    upload_dir = Path("uploads")
+    upload_dir.mkdir(exist_ok=True)
+    
+    # Serve UI
+    @app.route("/")
+    def index():
+        """Serve the main UI."""
+        return render_template("index.html")
     
     @app.route("/health", methods=["GET"])
     def health_check():
@@ -141,6 +183,202 @@ def create_app(config_path: str = "config.yaml") -> Flask:
             return jsonify({"error": "Conversation not found"}), 404
         
         return jsonify({"message": f"Conversation {conversation_id} cleared"})
+    
+    # Authentication Endpoints
+    @app.route("/auth/register", methods=["POST"])
+    def register():
+        """Register a new user."""
+        try:
+            data = request.get_json()
+            
+            if not data or "email" not in data or "password" not in data:
+                return jsonify({"error": "Email and password required"}), 400
+            
+            email = data["email"]
+            
+            # Check if user already exists
+            if email in users_db:
+                return jsonify({"error": "User already exists"}), 400
+            
+            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
+            # TODO: Hash password with bcrypt before storage
+            # TODO: Implement proper password validation rules
+            user_id = str(uuid.uuid4())
+            users_db[email] = {
+                "id": user_id,
+                "email": email,
+                "name": data.get("name", email.split("@")[0]),
+                "password": data["password"]  # SECURITY RISK: Plain text password!
+            }
+            
+            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
+            # TODO: Implement JWT tokens with expiration (e.g., PyJWT library)
+            # TODO: Add refresh token mechanism
+            token = str(uuid.uuid4())
+            
+            return jsonify({
+                "message": "User registered successfully",
+                "token": token,
+                "user": {
+                    "id": user_id,
+                    "email": email,
+                    "name": users_db[email]["name"]
+                }
+            }), 201
+            
+        except Exception as e:
+            logger.error(f"Registration error: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+    
+    @app.route("/auth/login", methods=["POST"])
+    def login():
+        """Login a user."""
+        try:
+            data = request.get_json()
+            
+            if not data or "email" not in data or "password" not in data:
+                return jsonify({"error": "Email and password required"}), 400
+            
+            email = data["email"]
+            password = data["password"]
+            
+            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
+            # TODO: Use bcrypt.checkpw() for constant-time password comparison
+            # TODO: Implement rate limiting to prevent brute force attacks
+            # TODO: Add account lockout after failed attempts
+            if email not in users_db or users_db[email]["password"] != password:
+                return jsonify({"error": "Invalid credentials"}), 401
+            
+            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
+            # TODO: Implement JWT tokens with expiration
+            token = str(uuid.uuid4())
+            
+            user = users_db[email]
+            return jsonify({
+                "message": "Login successful",
+                "token": token,
+                "user": {
+                    "id": user["id"],
+                    "email": user["email"],
+                    "name": user["name"]
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Login error: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+    
+    # Training Endpoints
+    @app.route("/training/url", methods=["POST"])
+    def train_from_url():
+        """Learn from a URL."""
+        try:
+            data = request.get_json()
+            
+            if not data or "url" not in data:
+                return jsonify({"error": "URL required"}), 400
+            
+            url = data["url"]
+            
+            # Store URL for training (in production, fetch and process content)
+            training_id = str(uuid.uuid4())
+            training_data_db[training_id] = {
+                "id": training_id,
+                "type": "url",
+                "source": url,
+                "status": "processed"
+            }
+            
+            logger.info(f"Added URL for training: {url}")
+            
+            return jsonify({
+                "message": f"Successfully learned from URL: {url}",
+                "training_id": training_id
+            })
+            
+        except Exception as e:
+            logger.error(f"URL training error: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+    
+    @app.route("/training/documents", methods=["POST"])
+    def upload_documents():
+        """Upload and process documents for training."""
+        try:
+            if 'documents' not in request.files:
+                return jsonify({"error": "No documents provided"}), 400
+            
+            files = request.files.getlist('documents')
+            uploaded = []
+            
+            for file in files:
+                if file.filename == '':
+                    continue
+                
+                # Save file
+                filename = secure_filename(file.filename)
+                file_id = str(uuid.uuid4())
+                filepath = upload_dir / f"{file_id}_{filename}"
+                file.save(filepath)
+                
+                # Store document info
+                documents_db[file_id] = {
+                    "id": file_id,
+                    "name": filename,
+                    "path": str(filepath),
+                    "size": os.path.getsize(filepath)
+                }
+                
+                uploaded.append({
+                    "id": file_id,
+                    "name": filename
+                })
+                
+                logger.info(f"Document uploaded: {filename}")
+            
+            return jsonify({
+                "message": f"Successfully uploaded {len(uploaded)} document(s)",
+                "documents": uploaded
+            })
+            
+        except Exception as e:
+            logger.error(f"Document upload error: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+    
+    @app.route("/training/documents", methods=["GET"])
+    def get_documents():
+        """Get list of uploaded documents."""
+        try:
+            docs = [
+                {"id": doc_id, "name": doc["name"], "size": doc["size"]}
+                for doc_id, doc in documents_db.items()
+            ]
+            return jsonify({"documents": docs})
+        except Exception as e:
+            logger.error(f"Get documents error: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+    
+    @app.route("/training/documents/<document_id>", methods=["DELETE"])
+    def delete_document(document_id: str):
+        """Delete a document."""
+        try:
+            if document_id not in documents_db:
+                return jsonify({"error": "Document not found"}), 404
+            
+            # Delete file
+            doc = documents_db[document_id]
+            if os.path.exists(doc["path"]):
+                os.remove(doc["path"])
+            
+            # Remove from database
+            del documents_db[document_id]
+            
+            logger.info(f"Document deleted: {doc['name']}")
+            
+            return jsonify({"message": "Document deleted successfully"})
+            
+        except Exception as e:
+            logger.error(f"Delete document error: {str(e)}")
+            return jsonify({"error": str(e)}), 500
     
     @app.errorhandler(404)
     def not_found(error):

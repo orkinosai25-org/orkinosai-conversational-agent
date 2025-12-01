@@ -62,3 +62,6 @@ htmlcov/
 
 # Node modules (if any frontend)
 node_modules/
+
+# Uploads
+uploads/
