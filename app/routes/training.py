@@ -116,6 +116,10 @@ async def upload_training_document(
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
     
+    # Read file content to get size
+    content = await file.read()
+    file_size = len(content)
+    
     # TODO: Upload to Azure Blob Storage
     # For now, we'll just record the metadata
     
@@ -127,6 +131,7 @@ async def upload_training_document(
         "filename": file.filename,
         "storage_path": storage_path,
         "content_type": file.content_type,
+        "size": file_size,
         "added_at": datetime.utcnow().isoformat()
     }
     
@@ -140,7 +145,7 @@ async def upload_training_document(
     
     return {
         "filename": file.filename,
-        "size": 0,  # Would be actual size after upload
+        "size": file_size,
         "content_type": file.content_type,
         "storage_path": storage_path
     }
