@@ -1,0 +1,43 @@
+# Azure AI Configuration
+azure:
+  # Azure OpenAI Service Configuration
+  openai:
+    endpoint: "${AZURE_OPENAI_ENDPOINT}"
+    api_key: "${AZURE_OPENAI_API_KEY}"
+    api_version: "2024-08-01-preview"
+    deployment_name: "${AZURE_OPENAI_DEPLOYMENT_NAME}"
+    model: "gpt-4"
+  
+  # Azure AI Search Configuration (optional)
+  search:
+    endpoint: "${AZURE_SEARCH_ENDPOINT}"
+    api_key: "${AZURE_SEARCH_API_KEY}"
+    index_name: "${AZURE_SEARCH_INDEX_NAME}"
+  
+  # Azure Cognitive Services (optional)
+  cognitive_services:
+    endpoint: "${AZURE_COGNITIVE_SERVICES_ENDPOINT}"
+    api_key: "${AZURE_COGNITIVE_SERVICES_API_KEY}"
+
+# Conversational Agent Settings
+agent:
+  name: "Orkinosai Conversational Agent"
+  version: "1.0.0"
+  max_history: 10
+  temperature: 0.7
+  max_tokens: 1000
+  system_prompt: "You are a helpful AI assistant."
+
+# API Server Settings
+server:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+  cors_origins:
+    - "*"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/agent.log"
