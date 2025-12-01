@@ -10,7 +10,7 @@ from typing import Optional, Dict, Any
 from datetime import datetime
 from decimal import Decimal
 from pydantic import Field
-from ..base import BaseEntity
+from ..base import BaseEntity, utc_now
 
 
 class SubscriptionStatus(str, Enum):
@@ -60,7 +60,7 @@ class Subscription(BaseEntity):
     tier_id: str
     status: SubscriptionStatus = SubscriptionStatus.TRIAL
     billing_cycle: BillingCycle = BillingCycle.MONTHLY
-    current_period_start: datetime = Field(default_factory=datetime.utcnow)
+    current_period_start: datetime = Field(default_factory=utc_now)
     current_period_end: Optional[datetime] = None
     trial_end: Optional[datetime] = None
     cancelled_at: Optional[datetime] = None

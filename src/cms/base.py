@@ -5,9 +5,14 @@ This module contains common base classes and utilities shared across
 all CMS modules. These should be generic and reusable.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
+
+
+def utc_now() -> datetime:
+    """Get current UTC time in timezone-aware format"""
+    return datetime.now(timezone.utc)
 
 
 class BaseEntity(BaseModel):
@@ -17,8 +22,8 @@ class BaseEntity(BaseModel):
     Provides common fields and functionality for all domain objects.
     """
     id: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
     is_active: bool = True
