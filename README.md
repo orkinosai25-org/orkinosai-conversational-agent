@@ -12,6 +12,20 @@ An Azure AI-powered conversational agent with a RESTful API interface. This proj
 - 🔒 Secure credential management
 - 🎯 Type-safe with Pydantic models
 
+## Architecture
+
+This project follows a **domain-partitioned architecture** separating:
+- **CMS Domain**: Generic, reusable features (user management, roles, billing, etc.) - to be synced with orkinosaicms
+- **Agent Domain**: AI-specific features (chat, Azure OpenAI, conversations)
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation, including:
+- Domain separation strategy
+- CMS-Agent synchronization guidelines
+- Development workflow and best practices
+- Integration patterns
+
+**Important**: All CMS domain features must be copied from [orkinosaicms](https://github.com/orkinosai25-org/orkinosaicms) before implementing agent-specific features.
+
 ## Prerequisites
 
 - Python 3.8 or higher
@@ -145,17 +159,25 @@ DELETE /conversations/{conversation_id}
 orkinosai-conversational-agent/
 ├── src/
 │   ├── __init__.py
-│   ├── agent/
+│   ├── agent/                   # AGENT DOMAIN (AI-specific features)
 │   │   ├── __init__.py
 │   │   ├── azure_client.py      # Azure OpenAI client wrapper
 │   │   └── conversation.py      # Conversation management
 │   ├── api/
 │   │   ├── __init__.py
 │   │   └── app.py              # Flask API endpoints
-│   └── config/
-│       ├── __init__.py
-│       └── settings.py         # Configuration management
+│   ├── config/
+│   │   ├── __init__.py
+│   │   └── settings.py         # Configuration management
+│   └── cms/                     # CMS DOMAIN (to be implemented)
+│       └── (generic features copied from orkinosaicms)
 ├── tests/                       # Test directory
+├── docs/                        # Documentation
+│   ├── ARCHITECTURE.md          # Architecture and domain partitioning
+│   ├── CMS_FEATURES_INVENTORY.md # CMS features to be copied
+│   ├── CMS_SYNC_LOG.md          # Sync history with orkinosaicms
+│   ├── DOMAIN_INTEGRATION.md    # Integration guidelines
+│   └── AZURE_DEPLOYMENT.md      # Azure deployment guide
 ├── logs/                        # Log files
 ├── config.yaml                  # Application configuration
 ├── .env.example                 # Example environment variables
@@ -164,6 +186,8 @@ orkinosai-conversational-agent/
 ├── main.py                      # Application entry point
 └── README.md                    # This file
 ```
+
+**Note**: The `src/cms/` directory will be populated with generic features copied from the main orkinosaicms project. See [docs/CMS_FEATURES_INVENTORY.md](docs/CMS_FEATURES_INVENTORY.md) for details.
 
 ## Development
 
