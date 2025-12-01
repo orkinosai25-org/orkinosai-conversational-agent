@@ -1,3 +1,15 @@
+/**
+ * SECURITY NOTICE: This is a demo implementation
+ * 
+ * Production considerations:
+ * - Use secure HTTP-only cookies instead of localStorage for tokens
+ * - Implement proper CSRF protection
+ * - Sanitize all user inputs before display
+ * - Use Content Security Policy headers
+ * - Implement proper error handling without exposing sensitive info
+ * - Add request/response encryption for sensitive data
+ */
+
 // Application State
 const appState = {
     currentConversationId: null,

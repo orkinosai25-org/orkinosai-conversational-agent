@@ -1,4 +1,22 @@
-"""Flask application for the conversational agent API."""
+"""Flask application for the conversational agent API.
+
+SECURITY NOTICE: This implementation includes demo authentication and storage
+features for development and testing purposes only. DO NOT use in production
+without implementing proper security measures:
+
+1. Replace plain-text password storage with bcrypt hashing
+2. Replace UUID tokens with JWT tokens with expiration
+3. Replace in-memory storage with a proper database
+4. Add rate limiting for API endpoints
+5. Implement HTTPS/TLS in production
+6. Add CSRF protection
+7. Implement proper session management
+8. Add input validation and sanitization
+9. Use environment-specific configuration
+10. Add security headers (HSTS, CSP, etc.)
+
+See requirements.txt for security-related packages to add for production.
+"""
 
 import logging
 import os
@@ -14,7 +32,10 @@ from src.agent import ConversationManager
 
 logger = logging.getLogger(__name__)
 
-# In-memory storage for demo (replace with database in production)
+# SECURITY WARNING: In-memory storage for DEMO ONLY
+# TODO: Replace with proper database (PostgreSQL, MongoDB, etc.) for production
+# TODO: Implement thread-safety for concurrent access
+# TODO: Add data persistence across server restarts
 users_db = {}
 documents_db = {}
 training_data_db = {}
@@ -179,16 +200,20 @@ def create_app(config_path: str = "config.yaml") -> Flask:
             if email in users_db:
                 return jsonify({"error": "User already exists"}), 400
             
-            # Create user (in production, hash the password!)
+            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
+            # TODO: Hash password with bcrypt before storage
+            # TODO: Implement proper password validation rules
             user_id = str(uuid.uuid4())
             users_db[email] = {
                 "id": user_id,
                 "email": email,
                 "name": data.get("name", email.split("@")[0]),
-                "password": data["password"]  # In production, hash this!
+                "password": data["password"]  # SECURITY RISK: Plain text password!
             }
             
-            # Generate token (in production, use JWT!)
+            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
+            # TODO: Implement JWT tokens with expiration (e.g., PyJWT library)
+            # TODO: Add refresh token mechanism
             token = str(uuid.uuid4())
             
             return jsonify({
@@ -217,11 +242,15 @@ def create_app(config_path: str = "config.yaml") -> Flask:
             email = data["email"]
             password = data["password"]
             
-            # Check credentials
+            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
+            # TODO: Use bcrypt.checkpw() for constant-time password comparison
+            # TODO: Implement rate limiting to prevent brute force attacks
+            # TODO: Add account lockout after failed attempts
             if email not in users_db or users_db[email]["password"] != password:
                 return jsonify({"error": "Invalid credentials"}), 401
             
-            # Generate token (in production, use JWT!)
+            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
+            # TODO: Implement JWT tokens with expiration
             token = str(uuid.uuid4())
             
             user = users_db[email]
