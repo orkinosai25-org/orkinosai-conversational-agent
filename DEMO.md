@@ -154,7 +154,7 @@ pytest tests/test_azure_integration.py -v
 pytest tests/test_ui_endpoints.py -v
 ```
 
-**Expected:** All tests should pass (75+ tests)
+**Expected:** All tests should pass (75 tests, 1 skipped)
 
 ## Enabling Azure OpenAI (Production Mode)
 

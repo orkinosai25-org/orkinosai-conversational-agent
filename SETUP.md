@@ -166,7 +166,7 @@ pytest tests/ -v
 
 All tests should pass:
 ```
-65 passed, 23 warnings in 1.13s
+75 passed, 1 skipped, 82 warnings
 ```
 
 ## Features

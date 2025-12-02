@@ -161,7 +161,7 @@ def test_conversation_history_limit(mock_settings):
     manager = ConversationManager(mock_settings)
     conversation_id = "test-history"
     
-    # Send multiple messages (more than max_history)
+    # Send multiple messages (each creates user + assistant pair)
     for i in range(15):
         manager.chat(
             conversation_id=conversation_id,
@@ -169,11 +169,12 @@ def test_conversation_history_limit(mock_settings):
         )
     
     conversation = manager.get_conversation(conversation_id)
-    # Should have system message + max_history messages
-    # max_history is 10, so we get last 10 messages (5 pairs of user/assistant)
+    # Each chat() call creates 2 messages (user + assistant)
+    # So 15 calls = 30 messages total
+    # max_history is 10, so we get last 10 conversation messages
     messages = conversation.get_messages(max_history=10)
     
-    # System message + 10 most recent messages
+    # System message + at most 10 most recent messages
     assert len(messages) <= 11
 
 
@@ -250,9 +251,14 @@ def test_temperature_override(mock_settings):
     # The override should work without errors
 
 
+def _has_valid_azure_credentials():
+    """Helper to check if valid Azure OpenAI credentials are configured."""
+    api_key = os.getenv('AZURE_OPENAI_API_KEY')
+    return api_key and not api_key.startswith('${')
+
+
 @pytest.mark.skipif(
-    not os.getenv('AZURE_OPENAI_API_KEY') or 
-    os.getenv('AZURE_OPENAI_API_KEY').startswith('${'),
+    not _has_valid_azure_credentials(),
     reason="Azure OpenAI credentials not configured"
 )
 def test_real_azure_openai_integration():
