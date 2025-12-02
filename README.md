@@ -23,6 +23,18 @@ An Azure AI-powered conversational agent with a modern, Azure-style dockable UI 
 - 💬 **Real-time Chat** - Interactive chat interface with message history
 - 🎛️ **Settings Panel** - Adjustable temperature and token limits
 
+### SharePoint-Style CMS Features ✨ NEW
+- 📋 **Master Pages** - Define overall site structure and chrome
+- 📐 **Page Layouts** - Flexible templates for content organization
+- 📄 **Full Page Management** - Create, edit, and publish complete pages
+- 🧩 **Content Zones** - Modular content areas within pages
+- 🎨 **Widgets** - Reusable content components (text, HTML, images, forms, etc.)
+- 🏢 **Multi-tenant Support** - Organization-scoped content with global templates
+- 🔄 **Version Control** - Track page history and changes
+- 🚀 **RESTful API** - Complete REST API for programmatic access
+
+See [CMS Documentation](docs/CMS_SYSTEM.md) for detailed information.
+
 ## Architecture
 
 This project follows a **domain-partitioned architecture** separating:
