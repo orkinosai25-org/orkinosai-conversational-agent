@@ -2,12 +2,27 @@
 
 An Azure AI-powered conversational agent with a modern, Azure-style dockable UI and RESTful API interface. This project provides a complete scaffolding for building conversational AI applications using Azure OpenAI Service, designed to help startups and founders automate SaaS operations quickly.
 
+## ⚡ Quick Start
+
+**Get started in 2 minutes with zero configuration!**
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the app - it works immediately!
+python main.py
+```
+
+Open `http://localhost:5000`, type "hello" and start chatting! The app runs in demo mode without requiring any Azure credentials. See [QUICKSTART.md](QUICKSTART.md) for more details.
+
 ## Features
 
 ### Core Features
-- 🤖 Azure OpenAI Service integration (with demo mode)
+- 🚀 **Works out of the box** - No configuration required to start!
+- 🤖 Azure OpenAI Service integration (with automatic demo mode fallback)
 - 💬 Conversation management with history
-- 🔧 Flexible configuration via YAML and environment variables
+- 🔧 Flexible configuration via `appsettings.json` and environment variables
 - 🌐 RESTful API endpoints
 - 📝 Comprehensive logging
 - 🔒 Secure credential management
@@ -52,8 +67,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation, 
 ## Prerequisites
 
 - Python 3.8 or higher
-- Azure OpenAI Service account
-- Azure OpenAI deployment (e.g., GPT-4, GPT-3.5-turbo)
+- (Optional) Azure OpenAI Service account and deployment for production use
 
 ## Installation
 
@@ -74,17 +88,57 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Configure environment variables:
+4. **Optional**: Configure Azure OpenAI credentials (see Configuration section below)
+
+## Configuration
+
+### Quick Setup (Works Out of the Box!)
+
+The application works immediately after installation with **no configuration required**! 
+
+When you first run the application, it automatically creates an `appsettings.json` file with default placeholder values and runs in **demo mode** using a mock AI client. This means:
+
+- ✅ Chat interface works immediately
+- ✅ You can test the UI without Azure credentials
+- ✅ Perfect for development and demonstrations
+- ✅ No Azure costs during testing
+
+### Connecting to Azure OpenAI
+
+To enable full AI capabilities with Azure OpenAI, edit the auto-generated `appsettings.json` file:
+
+```json
+{
+  "azure": {
+    "openai": {
+      "endpoint": "https://your-resource-name.openai.azure.com/",
+      "api_key": "your-api-key-here",
+      "deployment_name": "your-deployment-name",
+      "api_version": "2024-08-01-preview",
+      "model": "gpt-4"
+    }
+  }
+}
+```
+
+**To get your Azure OpenAI credentials:**
+
+1. Log in to [Azure Portal](https://portal.azure.com)
+2. Navigate to your Azure OpenAI resource
+3. Go to "Keys and Endpoint" section
+4. Copy the endpoint URL and API key
+5. Go to "Model deployments" to find your deployment name
+6. Update the values in `appsettings.json`
+7. Restart the application
+
+### Alternative: Environment Variables
+
+You can also use environment variables (which override `appsettings.json`):
+
 ```bash
 cp .env.example .env
 # Edit .env with your Azure credentials
 ```
-
-## Configuration
-
-### Environment Variables
-
-Create a `.env` file with the following variables:
 
 ```env
 # Azure OpenAI Configuration
@@ -94,16 +148,9 @@ AZURE_OPENAI_DEPLOYMENT_NAME=your-deployment-name
 AZURE_OPENAI_API_VERSION=2024-08-01-preview
 ```
 
-### Configuration File
+### Legacy Configuration
 
-The `config.yaml` file contains application settings:
-
-- **Azure Configuration**: OpenAI endpoint, API keys, deployment settings
-- **Agent Settings**: Model parameters, system prompts, conversation history limits
-- **Server Settings**: Host, port, CORS configuration
-- **Logging**: Log level, format, and file location
-
-See `config.yaml` for detailed configuration options.
+The application still supports the legacy `config.yaml` format for backward compatibility. However, `appsettings.json` is now the recommended configuration method and takes precedence when present.
 
 ## Usage
 
