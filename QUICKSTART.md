@@ -1,13 +1,13 @@
 # Quick Start Guide
 
-Get started with the Orkinosai Conversational Agent in minutes!
+Get started with the Orkinosai Conversational Agent in minutes! **No Azure account required to start!**
 
 ## Prerequisites
 
 - Python 3.8+
-- Azure OpenAI Service account with a deployed model
+- (Optional) Azure OpenAI Service account for production use
 
-## 5-Minute Setup
+## 2-Minute Quick Start
 
 ### 1. Install Dependencies
 
@@ -20,60 +20,92 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Configure Azure Credentials
-
-Create a `.env` file (copy from `.env.example`):
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your Azure credentials:
-
-```env
-AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
-AZURE_OPENAI_API_KEY=your-api-key-here
-AZURE_OPENAI_DEPLOYMENT_NAME=your-gpt4-deployment
-```
-
-### 3. Start the Server
+### 2. Start the Server
 
 ```bash
 python main.py
 ```
 
-The server starts at `http://localhost:5000`
+That's it! The server starts at `http://localhost:5000` and is ready to use.
 
-### 4. Test the API
+### 3. Test the Chat
+
+**Option A: Use the Web UI**
+
+Open your browser to `http://localhost:5000` and start chatting!
+
+**Option B: Test via API**
 
 Open a new terminal and run:
 
 ```bash
 curl -X POST http://localhost:5000/chat \
   -H "Content-Type: application/json" \
-  -d '{"message": "Hello! Tell me about Azure AI."}'
+  -d '{"message": "hello"}'
 ```
 
-Or run the example script:
+You'll get a response from the demo AI agent immediately!
+
+**Option C: Run the example script**
 
 ```bash
 python examples/simple_chat.py
 ```
 
+## What Just Happened?
+
+The application automatically:
+- ✅ Created `appsettings.json` with default configuration
+- ✅ Started in demo mode with a mock AI client
+- ✅ Made the chat interface fully functional
+- ✅ Works without any Azure credentials or costs!
+
+## Upgrade to Azure OpenAI (Optional)
+
+When you're ready to use real Azure OpenAI:
+
+### 1. Edit `appsettings.json`
+
+The file was auto-created in your project root. Update these values:
+
+```json
+{
+  "azure": {
+    "openai": {
+      "endpoint": "https://your-resource.openai.azure.com/",
+      "api_key": "your-api-key-here",
+      "deployment_name": "your-gpt4-deployment",
+      "api_version": "2024-08-01-preview"
+    }
+  }
+}
+```
+
+### 2. Restart the Server
+
+```bash
+# Stop with Ctrl+C, then restart
+python main.py
+```
+
+The app automatically detects your credentials and switches to production mode!
+
 ## What's Next?
 
-- **Customize the agent**: Edit `config.yaml` to adjust temperature, system prompt, etc.
+- **Customize the agent**: Edit `appsettings.json` to adjust temperature, system prompt, etc.
 - **Add authentication**: Implement auth middleware in `src/api/app.py`
-- **Connect to Azure AI Search**: Enable RAG by configuring search in `.env`
+- **Connect to Azure AI Search**: Enable RAG by configuring search in `appsettings.json`
 - **Deploy to Azure**: Use Azure App Service, Azure Functions, or Azure Container Apps
 
 ## Common Issues
 
 **Import errors**: Make sure virtual environment is activated and dependencies installed
 
-**Connection errors**: Verify your Azure endpoint URL and API key in `.env`
+**Port already in use**: Change the port in `appsettings.json` under `server.port`
 
-**Deployment name error**: Ensure `AZURE_OPENAI_DEPLOYMENT_NAME` matches your Azure deployment
+**Connection errors (with Azure)**: Verify your Azure endpoint URL and API key in `appsettings.json`
+
+**Deployment name error (with Azure)**: Ensure `deployment_name` matches your Azure OpenAI deployment
 
 ## Project Structure
 

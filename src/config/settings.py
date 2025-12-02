@@ -1,14 +1,18 @@
 """Settings and configuration management."""
 
 import os
+import json
 import yaml
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
+import logging
 
 # Load environment variables
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 
 class AzureOpenAIConfig(BaseModel):
@@ -73,6 +77,74 @@ class Settings(BaseModel):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
 
     @classmethod
+    def _create_default_appsettings(cls, config_path: str = "appsettings.json") -> None:
+        """Create default appsettings.json if it doesn't exist."""
+        config_file = Path(config_path)
+        
+        if not config_file.exists():
+            default_settings = {
+                "azure": {
+                    "openai": {
+                        "endpoint": "https://your-resource-name.openai.azure.com/",
+                        "api_key": "your-api-key-here",
+                        "api_version": "2024-08-01-preview",
+                        "deployment_name": "your-deployment-name",
+                        "model": "gpt-4"
+                    },
+                    "search": {
+                        "endpoint": "https://your-search-service.search.windows.net",
+                        "api_key": "your-search-api-key",
+                        "index_name": "your-index-name"
+                    },
+                    "cognitive_services": {
+                        "endpoint": "https://your-cognitive-service.cognitiveservices.azure.com/",
+                        "api_key": "your-cognitive-services-key"
+                    }
+                },
+                "agent": {
+                    "name": "Orkinosai Conversational Agent",
+                    "version": "1.0.0",
+                    "max_history": 10,
+                    "temperature": 0.7,
+                    "max_tokens": 1000,
+                    "system_prompt": "You are a helpful AI assistant."
+                },
+                "server": {
+                    "host": "0.0.0.0",
+                    "port": 5000,
+                    "debug": False,
+                    "cors_origins": ["*"]
+                },
+                "logging": {
+                    "level": "INFO",
+                    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+                    "file": "logs/agent.log"
+                }
+            }
+            
+            with open(config_file, "w") as f:
+                json.dump(default_settings, f, indent=2)
+            
+            logger.info(f"Created default configuration file: {config_path}")
+
+    @classmethod
+    def from_json(cls, config_path: str = "appsettings.json") -> "Settings":
+        """Load settings from JSON file with environment variable override."""
+        config_file = Path(config_path)
+        
+        # Create default appsettings.json if it doesn't exist
+        if not config_file.exists():
+            cls._create_default_appsettings(config_path)
+        
+        with open(config_file, "r") as f:
+            config_data = json.load(f)
+        
+        # Override with environment variables if present
+        config_data = cls._apply_env_overrides(config_data)
+        
+        return cls(**config_data)
+
+    @classmethod
     def from_yaml(cls, config_path: str = "config.yaml") -> "Settings":
         """Load settings from YAML file with environment variable substitution."""
         config_file = Path(config_path)
@@ -87,6 +159,41 @@ class Settings(BaseModel):
         config_data = cls._substitute_env_vars(config_data)
         
         return cls(**config_data)
+    
+    @staticmethod
+    def _apply_env_overrides(config_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Apply environment variable overrides to configuration."""
+        # Azure OpenAI overrides
+        endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+        if endpoint:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["endpoint"] = endpoint
+        
+        api_key = os.getenv("AZURE_OPENAI_API_KEY")
+        if api_key:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["api_key"] = api_key
+        
+        deployment_name = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+        if deployment_name:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["deployment_name"] = deployment_name
+        
+        api_version = os.getenv("AZURE_OPENAI_API_VERSION")
+        if api_version:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["api_version"] = api_version
+        
+        # Azure Search overrides
+        search_endpoint = os.getenv("AZURE_SEARCH_ENDPOINT")
+        if search_endpoint:
+            config_data.setdefault("azure", {}).setdefault("search", {})["endpoint"] = search_endpoint
+        
+        search_api_key = os.getenv("AZURE_SEARCH_API_KEY")
+        if search_api_key:
+            config_data.setdefault("azure", {}).setdefault("search", {})["api_key"] = search_api_key
+        
+        search_index_name = os.getenv("AZURE_SEARCH_INDEX_NAME")
+        if search_index_name:
+            config_data.setdefault("azure", {}).setdefault("search", {})["index_name"] = search_index_name
+        
+        return config_data
     
     @staticmethod
     def _substitute_env_vars(data: Any) -> Any:
@@ -110,12 +217,40 @@ import threading
 _settings_lock = threading.Lock()
 
 
-def get_settings(config_path: str = "config.yaml") -> Settings:
-    """Get or create settings instance (thread-safe)."""
+def get_settings(config_path: Optional[str] = None) -> Settings:
+    """Get or create settings instance (thread-safe).
+    
+    Args:
+        config_path: Optional path to config file. If not provided:
+                    - Creates appsettings.json with defaults if it doesn't exist
+                    - Prefers appsettings.json
+                    - Falls back to config.yaml if appsettings.json doesn't exist
+    
+    Returns:
+        Settings instance
+    """
     global _settings
     if _settings is None:
         with _settings_lock:
             # Double-check locking pattern
             if _settings is None:
-                _settings = Settings.from_yaml(config_path)
+                if config_path:
+                    # Use specified config file
+                    if config_path.endswith('.json'):
+                        _settings = Settings.from_json(config_path)
+                    else:
+                        _settings = Settings.from_yaml(config_path)
+                else:
+                    # Ensure appsettings.json exists with defaults
+                    Settings._create_default_appsettings("appsettings.json")
+                    
+                    # Prefer appsettings.json, fall back to config.yaml if JSON doesn't exist
+                    # (This handles edge case where creation failed)
+                    if Path("appsettings.json").exists():
+                        _settings = Settings.from_json("appsettings.json")
+                    elif Path("config.yaml").exists():
+                        _settings = Settings.from_yaml("config.yaml")
+                    else:
+                        # Should not reach here since _create_default_appsettings creates the file
+                        raise FileNotFoundError("No configuration file found and failed to create default appsettings.json")
     return _settings

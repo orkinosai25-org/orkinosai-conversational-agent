@@ -24,7 +24,7 @@ import uuid
 from pathlib import Path
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from werkzeug.utils import secure_filename
 
 from src.config import get_settings
@@ -41,7 +41,7 @@ documents_db = {}
 training_data_db = {}
 
 
-def create_app(config_path: str = "config.yaml") -> Flask:
+def create_app(config_path: Optional[str] = None) -> Flask:
     """Create and configure Flask application.
     
     Args:

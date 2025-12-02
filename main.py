@@ -14,8 +14,8 @@ def main():
     logs_dir = Path("logs")
     logs_dir.mkdir(exist_ok=True)
     
-    # Load settings
-    config_path = os.getenv("CONFIG_PATH", "config.yaml")
+    # Load settings (auto-detects appsettings.json or config.yaml)
+    config_path = os.getenv("CONFIG_PATH")
     settings = get_settings(config_path)
     
     # Configure logging to file

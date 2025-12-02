@@ -25,57 +25,98 @@ This guide provides comprehensive setup and configuration instructions for the O
    pip install -r requirements.txt
    ```
 
+3. **Run the application**
+   ```bash
+   python main.py
+   ```
+
+That's it! The application is now running and ready to use. Open your browser to `http://localhost:5000` and start chatting.
+
 ## Configuration
 
-### Environment Variables
+### Quick Start (No Configuration Required!)
 
-1. **Copy the example environment file**
-   ```bash
-   cp .env.example .env
-   ```
+🎉 **The application works immediately with zero configuration!**
 
-2. **Configure Azure OpenAI (Production Mode)**
+When you first run the application:
+1. It automatically creates `appsettings.json` with sensible defaults
+2. Runs in **demo mode** with a mock AI client
+3. Chat interface is fully functional
+4. Perfect for testing without Azure costs
+
+You can start chatting right away - just type "hello" and get a response!
+
+### Upgrading to Azure OpenAI (Production Mode)
+
+To connect to Azure OpenAI for full AI capabilities:
+
+1. **Locate the auto-generated `appsettings.json` file** in the project root
+
+2. **Update the Azure OpenAI settings:**
    
-   Edit `.env` and set the following variables:
-   ```bash
-   # Azure OpenAI Configuration
-   AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
-   AZURE_OPENAI_API_KEY=your-api-key-here
-   AZURE_OPENAI_DEPLOYMENT_NAME=your-deployment-name
-   AZURE_OPENAI_API_VERSION=2024-08-01-preview
+   ```json
+   {
+     "azure": {
+       "openai": {
+         "endpoint": "https://your-resource-name.openai.azure.com/",
+         "api_key": "your-actual-api-key",
+         "deployment_name": "your-deployment-name",
+         "api_version": "2024-08-01-preview",
+         "model": "gpt-4"
+       }
+     }
+   }
    ```
 
-   **To obtain these values:**
+3. **Get your Azure credentials:**
    - Log in to [Azure Portal](https://portal.azure.com)
    - Navigate to your Azure OpenAI resource
    - Go to "Keys and Endpoint" section
    - Copy the endpoint URL and API key
    - Go to "Model deployments" to find your deployment name
 
-3. **Demo Mode (No Azure Credentials Required)**
-   
-   If you don't set the Azure credentials or leave them as placeholder values, the application will automatically run in demo mode using the mock AI client. This is perfect for:
-   - Testing the UI
-   - Development without Azure costs
-   - Demonstrations
+4. **Save `appsettings.json` and restart the application**
+   ```bash
+   # Stop the server (Ctrl+C) and restart
+   python main.py
+   ```
+
+The application will automatically detect your credentials and switch to production mode!
+
+### Alternative: Environment Variables
+
+You can also use environment variables (which override `appsettings.json`):
+
+```bash
+cp .env.example .env
+# Edit .env with your Azure credentials
+```
+
+Environment variables are useful for:
+- Docker deployments
+- CI/CD pipelines
+- Keeping secrets out of config files
 
 ### Application Configuration
 
-The main configuration file is `config.yaml`. You can customize:
+You can customize various settings in `appsettings.json`:
 
-```yaml
-agent:
-  name: "Orkinosai Conversational Agent"
-  version: "1.0.0"
-  max_history: 10          # Number of messages to keep in context
-  temperature: 0.7         # AI response creativity (0.0-2.0)
-  max_tokens: 1000         # Maximum response length
-  system_prompt: "You are a helpful AI assistant."
-
-server:
-  host: "0.0.0.0"
-  port: 5000
-  debug: false             # Set to true for development
+```json
+{
+  "agent": {
+    "name": "Orkinosai Conversational Agent",
+    "version": "1.0.0",
+    "max_history": 10,        // Number of messages to keep in context
+    "temperature": 0.7,       // AI response creativity (0.0-2.0)
+    "max_tokens": 1000,       // Maximum response length
+    "system_prompt": "You are a helpful AI assistant."
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 5000,
+    "debug": false            // Set to true for development
+  }
+}
 ```
 
 ## Running the Application
