@@ -164,22 +164,34 @@ class Settings(BaseModel):
     def _apply_env_overrides(config_data: Dict[str, Any]) -> Dict[str, Any]:
         """Apply environment variable overrides to configuration."""
         # Azure OpenAI overrides
-        if os.getenv("AZURE_OPENAI_ENDPOINT"):
-            config_data.setdefault("azure", {}).setdefault("openai", {})["endpoint"] = os.getenv("AZURE_OPENAI_ENDPOINT")
-        if os.getenv("AZURE_OPENAI_API_KEY"):
-            config_data.setdefault("azure", {}).setdefault("openai", {})["api_key"] = os.getenv("AZURE_OPENAI_API_KEY")
-        if os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"):
-            config_data.setdefault("azure", {}).setdefault("openai", {})["deployment_name"] = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
-        if os.getenv("AZURE_OPENAI_API_VERSION"):
-            config_data.setdefault("azure", {}).setdefault("openai", {})["api_version"] = os.getenv("AZURE_OPENAI_API_VERSION")
+        endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+        if endpoint:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["endpoint"] = endpoint
+        
+        api_key = os.getenv("AZURE_OPENAI_API_KEY")
+        if api_key:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["api_key"] = api_key
+        
+        deployment_name = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
+        if deployment_name:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["deployment_name"] = deployment_name
+        
+        api_version = os.getenv("AZURE_OPENAI_API_VERSION")
+        if api_version:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["api_version"] = api_version
         
         # Azure Search overrides
-        if os.getenv("AZURE_SEARCH_ENDPOINT"):
-            config_data.setdefault("azure", {}).setdefault("search", {})["endpoint"] = os.getenv("AZURE_SEARCH_ENDPOINT")
-        if os.getenv("AZURE_SEARCH_API_KEY"):
-            config_data.setdefault("azure", {}).setdefault("search", {})["api_key"] = os.getenv("AZURE_SEARCH_API_KEY")
-        if os.getenv("AZURE_SEARCH_INDEX_NAME"):
-            config_data.setdefault("azure", {}).setdefault("search", {})["index_name"] = os.getenv("AZURE_SEARCH_INDEX_NAME")
+        search_endpoint = os.getenv("AZURE_SEARCH_ENDPOINT")
+        if search_endpoint:
+            config_data.setdefault("azure", {}).setdefault("search", {})["endpoint"] = search_endpoint
+        
+        search_api_key = os.getenv("AZURE_SEARCH_API_KEY")
+        if search_api_key:
+            config_data.setdefault("azure", {}).setdefault("search", {})["api_key"] = search_api_key
+        
+        search_index_name = os.getenv("AZURE_SEARCH_INDEX_NAME")
+        if search_index_name:
+            config_data.setdefault("azure", {}).setdefault("search", {})["index_name"] = search_index_name
         
         return config_data
     
@@ -232,9 +244,13 @@ def get_settings(config_path: Optional[str] = None) -> Settings:
                     # Ensure appsettings.json exists with defaults
                     Settings._create_default_appsettings("appsettings.json")
                     
-                    # Auto-detect: prefer appsettings.json, fall back to config.yaml
+                    # Prefer appsettings.json, fall back to config.yaml if JSON doesn't exist
+                    # (This handles edge case where creation failed)
                     if Path("appsettings.json").exists():
                         _settings = Settings.from_json("appsettings.json")
-                    else:
+                    elif Path("config.yaml").exists():
                         _settings = Settings.from_yaml("config.yaml")
+                    else:
+                        # Should not reach here since _create_default_appsettings creates the file
+                        raise FileNotFoundError("No configuration file found and failed to create default appsettings.json")
     return _settings

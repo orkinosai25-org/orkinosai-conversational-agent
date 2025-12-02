@@ -29,7 +29,7 @@ def main():
     logger.addHandler(file_handler)
     
     # Create and run app
-    app = create_app(config_path or "appsettings.json")
+    app = create_app(config_path)
     
     print(f"Starting {settings.agent.name} v{settings.agent.version}")
     print(f"Server running on http://{settings.server.host}:{settings.server.port}")
