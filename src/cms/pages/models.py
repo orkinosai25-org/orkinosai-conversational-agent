@@ -13,6 +13,7 @@ This module implements a flexible, SharePoint-style content management system wi
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from enum import Enum
+import re
 from pydantic import Field, field_validator
 from src.cms.base import BaseEntity
 
@@ -216,7 +217,6 @@ class Page(BaseEntity):
         if not v or len(v.strip()) == 0:
             raise ValueError("Page slug cannot be empty")
         # Basic slug validation
-        import re
         if not re.match(r'^[a-z0-9\-]+$', v):
             raise ValueError("Slug must contain only lowercase letters, numbers, and hyphens")
         return v.strip()

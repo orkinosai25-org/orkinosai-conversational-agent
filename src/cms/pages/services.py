@@ -488,14 +488,17 @@ class WidgetService:
         for widget in self._storage.values():
             if widget.page_id == page_id:
                 if zone_id is None or widget.zone_id == zone_id:
-                    widgets.append(widget.model_dump())
+                    widgets.append(widget)
         
-        # Sort by position
-        widgets.sort(key=lambda w: w.get('position', 0))
+        # Sort widgets by position before converting to dict
+        widgets.sort(key=lambda w: w.position)
+        
+        # Convert to dict after sorting
+        widget_dicts = [w.model_dump() for w in widgets]
         
         return ServiceResponse.success_response(
-            f"Found {len(widgets)} widget(s)",
-            data={"widgets": widgets}
+            f"Found {len(widget_dicts)} widget(s)",
+            data={"widgets": widget_dicts}
         )
     
     def update_widget(self, widget_id: str, **updates) -> ServiceResponse:
