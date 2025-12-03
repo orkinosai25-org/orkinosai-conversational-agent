@@ -381,8 +381,9 @@ def create_app(config_path: Optional[str] = None) -> Flask:
             return jsonify({"error": str(e)}), 500
     
     # Register CMS Blueprint
-    from src.api.cms_routes import cms_bp
-    app.register_blueprint(cms_bp)
+    # NOTE: CMS routes disabled - CMS is now implemented as a Blazor application in src/cms/
+    # from src.api.cms_routes import cms_bp
+    # app.register_blueprint(cms_bp)
     
     @app.errorhandler(404)
     def not_found(error):

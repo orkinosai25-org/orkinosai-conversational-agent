@@ -4,6 +4,8 @@ An Azure AI-powered conversational agent with a modern, Azure-style dockable UI 
 
 ## ⚡ Quick Start
 
+### Option 1: Python Web UI (Original)
+
 **Get started in 2 minutes with zero configuration!**
 
 ```bash
@@ -15,6 +17,21 @@ python main.py
 ```
 
 Open `http://localhost:5000`, type "hello" and start chatting! The app runs in demo mode without requiring any Azure credentials. See [QUICKSTART.md](QUICKSTART.md) for more details.
+
+### Option 2: Blazor CMS (New - Visual Studio)
+
+**Run the modern Blazor CMS with integrated chat agent!**
+
+1. **Start the backend** (in terminal 1):
+   ```bash
+   python main.py
+   ```
+
+2. **Open in Visual Studio**:
+   - Open `src/cms/OrkinosaiCMS.sln` in Visual Studio 2022/2026
+   - Press **F5** to run
+
+The CMS will open in your browser with the chat agent integrated on the home page! See [src/cms/README.md](src/cms/README.md) for more details.
 
 ## Features
 
@@ -38,17 +55,17 @@ Open `http://localhost:5000`, type "hello" and start chatting! The app runs in d
 - 💬 **Real-time Chat** - Interactive chat interface with message history
 - 🎛️ **Settings Panel** - Adjustable temperature and token limits
 
-### SharePoint-Style CMS Features ✨ NEW
-- 📋 **Master Pages** - Define overall site structure and chrome
-- 📐 **Page Layouts** - Flexible templates for content organization
-- 📄 **Full Page Management** - Create, edit, and publish complete pages
-- 🧩 **Content Zones** - Modular content areas within pages
-- 🎨 **Widgets** - Reusable content components (text, HTML, images, forms, etc.)
-- 🏢 **Multi-tenant Support** - Organization-scoped content with global templates
-- 🔄 **Version Control** - Track page history and changes
-- 🚀 **RESTful API** - Complete REST API for programmatic access
+### Blazor CMS Features ✨ NEW
+- 🌐 **Modern Blazor Web Application** - Built with .NET 10 and Blazor
+- 🎨 **Integrated Chat Agent** - AI assistant embedded directly in the CMS home page
+- 📄 **Content Management** - Full-featured CMS for managing content
+- 👥 **User Management** - Role-based access control and permissions
+- 📊 **Analytics Dashboard** - Track content performance
+- ⚡ **Real-time Updates** - Blazor's SignalR for instant updates
+- 🎯 **Visual Studio Integration** - Open and run with F5
+- 🔄 **Auto & Server Rendering** - Optimal performance with hybrid rendering
 
-See [CMS Documentation](docs/CMS_SYSTEM.md) for detailed information.
+See [Blazor CMS Documentation](src/cms/README.md) for detailed information on running the CMS in Visual Studio 2022/2026.
 
 ## Architecture
 
@@ -339,8 +356,12 @@ orkinosai-conversational-agent/
 │   ├── config/
 │   │   ├── __init__.py
 │   │   └── settings.py         # Configuration management
-│   └── cms/                     # CMS DOMAIN (to be implemented)
-│       └── (generic features copied from orkinosaicms)
+│   └── cms/                     # CMS DOMAIN (Blazor Web Application)
+│       ├── OrkinosaiCMS.sln    # Visual Studio solution
+│       ├── Server/             # Blazor server project
+│       │   ├── Components/     # Razor components and pages
+│       │   └── wwwroot/        # Static web assets
+│       └── Client/             # Blazor WebAssembly client
 ├── tests/                       # Test directory
 ├── docs/                        # Documentation
 │   ├── ARCHITECTURE.md          # Architecture and domain partitioning
@@ -357,7 +378,7 @@ orkinosai-conversational-agent/
 └── README.md                    # This file
 ```
 
-**Note**: The `src/cms/` directory will be populated with generic features copied from the main orkinosaicms project. See [docs/CMS_FEATURES_INVENTORY.md](docs/CMS_FEATURES_INVENTORY.md) for details.
+**Note**: The `src/cms/` directory contains a complete Blazor CMS application with integrated chat agent. See [src/cms/README.md](src/cms/README.md) for details on running the CMS.
 
 ## Development
 
