@@ -58,14 +58,147 @@ The CMS will open in your browser with the chat agent integrated on the home pag
 ### Blazor CMS Features ✨ NEW
 - 🌐 **Modern Blazor Web Application** - Built with .NET 10 and Blazor
 - 🎨 **Integrated Chat Agent** - AI assistant embedded directly in the CMS home page
+- 🎨 **Azure-Style Dockable Panel** - Modern UI inspired by Azure Portal and Visual Studio
+- 🔄 **Dynamic Dock Positioning** - Dock to top, right, bottom, or left with smooth animations
 - 📄 **Content Management** - Full-featured CMS for managing content
 - 👥 **User Management** - Role-based access control and permissions
 - 📊 **Analytics Dashboard** - Track content performance
 - ⚡ **Real-time Updates** - Blazor's SignalR for instant updates
 - 🎯 **Visual Studio Integration** - Open and run with F5
 - 🔄 **Auto & Server Rendering** - Optimal performance with hybrid rendering
+- 📦 **Embeddable SaaS Widget** - Reusable chat component for external websites
 
 See [Blazor CMS Documentation](src/cms/README.md) for detailed information on running the CMS in Visual Studio 2022/2026.
+
+### Embeddable SaaS Widget 🔌
+
+The Orkinosai Conversational Agent includes a **reusable, embeddable chat widget** that can be integrated into any website as a SaaS offering. The widget is built as a self-contained Blazor component with Azure branding.
+
+#### Key Features of the Widget:
+- **🎨 Azure Branding** - Professional look and feel matching Azure Portal design language
+- **🔄 Dockable Interface** - Users can dock the chat to any screen edge (top, right, bottom, left)
+- **⚡ Out-of-the-Box Functionality** - Works immediately with demo mode, no Azure credentials required
+- **📱 Fully Responsive** - Optimized for desktop, tablet, and mobile devices
+- **🎯 Easy Integration** - Add to any website with minimal configuration
+- **🔒 Secure Backend** - All AI processing happens on your secure backend server
+
+#### How to Use the Widget:
+
+**1. As Integrated Component (Current Implementation)**
+
+The widget is fully integrated into the Orkinosai CMS home page:
+
+```razor
+<!-- In your Blazor page -->
+<DockableChatPanel IsOpen="isChatOpen" IsOpenChanged="HandleChatOpenChanged" />
+
+@code {
+    private bool isChatOpen = false;
+    
+    private void HandleChatOpenChanged(bool isOpen)
+    {
+        isChatOpen = isOpen;
+    }
+}
+```
+
+**2. As Embeddable Widget for External Websites**
+
+To embed the chat widget on external websites:
+
+1. **Host the Backend API** - Deploy the Python backend (`main.py`) to your server
+   ```bash
+   python main.py
+   ```
+   The backend will be available at `http://your-domain.com:5000`
+
+2. **Configure CORS** - Ensure the backend allows requests from your customer domains
+   ```python
+   # In src/api/app.py
+   CORS(app, resources={r"/*": {"origins": ["https://customer-site.com"]}})
+   ```
+
+3. **Embed the Widget** - Customers can add the widget to their website:
+
+   **Option A: Direct Blazor Component** (for .NET sites)
+   ```razor
+   @using OrkinosaiCMS.Components.Pages
+   
+   <DockableChatPanel IsOpen="true" IsOpenChanged="@((open) => {})" />
+   ```
+
+   **Option B: IFrame Embed** (for any website)
+   ```html
+   <!-- Add to any HTML page -->
+   <iframe 
+       src="https://your-cms-domain.com/chat-widget" 
+       width="100%" 
+       height="600px"
+       style="border: none; position: fixed; bottom: 20px; right: 20px; 
+              width: 420px; height: 600px; z-index: 9999;">
+   </iframe>
+   ```
+
+   **Option C: JavaScript Widget** (coming soon)
+   ```html
+   <script src="https://your-domain.com/orkinosai-widget.js"></script>
+   <script>
+     OrkinosaiWidget.init({
+       apiUrl: 'https://your-backend.com',
+       dockPosition: 'right',
+       theme: 'azure'
+     });
+   </script>
+   ```
+
+**3. Widget Configuration Options**
+
+The widget supports various configuration parameters:
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `IsOpen` | bool | false | Initial open/closed state |
+| `DockPosition` | enum | Right | Initial dock position (Top, Right, Bottom, Left) |
+| `Temperature` | double | 0.7 | AI response creativity (0.0 - 1.0) |
+| `MaxTokens` | int | 1000 | Maximum response length |
+| `ApiUrl` | string | http://localhost:5000 | Backend API URL |
+
+**4. Styling and Branding**
+
+The widget uses Azure design system colors and can be customized:
+
+```css
+/* Override widget styles */
+:root {
+    --azure-blue: #0078D4;
+    --azure-blue-dark: #005A9E;
+    --azure-blue-light: #50E6FF;
+}
+```
+
+**5. Mobile Optimization**
+
+The widget is fully responsive and optimized for mobile devices:
+- Automatically fills the screen width on mobile
+- Touch-friendly controls
+- Optimized message bubbles
+- Adaptive dock controls (hidden on very small screens)
+
+#### Use Cases for the Widget:
+
+1. **Customer Support** - Add AI-powered support to any website
+2. **SaaS Product** - Offer the chat agent as a white-label SaaS service
+3. **Internal Tools** - Integrate into corporate portals and intranets
+4. **E-commerce** - Provide shopping assistance on online stores
+5. **Documentation Sites** - Help users navigate documentation
+
+#### Demo Mode
+
+The widget works out-of-the-box in demo mode without requiring Azure OpenAI credentials, making it perfect for:
+- Testing and development
+- Demonstrations to clients
+- Prototyping before Azure setup
+- Development environments
 
 ## Architecture
 
