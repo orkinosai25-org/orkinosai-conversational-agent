@@ -8,6 +8,14 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+// Configure HttpClient for chat agent backend
+var backendUrl = builder.Configuration["ChatAgent:BackendUrl"] ?? "http://localhost:5000";
+builder.Services.AddHttpClient("ChatBackend", client =>
+{
+    client.BaseAddress = new Uri(backendUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

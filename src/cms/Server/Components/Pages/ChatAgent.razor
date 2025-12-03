@@ -1,5 +1,7 @@
 @page "/chat"
 @inject IJSRuntime JSRuntime
+@inject IHttpClientFactory HttpClientFactory
+@inject ILogger<ChatAgent> Logger
 
 <PageTitle>Orkinosai Chat Agent</PageTitle>
 
@@ -68,7 +70,7 @@
     private string conversationId = Guid.NewGuid().ToString();
     private double temperature = 0.7;
     private int maxTokens = 1000;
-    private HttpClient httpClient = new HttpClient();
+    private HttpClient? httpClient;
 
     private class ChatMessage
     {
@@ -77,22 +79,18 @@
         public DateTime Timestamp { get; set; } = DateTime.Now;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
-        {
-            // Set the API base URL to the Python backend
-            httpClient.BaseAddress = new Uri("http://localhost:5000");
-            
-            // Add welcome message
-            messages.Add(new ChatMessage 
-            { 
-                Role = "assistant", 
-                Content = "Hello! I'm Orkinosai, your AI assistant. How can I help you today?",
-                Timestamp = DateTime.Now
-            });
-            StateHasChanged();
-        }
+        // Get HttpClient from factory
+        httpClient = HttpClientFactory.CreateClient("ChatBackend");
+        
+        // Add welcome message
+        messages.Add(new ChatMessage 
+        { 
+            Role = "assistant", 
+            Content = "Hello! I'm Orkinosai, your AI assistant. How can I help you today?",
+            Timestamp = DateTime.Now
+        });
     }
 
     private async Task SendMessage()
@@ -116,6 +114,14 @@
 
         try
         {
+            if (httpClient == null)
+            {
+                Logger.LogError("HttpClient is not initialized");
+                throw new InvalidOperationException("HttpClient not initialized");
+            }
+
+            Logger.LogInformation("Sending chat message to backend");
+            
             // Call the Python backend chat API
             var response = await httpClient.PostAsJsonAsync("/chat", new
             {
@@ -137,20 +143,23 @@
                         Content = result.assistant_message,
                         Timestamp = DateTime.Now
                     });
+                    Logger.LogInformation("Received successful response from backend");
                 }
             }
             else
             {
+                Logger.LogWarning("Backend returned error status: {StatusCode}", response.StatusCode);
                 messages.Add(new ChatMessage 
                 { 
                     Role = "assistant", 
-                    Content = "Sorry, I encountered an error. Please make sure the Python backend is running on http://localhost:5000",
+                    Content = $"Sorry, I encountered an error (Status: {response.StatusCode}). Please make sure the Python backend is running.",
                     Timestamp = DateTime.Now
                 });
             }
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Error communicating with chat backend");
             messages.Add(new ChatMessage 
             { 
                 Role = "assistant", 
@@ -195,9 +204,10 @@
         {
             await JSRuntime.InvokeVoidAsync("scrollToBottom", "chatMessages");
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore JS interop errors
+            // Log JS interop errors for debugging
+            Logger.LogDebug(ex, "JS interop error when scrolling to bottom");
         }
     }
 
