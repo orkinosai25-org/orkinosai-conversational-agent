@@ -200,8 +200,6 @@ The widget works out-of-the-box in demo mode without requiring Azure OpenAI cred
 - Prototyping before Azure setup
 - Development environments
 
-See [WIDGET_INTEGRATION.md](docs/WIDGET_INTEGRATION.md) for detailed integration guide (coming soon).
-
 ## Architecture
 
 This project follows a **domain-partitioned architecture** separating:

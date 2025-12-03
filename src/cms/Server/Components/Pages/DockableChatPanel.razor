@@ -30,9 +30,6 @@
                             <i class="fas fa-arrow-left"></i>
                         </button>
                     </div>
-                    <button class="btn-minimize" @onclick="MinimizePanel" title="Minimize" aria-label="Minimize">
-                        <i class="fas fa-minus"></i>
-                    </button>
                     <button class="btn-close-panel" @onclick="ClosePanel" title="Close" aria-label="Close">
                         <i class="fas fa-times"></i>
                     </button>
@@ -268,15 +265,13 @@
             return;
 
         isAnimating = true;
+        currentDockPosition = newPosition;
         StateHasChanged();
         
-        await Task.Delay(50);
-        
-        currentDockPosition = newPosition;
+        // Allow animation to complete (CSS transitions handle the visual effect)
+        await Task.Delay(350);
         isAnimating = false;
         StateHasChanged();
-        
-        await Task.Delay(300);
     }
 
     private string GetDockPositionClass()
@@ -295,12 +290,6 @@
     {
         IsOpen = false;
         await IsOpenChanged.InvokeAsync(false);
-    }
-
-    private async Task MinimizePanel()
-    {
-        // For now, minimize = close. Can be enhanced later
-        await ClosePanel();
     }
 
     private class ChatResponse
@@ -447,7 +436,7 @@
         transform: scale(0.95);
     }
 
-    .btn-minimize, .btn-close-panel {
+    .btn-close-panel {
         background: transparent;
         border: none;
         color: var(--azure-white);
@@ -457,7 +446,7 @@
         font-size: 14px;
     }
 
-    .btn-minimize:hover, .btn-close-panel:hover {
+    .btn-close-panel:hover {
         background: rgba(255, 255, 255, 0.2);
         border-radius: 4px;
     }
