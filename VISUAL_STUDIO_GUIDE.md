@@ -204,8 +204,12 @@ cd orkinosai-conversational-agent
 ls -la  # Should see main.py, requirements.txt, etc.
 ```
 
-**If files are nested deeper:**
+**If files are nested deeper (only applies if accidentally cloned into a subdirectory):**
+
+Sometimes when cloning, you might accidentally create nested directories with the same name. This is not standard but can happen.
+
 ```bash
+# Only do this if main.py is not in the current directory
 cd orkinosai-conversational-agent/orkinosai-conversational-agent
 ```
 
@@ -279,12 +283,13 @@ pip list
    ```json
    {
      "server": {
-       "port": 5001  // Change to different port
+       "port": 5001
      }
    }
    ```
+   Note: Change `5001` to any available port number.
 2. Restart the application
-3. Access at http://localhost:5001
+3. Access at http://localhost:5001 (or your chosen port)
 
 **Option B: Kill the existing process**
 ```bash
@@ -325,19 +330,20 @@ lsof -ti:5000 | xargs kill -9
 - Check `logs/agent.log` for Python errors
 
 **For Azure OpenAI Mode:**
-1. Verify `appsettings.json` has valid credentials:
+1. Verify `appsettings.json` has valid credentials (not placeholders):
    ```json
    {
      "azure": {
        "openai": {
          "endpoint": "https://your-resource.openai.azure.com/",
-         "api_key": "your-actual-key",  // Not a placeholder!
+         "api_key": "your-actual-key",
          "deployment_name": "your-deployment",
          "api_version": "2024-08-01-preview"
        }
      }
    }
    ```
+   **Important:** Replace the example values with your actual Azure credentials.
 2. Test Azure connection:
    ```bash
    curl -X POST http://localhost:5000/chat \
@@ -448,11 +454,11 @@ pytest tests/test_api.py -v
 
 ### Enable Debug Mode
 
-Edit `appsettings.json`:
+Edit `appsettings.json` to enable auto-reload and detailed errors:
 ```json
 {
   "server": {
-    "debug": true  // Enables auto-reload and detailed errors
+    "debug": true
   }
 }
 ```
@@ -470,16 +476,21 @@ Edit `appsettings.json`:
 
 ### Adjust AI Parameters
 
-Edit `appsettings.json`:
+Edit `appsettings.json` to customize AI behavior:
 ```json
 {
   "agent": {
-    "temperature": 0.7,      // 0.0 = focused, 2.0 = creative
-    "max_tokens": 1000,      // Maximum response length
-    "max_history": 10        // Conversation context size
+    "temperature": 0.7,
+    "max_tokens": 1000,
+    "max_history": 10
   }
 }
 ```
+
+Parameter descriptions:
+- **temperature**: Controls response creativity (0.0 = focused, 2.0 = creative)
+- **max_tokens**: Maximum response length
+- **max_history**: Number of conversation messages to keep in context
 
 ## Next Steps After Setup
 
