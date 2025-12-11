@@ -16,6 +16,7 @@ Usage in Flask app:
 from flask import Blueprint, request, jsonify
 from typing import Optional, Dict, Any
 import logging
+import threading
 
 from src.cms.onboarding import (
     OnboardingService,
@@ -27,20 +28,26 @@ logger = logging.getLogger(__name__)
 # Create blueprint for onboarding routes
 onboarding_bp = Blueprint('onboarding', __name__, url_prefix='/api/onboarding')
 
-# Initialize onboarding service (singleton pattern)
+# Initialize onboarding service (thread-safe singleton pattern)
 _onboarding_service: Optional[OnboardingService] = None
+_service_lock = threading.Lock()
 
 
 def get_onboarding_service() -> OnboardingService:
     """
-    Get the onboarding service instance (lazy initialization).
+    Get the onboarding service instance (lazy initialization, thread-safe).
     
     Returns:
         OnboardingService singleton instance
     """
     global _onboarding_service
+    
+    # Double-checked locking pattern for thread safety
     if _onboarding_service is None:
-        _onboarding_service = OnboardingService()
+        with _service_lock:
+            if _onboarding_service is None:
+                _onboarding_service = OnboardingService()
+    
     return _onboarding_service
 
 

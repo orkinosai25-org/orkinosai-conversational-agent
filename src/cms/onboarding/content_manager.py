@@ -63,10 +63,10 @@ class OnboardingContentManager:
         # Default content for WELCOME step
         self._content_cache[OnboardingStepType.WELCOME] = {
             'title': 'Welcome to Orkinosai! 🚀',
-            'description': 'Let\'s get you set up in just a few minutes.',
+            'description': "Let's get you set up in just a few minutes.",
             'content': {
                 'hero_text': 'Welcome to the future of conversational AI',
-                'subtitle': 'We\'re excited to help you build amazing experiences',
+                'subtitle': "We're excited to help you build amazing experiences",
                 'features': [
                     'AI-powered conversations',
                     'Easy integration',
@@ -225,7 +225,7 @@ class OnboardingContentManager:
         
         # Default content for COMPLETION step
         self._content_cache[OnboardingStepType.COMPLETION] = {
-            'title': 'You\'re All Set! 🎉',
+            'title': "You're All Set! 🎉",
             'description': 'Your workspace is ready to go',
             'content': {
                 'success_message': 'Congratulations! Your setup is complete.',
