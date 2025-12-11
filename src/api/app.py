@@ -385,6 +385,11 @@ def create_app(config_path: Optional[str] = None) -> Flask:
     # from src.api.cms_routes import cms_bp
     # app.register_blueprint(cms_bp)
     
+    # Register Onboarding Blueprint
+    # Onboarding integration with CMS for user welcome flows and configuration
+    from src.api.onboarding_routes import onboarding_bp
+    app.register_blueprint(onboarding_bp)
+    
     @app.errorhandler(404)
     def not_found(error):
         """Handle 404 errors."""
