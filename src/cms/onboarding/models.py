@@ -8,7 +8,7 @@ user onboarding flows in the CMS.
 
 from enum import Enum
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 
 
@@ -143,11 +143,11 @@ class OnboardingFlow(BaseModel):
         description="Additional metadata for the flow"
     )
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Timestamp when flow was created"
     )
     updated_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Timestamp when flow was last updated"
     )
 
@@ -197,7 +197,7 @@ class UserOnboardingProgress(BaseModel):
         description="Timestamp when onboarding completed"
     )
     last_activity_at: datetime = Field(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         description="Timestamp of last user activity"
     )
     metadata: Dict[str, Any] = Field(

@@ -14,7 +14,7 @@ The service handles:
 """
 
 from typing import Dict, Any, Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 import logging
 
@@ -228,7 +228,7 @@ class OnboardingService:
             flow_id=flow.id,
             state=OnboardingState.IN_PROGRESS,
             current_step_index=0,
-            started_at=datetime.utcnow(),
+            started_at=datetime.now(timezone.utc),
             metadata=metadata or {}
         )
         
@@ -353,7 +353,7 @@ class OnboardingService:
             progress.completed_steps.append(step_id)
         
         # Update timestamp
-        progress.last_activity_at = datetime.utcnow()
+        progress.last_activity_at = datetime.now(timezone.utc)
         
         # Move to next step
         progress.current_step_index += 1
@@ -361,7 +361,7 @@ class OnboardingService:
         # Check if onboarding is complete
         if progress.current_step_index >= len(flow.steps):
             progress.state = OnboardingState.COMPLETED
-            progress.completed_at = datetime.utcnow()
+            progress.completed_at = datetime.now(timezone.utc)
             logger.info(f"Onboarding completed for user {progress.user_id}")
         
         logger.info(f"Completed step {step_id} for progress {progress_id}")
@@ -406,12 +406,12 @@ class OnboardingService:
         
         # Move to next step without marking as completed
         progress.current_step_index += 1
-        progress.last_activity_at = datetime.utcnow()
+        progress.last_activity_at = datetime.now(timezone.utc)
         
         # Check if onboarding is complete
         if progress.current_step_index >= len(flow.steps):
             progress.state = OnboardingState.COMPLETED
-            progress.completed_at = datetime.utcnow()
+            progress.completed_at = datetime.now(timezone.utc)
         
         logger.info(f"Skipped step {step_id} for progress {progress_id}")
         return True
