@@ -200,6 +200,34 @@ The widget works out-of-the-box in demo mode without requiring Azure OpenAI cred
 - Prototyping before Azure setup
 - Development environments
 
+## SaaS Pricing & Product Roadmap
+
+This project is being developed as **Zoota Conversational Agent** - a commercial SaaS offering with multiple pricing tiers. Our product documentation includes:
+
+- 📋 **[PRICING.md](PRICING.md)** - Complete SaaS pricing tiers (Free, Starter, Pro, Business, Enterprise) with detailed feature breakdowns for:
+  - Knowledge sources and limits
+  - Supported AI models (GPT-4o, Gemini, Claude, BYOK, on-prem LLMs)
+  - Integrations (M365/SharePoint, Salesforce, HubSpot, Shopify, etc.)
+  - Conversation, usage, and seat limits
+  - Branding and customization options
+  - Compliance, support, and SLA guarantees
+
+- 🛠️ **[ENGINEERING_BACKLOG.md](ENGINEERING_BACKLOG.md)** - Comprehensive engineering backlog with 12 epics and 60+ user stories:
+  - SharePoint/M365 Integration
+  - AI Model Support & Management
+  - Anti-Hallucination & Citation System
+  - Multi-Tenant Analytics
+  - Team Management & Collaboration
+  - Advanced Embed & Widget Features
+  - Bring-Your-Own-Model Support
+  - White-Labeling & Customization
+  - SSO & Advanced Authentication
+  - Audit Logs & Compliance
+  - Enterprise Onboarding
+  - Public/Private API with SLAs
+
+These documents provide a clear roadmap for implementation teams and define how features align with pricing tiers.
+
 ## Architecture
 
 This project follows a **domain-partitioned architecture** separating:
