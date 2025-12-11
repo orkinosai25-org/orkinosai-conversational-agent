@@ -1821,7 +1821,17 @@ This document outlines the engineering backlog for implementing features across 
 - **21 points**: Extra Large (3-4 weeks)
 
 **Total Story Points**: ~600 points
+
 **Estimated Timeline**: 12-15 months with 3-4 developers
+
+**Velocity Assumptions**:
+- Team velocity: 10-12 story points per developer per 2-week sprint
+- 4-developer team: 40-48 points per sprint
+- Accounting for holidays, sick leave, and meetings: ~35 points per sprint effective velocity
+- 600 points ÷ 35 points per sprint ≈ 17 sprints ≈ 34 weeks ≈ 8.5 months (minimum)
+- Adding buffer for unknowns, dependencies, and rework: 12-15 months total
+
+**Note**: Timeline can be accelerated with more developers or reduced scope (MVP approach with phased rollout).
 
 ---
 
@@ -1879,5 +1889,5 @@ This document outlines the engineering backlog for implementing features across 
 
 ---
 
-*Last Updated: December 2025*
+*Last Updated: December 2024*
 *This backlog is a living document and should be updated as priorities and requirements evolve.*

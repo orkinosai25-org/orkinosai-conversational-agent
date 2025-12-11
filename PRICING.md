@@ -442,6 +442,11 @@ Ultimate solution for large enterprises requiring maximum customization, securit
 - **Eligible organizations**: 30% discount on all tiers
 - **Verification required**: Must provide non-profit/education credentials
 
+**Note on Discount Stacking**: 
+- Annual prepayment discounts and non-profit/education discounts **can be combined**.
+- Multi-tenant discounts are **exclusive** and cannot be combined with other discounts.
+- When multiple non-exclusive discounts apply, they are applied sequentially (e.g., 30% education discount, then 10% annual prepayment discount on the reduced price).
+
 ---
 
 ## Migration & Upgrade Path
@@ -532,5 +537,5 @@ For custom Enterprise plans, volume discounts, or questions:
 
 ---
 
-*Last Updated: December 2025*
+*Last Updated: December 2024*
 *Pricing subject to change. See zoota.ai/pricing for current pricing.*
