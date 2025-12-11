@@ -70,6 +70,17 @@ The CMS will open in your browser with the chat agent integrated on the home pag
 
 See [Blazor CMS Documentation](src/cms/README.md) for detailed information on running the CMS in Visual Studio 2022/2026.
 
+### User Onboarding System 🎯 NEW
+- 🚀 **Integrated Onboarding Flows** - Multi-step wizard for new user setup
+- 📝 **CMS-Powered Content** - Dynamic content management for onboarding steps
+- 👤 **Personalized Welcome** - User-specific customization and greetings
+- 📊 **Progress Tracking** - Track user progress through onboarding steps
+- ⚙️ **Scalable Configuration** - Easy to add steps and customize flows
+- 🌐 **RESTful API** - Complete API for onboarding integration
+- 📄 **State Management** - Resume interrupted onboarding sessions
+
+See [Onboarding Documentation](docs/ONBOARDING_INTEGRATION.md) for detailed integration guide and [Quick Start](docs/ONBOARDING_QUICK_START.md) for usage examples.
+
 ### Embeddable SaaS Widget 🔌
 
 The Orkinosai Conversational Agent includes a **reusable, embeddable chat widget** that can be integrated into any website as a SaaS offering. The widget is built as a self-contained Blazor component with Azure branding.
