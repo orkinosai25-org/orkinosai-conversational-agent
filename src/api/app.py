@@ -29,6 +29,7 @@ from werkzeug.utils import secure_filename
 
 from src.config import get_settings
 from src.agent import ConversationManager
+from src.cms_module import UserService, UserCreate, UserLogin
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,9 @@ def create_app(config_path: Optional[str] = None) -> Flask:
     
     # Initialize conversation manager
     conversation_manager = ConversationManager(settings)
+    
+    # Initialize user service for authentication
+    user_service = UserService()
     
     # Configure logging
     logging.basicConfig(
@@ -187,86 +191,103 @@ def create_app(config_path: Optional[str] = None) -> Flask:
     # Authentication Endpoints
     @app.route("/auth/register", methods=["POST"])
     def register():
-        """Register a new user."""
+        """Register a new user with proper password hashing and JWT tokens."""
         try:
             data = request.get_json()
             
-            if not data or "email" not in data or "password" not in data:
-                return jsonify({"error": "Email and password required"}), 400
+            if not data:
+                return jsonify({"error": "Request body is required"}), 400
             
-            email = data["email"]
+            # Validate required fields
+            required_fields = ["email", "password", "name"]
+            missing_fields = [f for f in required_fields if f not in data]
+            if missing_fields:
+                return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
             
-            # Check if user already exists
-            if email in users_db:
-                return jsonify({"error": "User already exists"}), 400
+            # Create UserCreate model (this will validate the data)
+            try:
+                user_create = UserCreate(
+                    email=data["email"],
+                    password=data["password"],
+                    name=data["name"],
+                    phone=data.get("phone"),
+                    organization_name=data.get("organization_name")
+                )
+            except Exception as validation_error:
+                return jsonify({"error": str(validation_error)}), 400
             
-            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
-            # TODO: Hash password with bcrypt before storage
-            # TODO: Implement proper password validation rules
-            user_id = str(uuid.uuid4())
-            users_db[email] = {
-                "id": user_id,
-                "email": email,
-                "name": data.get("name", email.split("@")[0]),
-                "password": data["password"]  # SECURITY RISK: Plain text password!
-            }
+            # Register user using the CMS user service
+            response = user_service.register_user(user_create)
             
-            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
-            # TODO: Implement JWT tokens with expiration (e.g., PyJWT library)
-            # TODO: Add refresh token mechanism
-            token = str(uuid.uuid4())
+            if not response.success:
+                return jsonify({"error": response.message}), 400
             
             return jsonify({
-                "message": "User registered successfully",
-                "token": token,
+                "message": response.message,
+                "token": response.token,
                 "user": {
-                    "id": user_id,
-                    "email": email,
-                    "name": users_db[email]["name"]
+                    "id": response.user.id,
+                    "email": response.user.email,
+                    "name": response.user.name,
+                    "phone": response.user.phone,
+                    "organization_id": response.user.organization_id,
+                    "organization_name": response.user.organization_name,
+                    "is_verified": response.user.is_verified,
+                    "onboarding_completed": response.user.onboarding_completed
                 }
             }), 201
             
         except Exception as e:
             logger.error(f"Registration error: {str(e)}")
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "Internal server error"}), 500
     
     @app.route("/auth/login", methods=["POST"])
     def login():
-        """Login a user."""
+        """Login a user with proper password verification and JWT tokens."""
         try:
             data = request.get_json()
             
-            if not data or "email" not in data or "password" not in data:
+            if not data:
+                return jsonify({"error": "Request body is required"}), 400
+            
+            # Validate required fields
+            if "email" not in data or "password" not in data:
                 return jsonify({"error": "Email and password required"}), 400
             
-            email = data["email"]
-            password = data["password"]
+            # Create UserLogin model
+            try:
+                user_login = UserLogin(
+                    email=data["email"],
+                    password=data["password"]
+                )
+            except Exception as validation_error:
+                return jsonify({"error": str(validation_error)}), 400
             
-            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
-            # TODO: Use bcrypt.checkpw() for constant-time password comparison
-            # TODO: Implement rate limiting to prevent brute force attacks
-            # TODO: Add account lockout after failed attempts
-            if email not in users_db or users_db[email]["password"] != password:
-                return jsonify({"error": "Invalid credentials"}), 401
+            # Login user using the CMS user service
+            response = user_service.login_user(user_login)
             
-            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
-            # TODO: Implement JWT tokens with expiration
-            token = str(uuid.uuid4())
+            if not response.success:
+                return jsonify({"error": response.message}), 401
             
-            user = users_db[email]
             return jsonify({
-                "message": "Login successful",
-                "token": token,
+                "message": response.message,
+                "token": response.token,
                 "user": {
-                    "id": user["id"],
-                    "email": user["email"],
-                    "name": user["name"]
+                    "id": response.user.id,
+                    "email": response.user.email,
+                    "name": response.user.name,
+                    "phone": response.user.phone,
+                    "organization_id": response.user.organization_id,
+                    "organization_name": response.user.organization_name,
+                    "is_verified": response.user.is_verified,
+                    "onboarding_completed": response.user.onboarding_completed,
+                    "last_login": response.user.last_login.isoformat() if response.user.last_login else None
                 }
             })
             
         except Exception as e:
             logger.error(f"Login error: {str(e)}")
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "Internal server error"}), 500
     
     # Training Endpoints
     @app.route("/training/url", methods=["POST"])
