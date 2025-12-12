@@ -1,0 +1,103 @@
+@page "/subscription/success"
+@inject NavigationManager Navigation
+
+<PageTitle>Subscription Success - Orkinosai CMS</PageTitle>
+
+<div class="success-page">
+    <div class="success-card">
+        <div class="success-icon">✓</div>
+        <h1>Welcome to Your New Plan!</h1>
+        <p>Your subscription has been successfully activated.</p>
+        <p>Thank you for upgrading. You now have access to all the features of your selected plan.</p>
+        
+        <div class="actions">
+            <button class="btn btn-primary" @onclick="@(() => Navigation.NavigateTo("/subscription"))">
+                View Subscription
+            </button>
+            <button class="btn btn-secondary" @onclick="@(() => Navigation.NavigateTo("/"))">
+                Go to Dashboard
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .success-page {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+
+    .success-card {
+        max-width: 600px;
+        text-align: center;
+        background: white;
+        padding: 3rem 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .success-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+        font-size: 3rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .success-card h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .success-card p {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 1rem;
+    }
+
+    .actions {
+        margin-top: 2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: #2196F3;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1976D2;
+    }
+
+    .btn-secondary {
+        background: #757575;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #616161;
+    }
+</style>

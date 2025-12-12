@@ -1,0 +1,408 @@
+@page "/pricing"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using OrkinosaiCMS.Shared.DTOs.Subscriptions
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+
+<PageTitle>Pricing - Orkinosai CMS</PageTitle>
+
+<div class="pricing-page">
+    <div class="pricing-header">
+        <h1>Choose Your Plan</h1>
+        <p>Select the perfect plan for your needs. Upgrade, downgrade, or cancel anytime.</p>
+        
+        <div class="billing-toggle">
+            <button class="@(isYearly ? "" : "active")" @onclick="() => SetBillingInterval(false)">
+                Monthly
+            </button>
+            <button class="@(isYearly ? "active" : "")" @onclick="() => SetBillingInterval(true)">
+                Yearly <span class="badge">Save 17%</span>
+            </button>
+        </div>
+    </div>
+
+    @if (loading)
+    {
+        <div class="loading">
+            <p>Loading pricing plans...</p>
+        </div>
+    }
+    else if (plans != null && plans.Any())
+    {
+        <div class="pricing-cards">
+            @foreach (var plan in plans)
+            {
+                <div class="pricing-card @(plan.Tier == "Pro" ? "featured" : "")">
+                    @if (plan.Tier == "Pro")
+                    {
+                        <div class="featured-badge">Most Popular</div>
+                    }
+                    
+                    <h2>@plan.Name</h2>
+                    <p class="description">@plan.Description</p>
+                    
+                    <div class="price">
+                        @if (plan.MonthlyPrice == 0)
+                        {
+                            <span class="amount">Free</span>
+                        }
+                        else
+                        {
+                            <span class="currency">$</span>
+                            <span class="amount">@((isYearly ? plan.YearlyPrice : plan.MonthlyPrice).ToString("0"))</span>
+                            <span class="period">/@(isYearly ? "year" : "month")</span>
+                        }
+                    </div>
+                    
+                    @if (isYearly && plan.MonthlyPrice > 0)
+                    {
+                        <p class="yearly-note">Billed as $@plan.YearlyPrice/year</p>
+                    }
+                    
+                    <button class="subscribe-btn @(plan.Tier == "Pro" ? "featured" : "")" 
+                            @onclick="() => SelectPlan(plan)">
+                        @if (plan.Tier == "Free")
+                        {
+                            <text>Get Started</text>
+                        }
+                        else
+                        {
+                            <text>Subscribe Now</text>
+                        }
+                    </button>
+                    
+                    <div class="features">
+                        <h3>Features:</h3>
+                        <ul>
+                            <li>✓ @plan.Limits.MaxWebsites @(plan.Limits.MaxWebsites == 1 ? "Website" : "Websites")</li>
+                            <li>✓ @FormatBytes(plan.Limits.MaxStorageBytes) Storage</li>
+                            <li>✓ @FormatBytes(plan.Limits.MaxBandwidthBytes) Bandwidth</li>
+                            @if (plan.Limits.MaxCustomDomains > 0)
+                            {
+                                <li>✓ @plan.Limits.MaxCustomDomains Custom @(plan.Limits.MaxCustomDomains == 1 ? "Domain" : "Domains")</li>
+                            }
+                            @if (!plan.Limits.HasAds)
+                            {
+                                <li>✓ No Advertisements</li>
+                            }
+                            @if (!plan.Limits.HasBranding)
+                            {
+                                <li>✓ Remove Platform Branding</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (errorMessage != null)
+    {
+        <div class="error">
+            <p>@errorMessage</p>
+        </div>
+    }
+</div>
+
+@code {
+    private List<PlanDto>? plans;
+    private bool loading = true;
+    private bool isYearly = false;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPlansAsync();
+    }
+
+    private async Task LoadPlansAsync()
+    {
+        try
+        {
+            loading = true;
+            errorMessage = null;
+            
+            var request = new HttpRequestMessage(HttpMethod.Get, "/api/subscription/plans");
+            request.SetBrowserRequestMode(BrowserRequestMode.Cors);
+            
+            var response = await Http.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                plans = await response.Content.ReadFromJsonAsync<List<PlanDto>>();
+            }
+            else
+            {
+                errorMessage = "Failed to load pricing plans. Please try again later.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading plans: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void SetBillingInterval(bool yearly)
+    {
+        isYearly = yearly;
+    }
+
+    private async Task SelectPlan(PlanDto plan)
+    {
+        if (plan.Tier == "Free")
+        {
+            // For free tier, just navigate to registration/onboarding
+            Navigation.NavigateTo("/register");
+        }
+        else
+        {
+            // For paid tiers, create checkout session
+            var checkoutDto = new CreateCheckoutSessionDto
+            {
+                Tier = plan.Tier,
+                BillingInterval = isYearly ? "Yearly" : "Monthly",
+                SuccessUrl = $"{Navigation.BaseUri}subscription/success",
+                CancelUrl = $"{Navigation.BaseUri}pricing"
+            };
+
+            try
+            {
+                // TODO: Get user email from authentication
+                var userEmail = "demo@example.com";
+                
+                var request = new HttpRequestMessage(HttpMethod.Post, $"/api/subscription/checkout?userEmail={userEmail}")
+                {
+                    Content = JsonContent.Create(checkoutDto)
+                };
+                request.SetBrowserRequestMode(BrowserRequestMode.Cors);
+                
+                var response = await Http.SendAsync(request);
+                if (response.IsSuccessStatusCode)
+                {
+                    var sessionResponse = await response.Content.ReadFromJsonAsync<CheckoutSessionResponseDto>();
+                    if (sessionResponse?.SessionUrl != null)
+                    {
+                        // Redirect to Stripe Checkout
+                        Navigation.NavigateTo(sessionResponse.SessionUrl, forceLoad: true);
+                    }
+                }
+                else
+                {
+                    errorMessage = "Failed to create checkout session. Please try again.";
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Error creating checkout session: {ex.Message}";
+            }
+        }
+    }
+
+    private string FormatBytes(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.#}{sizes[order]}";
+    }
+}
+
+<style>
+    .pricing-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .pricing-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .pricing-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .pricing-header p {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 2rem;
+    }
+
+    .billing-toggle {
+        display: inline-flex;
+        gap: 0;
+        background: #f0f0f0;
+        border-radius: 25px;
+        padding: 4px;
+    }
+
+    .billing-toggle button {
+        padding: 10px 24px;
+        border: none;
+        background: transparent;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .billing-toggle button.active {
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .billing-toggle .badge {
+        font-size: 0.75rem;
+        background: #4CAF50;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-left: 6px;
+    }
+
+    .pricing-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .pricing-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 2rem;
+        position: relative;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .pricing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .pricing-card.featured {
+        border-color: #2196F3;
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+    }
+
+    .featured-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .pricing-card h2 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .pricing-card .description {
+        color: #666;
+        margin-bottom: 1.5rem;
+        min-height: 40px;
+    }
+
+    .price {
+        margin-bottom: 0.5rem;
+    }
+
+    .price .currency {
+        font-size: 1.5rem;
+        vertical-align: super;
+        color: #666;
+    }
+
+    .price .amount {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .price .period {
+        font-size: 1rem;
+        color: #666;
+    }
+
+    .yearly-note {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .subscribe-btn {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        background: #2196F3;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+        margin-bottom: 1.5rem;
+    }
+
+    .subscribe-btn:hover {
+        background: #1976D2;
+    }
+
+    .subscribe-btn.featured {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .subscribe-btn.featured:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #63397c 100%);
+    }
+
+    .features {
+        border-top: 1px solid #e0e0e0;
+        padding-top: 1.5rem;
+    }
+
+    .features h3 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .features ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .features li {
+        padding: 0.5rem 0;
+        color: #555;
+        font-size: 0.95rem;
+    }
+
+    .loading, .error {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+
+    .error {
+        color: #f44336;
+    }
+</style>
