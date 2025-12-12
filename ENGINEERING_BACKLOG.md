@@ -1,8 +1,8 @@
-# Zoota Conversational Agent - Engineering Backlog
+# Papagan (The Chatter Parrot) - Engineering Backlog
 
 ## Overview
 
-This document outlines the engineering backlog for implementing features across all pricing tiers of the Zoota Conversational Agent. Each epic is broken down into user stories with clear acceptance criteria, technical requirements, and tier associations.
+This document outlines the engineering backlog for implementing features across all pricing tiers of Papagan. Each epic is broken down into user stories with clear acceptance criteria, technical requirements, and tier associations.
 
 **Legend:**
 - 🆓 Free Tier
@@ -27,7 +27,7 @@ This document outlines the engineering backlog for implementing features across 
 
 #### Story 1.1: SharePoint Authentication & Connection
 **As a** Pro tier user  
-**I want to** connect my SharePoint site to Zoota  
+**I want to** connect my SharePoint site to Papagan  
 **So that** I can index and search SharePoint documents in conversations
 
 **Acceptance Criteria:**
