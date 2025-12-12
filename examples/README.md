@@ -1,6 +1,6 @@
 # Examples
 
-This directory contains example scripts demonstrating how to use the Orkinosai Conversational Agent.
+This directory contains example scripts demonstrating how to use the Papagan - The Chatter Parrot.
 
 ## Prerequisites
 

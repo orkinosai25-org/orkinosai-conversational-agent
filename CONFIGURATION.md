@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Orkinosai Conversational Agent uses `appsettings.json` as its primary configuration file. This file is automatically created with default values when you first run the application.
+The Papagan Conversational Agent uses `appsettings.json` as its primary configuration file. This file is automatically created with default values when you first run the application.
 
 ## How It Works
 
@@ -43,7 +43,7 @@ The Orkinosai Conversational Agent uses `appsettings.json` as its primary config
 ```json
 {
   "agent": {
-    "name": "Orkinosai Conversational Agent",
+    "name": "Papagan Conversational Agent",
     "version": "1.0.0",
     "max_history": 10,
     "temperature": 0.7,

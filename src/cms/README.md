@@ -1,18 +1,18 @@
-# Orkinosai CMS - Blazor Web Application
+# Papagan CMS - Blazor Web Application
 
 A modern Blazor-based Content Management System with an integrated AI Chat Agent.
 
 ## Overview
 
-This is a complete, runnable Blazor CMS project that integrates with the Orkinosai Conversational Agent. The CMS provides a full-featured web interface with an embedded chat agent powered by Azure OpenAI.
+This is a complete, runnable Blazor CMS project that integrates with the Papagan Conversational Agent. The CMS provides a full-featured web interface with an embedded chat agent powered by Azure OpenAI.
 
 ## Project Structure
 
 ```
 src/cms/
-├── OrkinosaiCMS.sln          # Visual Studio solution file
+├── PapaganCMS.sln          # Visual Studio solution file
 ├── Server/                    # Server-side Blazor project
-│   ├── OrkinosaiCMS.csproj   # Project file
+│   ├── PapaganCMS.csproj   # Project file
 │   ├── Program.cs            # Application entry point
 │   ├── Components/           # Blazor components
 │   │   ├── Pages/           # Razor pages
@@ -25,7 +25,7 @@ src/cms/
 │       ├── app.css          # Application styles
 │       └── ...
 └── Client/                   # Client-side WebAssembly project
-    └── OrkinosaiCMS.Client.csproj
+    └── PapaganCMS.Client.csproj
 ```
 
 ## Requirements
@@ -39,8 +39,8 @@ src/cms/
 ### Option 1: Visual Studio 2022/2026
 
 1. **Open in Visual Studio**:
-   - Double-click `OrkinosaiCMS.sln` to open the solution in Visual Studio
-   - Or from Visual Studio: File → Open → Project/Solution → Select `OrkinosaiCMS.sln`
+   - Double-click `PapaganCMS.sln` to open the solution in Visual Studio
+   - Or from Visual Studio: File → Open → Project/Solution → Select `PapaganCMS.sln`
 
 2. **Start the Backend Chat Service** (in a separate terminal):
    ```bash
@@ -59,14 +59,14 @@ src/cms/
 1. **Start the Backend Chat Service** (in terminal 1):
    ```bash
    # From the repository root
-   cd /home/runner/work/orkinosai-conversational-agent/orkinosai-conversational-agent
+   cd /home/runner/work/papagan-conversational-agent/papagan-conversational-agent
    python main.py
    ```
 
 2. **Run the Blazor CMS** (in terminal 2):
    ```bash
    cd src/cms
-   dotnet run --project Server/OrkinosaiCMS.csproj
+   dotnet run --project Server/PapaganCMS.csproj
    ```
 
 3. **Open your browser**:
@@ -123,7 +123,7 @@ To publish the application for deployment:
 
 ```bash
 cd src/cms
-dotnet publish Server/OrkinosaiCMS.csproj -c Release -o ../../publish
+dotnet publish Server/PapaganCMS.csproj -c Release -o ../../publish
 ```
 
 The published files will be in the `publish` directory.
@@ -226,7 +226,7 @@ MIT License - See [LICENSE](../../LICENSE) for details
 ## Support
 
 For issues and questions:
-- Repository Issues: https://github.com/orkinosai25-org/orkinosai-conversational-agent/issues
+- Repository Issues: https://github.com/orkinosai25-org/papagan-conversational-agent/issues
 - Main Documentation: [../../README.md](../../README.md)
 
 ## Next Steps
@@ -237,4 +237,4 @@ For issues and questions:
 4. Add your own features
 5. Deploy to production
 
-Enjoy using Orkinosai CMS! 🚀
+Enjoy using Papagan CMS! 🚀

@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get started with the Orkinosai Conversational Agent in minutes! **No Azure account required to start!**
+Get started with the Papagan - The Chatter Parrot in minutes! **No Azure account required to start!**
 
 ## Prerequisites
 

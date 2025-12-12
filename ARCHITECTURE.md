@@ -164,7 +164,7 @@ The current implementation includes only the **Agent Domain** core functionality
 
 4. **Synchronization Back**:
    - Document all changes made
-   - Create sync PR to orkinosaicms
+   - Create sync PR to papagancms
    - Update both projects to maintain consistency
 
 #### For Agent Features
@@ -178,7 +178,7 @@ The current implementation includes only the **Agent Domain** core functionality
 
 **ADR-001: Domain Separation**
 - **Decision**: Partition project into CMS and Agent domains
-- **Rationale**: Enable code reuse with orkinosaicms while maintaining agent-specific features
+- **Rationale**: Enable code reuse with papagancms while maintaining agent-specific features
 - **Consequences**: 
   - Easier maintenance and synchronization
   - Clear separation of concerns
@@ -445,11 +445,11 @@ See `docs/AZURE_DEPLOYMENT.md` for detailed deployment instructions.
 
 ### Overview
 
-This section provides detailed guidelines for maintaining synchronization between the Orkinosai Conversational Agent and the main orkinosaicms project for CMS domain features.
+This section provides detailed guidelines for maintaining synchronization between the Papagan Conversational Agent and the main papagancms project for CMS domain features.
 
 ### Synchronization Principles
 
-1. **CMS is the Source of Truth**: orkinosaicms is the authoritative source for all CMS domain features
+1. **CMS is the Source of Truth**: papagancms is the authoritative source for all CMS domain features
 2. **Unidirectional Flow**: Features flow from CMS → Agent, improvements flow back CMS ← Agent
 3. **Regular Sync Cycles**: Establish regular sync windows (e.g., weekly, bi-weekly)
 4. **Change Documentation**: All CMS modifications must be documented for sync purposes
@@ -477,17 +477,17 @@ Features to Copy:
 
 **Step 2: Copy CMS Features**
 ```bash
-# Clone orkinosaicms
-git clone https://github.com/orkinosai25-org/orkinosaicms.git ../orkinosaicms
+# Clone papagancms
+git clone https://github.com/orkinosai25-org/papagancms.git ../papagancms
 
 # Create CMS directory structure
 mkdir -p src/cms
 
 # Copy core CMS modules (example - actual structure may vary)
-cp -r ../orkinosaicms/src/users src/cms/
-cp -r ../orkinosaicms/src/roles src/cms/
-cp -r ../orkinosaicms/src/organizations src/cms/
-cp -r ../orkinosaicms/src/billing src/cms/
+cp -r ../papagancms/src/users src/cms/
+cp -r ../papagancms/src/roles src/cms/
+cp -r ../papagancms/src/organizations src/cms/
+cp -r ../papagancms/src/billing src/cms/
 # ... continue for all CMS features
 ```
 
@@ -505,14 +505,14 @@ touch docs/CMS_SYNC_LOG.md
 
 Document:
 - Date of copy
-- Commit hash from orkinosaicms
+- Commit hash from papagancms
 - Features copied
 - Modifications made
 - Integration notes
 
 #### Phase 2: Ongoing Synchronization
 
-**When to Sync from orkinosaicms → Agent**
+**When to Sync from papagancms → Agent**
 
 Sync when:
 - New CMS features are released
@@ -522,8 +522,8 @@ Sync when:
 
 **Process**:
 ```bash
-# 1. Check for updates in orkinosaicms
-cd ../orkinosaicms
+# 1. Check for updates in papagancms
+cd ../papagancms
 git pull origin main
 git log --oneline --since="last-sync-date"
 
@@ -531,7 +531,7 @@ git log --oneline --since="last-sync-date"
 git diff last-sync-commit..HEAD -- src/users src/roles src/organizations
 
 # 3. Cherry-pick or manually apply relevant changes
-cd ../orkinosai-conversational-agent
+cd ../papagan-conversational-agent
 # Apply changes to src/cms/
 
 # 4. Test integration
@@ -541,7 +541,7 @@ pytest tests/cms/
 # Add entry to docs/CMS_SYNC_LOG.md
 ```
 
-**When to Sync from Agent → orkinosaicms**
+**When to Sync from Agent → papagancms**
 
 Sync back when:
 - Bug fixes discovered in CMS code while using in agent
@@ -561,11 +561,11 @@ git diff base-commit..HEAD -- src/cms/ > cms-changes.patch
 # Remove any agent-specific modifications
 # Ensure changes are generic and reusable
 
-# 4. Create PR in orkinosaicms
-cd ../orkinosaicms
+# 4. Create PR in papagancms
+cd ../papagancms
 git checkout -b feature/agent-improvements
 # Apply cleaned changes
-git apply ../orkinosai-conversational-agent/cms-changes.patch
+git apply ../papagan-conversational-agent/cms-changes.patch
 
 # 5. Submit PR with clear documentation
 # Include: what changed, why, and benefits
@@ -574,9 +574,9 @@ git apply ../orkinosai-conversational-agent/cms-changes.patch
 ### Directory Structure After CMS Integration
 
 ```
-orkinosai-conversational-agent/
+papagan-conversational-agent/
 ├── src/
-│   ├── cms/                      # CMS DOMAIN (copied from orkinosaicms)
+│   ├── cms/                      # CMS DOMAIN (copied from papagancms)
 │   │   ├── __init__.py
 │   │   ├── users/               # User management
 │   │   │   ├── models.py
@@ -717,7 +717,7 @@ cms:
 
 # Agent Configuration (agent-specific)
 agent:
-  name: "Orkinosai Conversational Agent"
+  name: "Papagan Conversational Agent"
   azure:
     openai:
       endpoint: "${AZURE_OPENAI_ENDPOINT}"
@@ -730,7 +730,7 @@ agent:
 
 Before declaring CMS integration complete, verify:
 
-- [ ] All CMS features copied from orkinosaicms
+- [ ] All CMS features copied from papagancms
 - [ ] CMS tests adapted and passing
 - [ ] CMS code remains generic (no agent-specific logic)
 - [ ] Agent code uses CMS features through defined interfaces
@@ -757,7 +757,7 @@ jobs:
       - name: Check for CMS updates
         run: |
           # Clone both repos
-          # Compare src/cms with orkinosaicms source
+          # Compare src/cms with papagancms source
           # Report drift if found
           
       - name: Create sync reminder issue
@@ -774,7 +774,7 @@ jobs:
 
 ### References
 
-- Main CMS Repository: https://github.com/orkinosai25-org/orkinosaicms
-- Agent Repository: https://github.com/orkinosai25-org/orkinosai-conversational-agent
+- Main CMS Repository: https://github.com/orkinosai25-org/papagancms
+- Agent Repository: https://github.com/orkinosai25-org/papagan-conversational-agent
 - Sync Log: `docs/CMS_SYNC_LOG.md` (to be created)
 - Feature Inventory: `docs/CMS_FEATURES_INVENTORY.md` (to be created)

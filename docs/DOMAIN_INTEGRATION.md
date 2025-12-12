@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides practical instructions for developers working with the CMS and Agent domains in the Orkinosai Conversational Agent project.
+This guide provides practical instructions for developers working with the CMS and Agent domains in the Papagan Conversational Agent project.
 
 ## Quick Reference
 

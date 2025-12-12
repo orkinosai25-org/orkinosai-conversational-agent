@@ -528,7 +528,7 @@ papagan-conversational-agent/
 ├── docs/                        # Documentation
 │   ├── ARCHITECTURE.md          # Architecture and domain partitioning
 │   ├── CMS_FEATURES_INVENTORY.md # CMS features to be copied
-│   ├── CMS_SYNC_LOG.md          # Sync history with orkinosaicms
+│   ├── CMS_SYNC_LOG.md          # Sync history with papagancms
 │   ├── DOMAIN_INTEGRATION.md    # Integration guidelines
 │   └── AZURE_DEPLOYMENT.md      # Azure deployment guide
 ├── logs/                        # Log files
