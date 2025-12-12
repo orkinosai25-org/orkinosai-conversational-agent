@@ -1,80 +1,128 @@
 @page "/"
 @rendermode InteractiveServer
+@inject NavigationManager Navigation
 
-<PageTitle>Papagan CMS - Home</PageTitle>
+<PageTitle>Papagan - AI Chatbot Platform</PageTitle>
 
 <div class="home-container">
     <div class="hero-section">
+        <div class="microsoft-badge" style="margin-bottom: 30px;">
+            <img src="/images/microsoft-for-startups-badge.png" alt="Microsoft for Startups" style="max-width: 150px; height: auto; display: block; margin: 0 auto;">
+            <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 10px;">
+                Proud member of Microsoft for Startups
+            </p>
+        </div>
+
         <div style="margin-bottom: 20px;">
             <img src="/branding/logos/papagan-logo-main.svg" alt="Papagan - The Chatter Parrot" style="max-width: 300px; height: auto;">
         </div>
-        <p class="subtitle">Content Management System with Integrated AI Chat Agent</p>
+        <h1 class="main-title">Build & Deploy AI Chatbots in Minutes</h1>
+        <p class="subtitle">Train your chatbot with documents and URLs, then embed it on any website</p>
         <p class="description">
-            Welcome to Papagan CMS - a modern Blazor-based content management system 
-            with an integrated conversational AI agent. Manage your content and chat 
-            with our friendly AI parrot assistant all in one place.
+            Papagan is a SaaS platform powered by Azure OpenAI that lets you create custom AI chatbots
+            for your business. No coding required - just upload your content and embed the widget.
         </p>
         
-        <!-- Prominent Conversation Agent Button -->
+        <!-- Hero Actions -->
         <div class="hero-actions">
-            <button class="btn-conversation-agent" @onclick="OpenChatPanel">
+            <button class="btn-primary-large" @onclick="GoToRegister">
+                <span>Get Started Free</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <button class="btn-secondary-large" @onclick="GoToLogin">
+                <span>Sign In</span>
+            </button>
+            <button class="btn-demo" @onclick="OpenChatPanel">
                 <i class="fas fa-comment"></i>
-                <span>Chat with Papagan</span>
-                <i class="fas fa-chevron-right"></i>
+                <span>Try Demo Bot</span>
             </button>
         </div>
     </div>
 
     <div class="content-grid">
-        <div class="cms-section">
-            <h2><i class="fas fa-folder-open"></i> CMS Features</h2>
+        <div class="features-section">
+            <h2>🚀 Key Features</h2>
             <div class="feature-cards">
                 <div class="feature-card">
-                    <i class="fas fa-file-alt"></i>
-                    <h3>Content Management</h3>
-                    <p>Create, edit, and organize your content with ease</p>
+                    <i class="fas fa-upload"></i>
+                    <h3>Train Your Bot</h3>
+                    <p>Upload documents (PDF, Word, TXT) or add website URLs to train your AI chatbot</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-code"></i>
+                    <h3>Embed Anywhere</h3>
+                    <p>Copy the embed code and add your bot to any website or WordPress site</p>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-users"></i>
-                    <h3>User Management</h3>
-                    <p>Manage users, roles, and permissions</p>
+                    <h3>Multi-Tenant</h3>
+                    <p>Create multiple bots for different teams or clients with organization support</p>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-chart-line"></i>
                     <h3>Analytics</h3>
-                    <p>Track and analyze your content performance</p>
+                    <p>Track conversations, usage, and bot performance with detailed analytics</p>
                 </div>
                 <div class="feature-card">
-                    <i class="fas fa-cog"></i>
-                    <h3>Settings</h3>
-                    <p>Customize your CMS experience</p>
+                    <i class="fas fa-palette"></i>
+                    <h3>Customize</h3>
+                    <p>Adjust colors, position, and bot behavior to match your brand</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Enterprise Security</h3>
+                    <p>Built on Azure with enterprise-grade security and 99.9% uptime SLA</p>
                 </div>
             </div>
         </div>
 
-        <div class="chat-section">
-            <h2><i class="fas fa-comments"></i> AI Chat Assistant</h2>
-            <p class="chat-intro">
-                Click the "Conversation Agent" button to open our Azure-powered AI assistant 
-                in a dockable panel. The panel can be positioned on any side of the screen 
-                for your convenience.
+        <div class="powered-by-section">
+            <h2>⚡ Powered by Microsoft Azure</h2>
+            <p class="powered-description">
+                As a Microsoft for Startups member, Papagan leverages cutting-edge Azure services
+                to deliver enterprise-grade AI chatbot solutions.
             </p>
-            <div class="chat-info-card">
-                <div class="info-item">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Works out-of-the-box with demo mode</span>
+            <div class="tech-cards">
+                <div class="tech-card">
+                    <i class="fas fa-brain"></i>
+                    <h4>Azure OpenAI</h4>
+                    <p>GPT-4 powered conversations</p>
                 </div>
-                <div class="info-item">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Azure OpenAI powered responses</span>
+                <div class="tech-card">
+                    <i class="fas fa-cloud"></i>
+                    <h4>Azure Cloud</h4>
+                    <p>Global scalability & reliability</p>
                 </div>
-                <div class="info-item">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Dockable to any screen edge</span>
+                <div class="tech-card">
+                    <i class="fas fa-lock"></i>
+                    <h4>Enterprise Security</h4>
+                    <p>SOC 2, GDPR, HIPAA compliant</p>
                 </div>
-                <div class="info-item">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Embeddable as SaaS widget</span>
+            </div>
+        </div>
+
+        <div class="how-it-works">
+            <h2>📝 How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Sign Up</h3>
+                    <p>Create your free account in seconds</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Create Bot</h3>
+                    <p>Give your bot a name and purpose</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Train</h3>
+                    <p>Upload docs or add URLs to train</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Embed</h3>
+                    <p>Copy the code and add to your site</p>
                 </div>
             </div>
         </div>
@@ -87,10 +135,162 @@
 <!-- Floating Chat Button (always visible) -->
 @if (!isChatOpen)
 {
-    <button class="floating-chat-button" @onclick="OpenChatPanel" title="Open Conversation Agent">
+    <button class="floating-chat-button" @onclick="OpenChatPanel" title="Try Demo Chatbot">
         <i class="fas fa-robot"></i>
     </button>
 }
+
+<style>
+    .main-title {
+        font-size: 3em;
+        margin: 20px 0;
+        color: #333;
+        font-weight: 700;
+    }
+
+    .btn-primary-large, .btn-secondary-large, .btn-demo {
+        padding: 16px 40px;
+        border-radius: 8px;
+        font-size: 1.2em;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-primary-large {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .btn-primary-large:hover {
+        background: #2E7D32;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+
+    .btn-secondary-large {
+        background: white;
+        color: #4CAF50;
+        border: 2px solid #4CAF50;
+    }
+
+    .btn-secondary-large:hover {
+        background: #f1f8f1;
+    }
+
+    .btn-demo {
+        background: #00BCD4;
+        color: white;
+    }
+
+    .btn-demo:hover {
+        background: #0097A7;
+    }
+
+    .features-section {
+        margin: 60px 0;
+    }
+
+    .features-section h2 {
+        text-align: center;
+        font-size: 2.5em;
+        margin-bottom: 40px;
+    }
+
+    .powered-by-section {
+        background: linear-gradient(135deg, #4CAF50 0%, #00BCD4 100%);
+        padding: 60px 40px;
+        border-radius: 16px;
+        color: white;
+        margin: 60px 0;
+        text-align: center;
+    }
+
+    .powered-by-section h2 {
+        font-size: 2.5em;
+        margin-bottom: 20px;
+    }
+
+    .powered-description {
+        font-size: 1.2em;
+        margin-bottom: 40px;
+        opacity: 0.95;
+    }
+
+    .tech-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+    }
+
+    .tech-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+    }
+
+    .tech-card i {
+        font-size: 3em;
+        margin-bottom: 15px;
+    }
+
+    .tech-card h4 {
+        font-size: 1.3em;
+        margin: 15px 0 10px;
+    }
+
+    .how-it-works {
+        margin: 80px 0;
+        text-align: center;
+    }
+
+    .how-it-works h2 {
+        font-size: 2.5em;
+        margin-bottom: 50px;
+    }
+
+    .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+    }
+
+    .step {
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        border: 2px solid #e0e0e0;
+    }
+
+    .step-number {
+        width: 60px;
+        height: 60px;
+        background: #4CAF50;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8em;
+        font-weight: bold;
+        margin: 0 auto 20px;
+    }
+
+    .step h3 {
+        font-size: 1.4em;
+        margin: 15px 0 10px;
+        color: #333;
+    }
+
+    .step p {
+        color: #666;
+    }
+</style>
 
 @code {
     private bool isChatOpen = false;
@@ -103,6 +303,16 @@
     private void HandleChatOpenChanged(bool isOpen)
     {
         isChatOpen = isOpen;
+    }
+
+    private void GoToRegister()
+    {
+        Navigation.NavigateTo("/register");
+    }
+
+    private void GoToLogin()
+    {
+        Navigation.NavigateTo("/login");
     }
 }
 
