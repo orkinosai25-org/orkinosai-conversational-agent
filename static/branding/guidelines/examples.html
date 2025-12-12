@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papagan Branding Examples - Website Integration</title>
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
+    <style>
+        :root {
+            --papagan-green: #4CAF50;
+            --papagan-green-dark: #2E7D32;
+            --papagan-cyan: #00BCD4;
+            --papagan-teal: #0097A7;
+            --papagan-teal-dark: #00838F;
+            --papagan-yellow: #FFC107;
+            --papagan-text-dark: #212121;
+            --papagan-white: #FFFFFF;
+            --papagan-gray-light: #F5F5F5;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--papagan-text-dark);
+            background: var(--papagan-gray-light);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header Examples */
+        .example-section {
+            background: white;
+            margin: 30px 0;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .example-section h2 {
+            color: var(--papagan-green-dark);
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        .example-section h3 {
+            color: var(--papagan-teal);
+            margin: 20px 0 10px;
+            font-size: 20px;
+        }
+        
+        /* Header with logo */
+        .header-example {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--papagan-gray-light);
+            margin-bottom: 20px;
+        }
+        
+        .header-example img {
+            height: 50px;
+        }
+        
+        .header-example nav a {
+            margin-left: 25px;
+            text-decoration: none;
+            color: var(--papagan-text-dark);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .header-example nav a:hover {
+            color: var(--papagan-green);
+        }
+        
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--papagan-green), var(--papagan-green-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--papagan-green-dark);
+            border: 2px solid var(--papagan-green);
+            border-radius: 8px;
+            padding: 10px 22px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--papagan-green);
+            color: white;
+        }
+        
+        .btn-icon {
+            background: linear-gradient(135deg, var(--papagan-green), var(--papagan-green-dark));
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
+        }
+        
+        .btn-icon img {
+            width: 36px;
+            height: 36px;
+        }
+        
+        /* Chat Interface */
+        .chat-interface {
+            background: var(--papagan-gray-light);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 600px;
+        }
+        
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 2px solid var(--papagan-green);
+        }
+        
+        .chat-header img {
+            width: 48px;
+            height: 48px;
+        }
+        
+        .chat-header-info h4 {
+            color: var(--papagan-green-dark);
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+        
+        .chat-header-info p {
+            color: var(--papagan-teal);
+            font-size: 14px;
+            font-style: italic;
+        }
+        
+        .chat-messages {
+            padding: 20px;
+            background: white;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            display: flex;
+            max-width: 75%;
+        }
+        
+        .message-user {
+            margin-left: auto;
+            background: linear-gradient(135deg, var(--papagan-cyan), var(--papagan-teal));
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+            padding: 12px 16px;
+        }
+        
+        .message-papagan {
+            background: white;
+            color: var(--papagan-text-dark);
+            border: 1px solid #E0E0E0;
+            border-radius: 18px 18px 18px 4px;
+            padding: 12px 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: white;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--papagan-gray-light);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        .chat-input input:focus {
+            outline: none;
+            border-color: var(--papagan-green);
+        }
+        
+        .chat-input button {
+            background: linear-gradient(135deg, var(--papagan-green), var(--papagan-green-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--papagan-green), var(--papagan-teal));
+            color: white;
+            padding: 60px 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .hero-section h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .hero-section .tagline {
+            font-size: 24px;
+            font-style: italic;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .hero-section p {
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.7;
+        }
+        
+        /* Color Palette Display */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .color-swatch {
+            text-align: center;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .color-sample {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .color-info {
+            padding: 10px;
+            background: white;
+        }
+        
+        .color-info .color-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--papagan-text-dark);
+        }
+        
+        .color-info .color-hex {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* Floating chat button */
+        .floating-chat-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, var(--papagan-green), var(--papagan-green-dark));
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 1000;
+        }
+        
+        .floating-chat-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
+        }
+        
+        .floating-chat-btn img {
+            width: 42px;
+            height: 42px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="example-section">
+            <h2>Papagan Branding Examples</h2>
+            <p>This page demonstrates various applications of the Papagan brand identity. Use these examples as a reference for implementing Papagan branding in your projects.</p>
+        </div>
+
+        <!-- Header Example -->
+        <div class="example-section">
+            <h2>1. Website Header</h2>
+            <div class="header-example">
+                <img src="../logos/papagan-logo-main.svg" alt="Papagan - The Chatter Parrot">
+                <nav>
+                    <a href="#">Features</a>
+                    <a href="#">Pricing</a>
+                    <a href="#">Docs</a>
+                    <a href="#">Contact</a>
+                </nav>
+            </div>
+            <p style="margin-top: 15px; color: #666;">The primary logo in the header provides instant brand recognition. Maintain proper clear space and use the full logo at sizes above 200px wide.</p>
+        </div>
+
+        <!-- Hero Section Example -->
+        <div class="example-section">
+            <h2>2. Hero Section</h2>
+            <div class="hero-section">
+                <h1>Meet Papagan</h1>
+                <p class="tagline">The Chatter Parrot</p>
+                <p>Your friendly AI chat agent that talks to customers naturally, instantly, and intelligently. Like a well-trained parrot, Papagan learns from your content and engages your visitors 24/7.</p>
+                <button class="btn-primary" style="font-size: 18px; padding: 15px 32px;">Start Chatting with Papagan</button>
+            </div>
+        </div>
+
+        <!-- Button Examples -->
+        <div class="example-section">
+            <h2>3. Button Styles</h2>
+            <h3>Primary Buttons</h3>
+            <div class="button-group">
+                <button class="btn-primary">Start Chat</button>
+                <button class="btn-primary">Try Demo</button>
+                <button class="btn-primary">Get Started</button>
+            </div>
+            
+            <h3>Secondary Buttons</h3>
+            <div class="button-group">
+                <button class="btn-secondary">Learn More</button>
+                <button class="btn-secondary">View Documentation</button>
+                <button class="btn-secondary">Contact Us</button>
+            </div>
+            
+            <h3>Icon Button (Chat Widget)</h3>
+            <div class="button-group">
+                <button class="btn-icon">
+                    <img src="../logos/papagan-icon.svg" alt="Chat">
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Interface Example -->
+        <div class="example-section">
+            <h2>4. Chat Interface</h2>
+            <div class="chat-interface">
+                <div class="chat-header">
+                    <img src="../logos/papagan-icon.svg" alt="Papagan">
+                    <div class="chat-header-info">
+                        <h4>Papagan</h4>
+                        <p>The Chatter Parrot</p>
+                    </div>
+                </div>
+                <div class="chat-messages">
+                    <div class="message message-papagan">
+                        <div>Hello! I'm Papagan, your friendly chat assistant. How can I help you today?</div>
+                    </div>
+                    <div class="message message-user">
+                        <div>What features do you offer?</div>
+                    </div>
+                    <div class="message message-papagan">
+                        <div>Great question! I can help with customer support, answer questions about your products, and provide instant assistance 24/7. I learn from your website content to give accurate, helpful responses.</div>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Type your message...">
+                    <button>Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Palette Example -->
+        <div class="example-section">
+            <h2>5. Color Palette</h2>
+            <div class="color-palette">
+                <div class="color-swatch">
+                    <div class="color-sample" style="background: #4CAF50;">
+                        <span>Aa</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Parrot Green</div>
+                        <div class="color-hex">#4CAF50</div>
+                    </div>
+                </div>
+                
+                <div class="color-swatch">
+                    <div class="color-sample" style="background: #2E7D32;">
+                        <span>Aa</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Deep Green</div>
+                        <div class="color-hex">#2E7D32</div>
+                    </div>
+                </div>
+                
+                <div class="color-swatch">
+                    <div class="color-sample" style="background: #00BCD4;">
+                        <span>Aa</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Cyan Blue</div>
+                        <div class="color-hex">#00BCD4</div>
+                    </div>
+                </div>
+                
+                <div class="color-swatch">
+                    <div class="color-sample" style="background: #0097A7;">
+                        <span>Aa</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Teal</div>
+                        <div class="color-hex">#0097A7</div>
+                    </div>
+                </div>
+                
+                <div class="color-swatch">
+                    <div class="color-sample" style="background: #FFC107; color: #212121;">
+                        <span>Aa</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Golden Yellow</div>
+                        <div class="color-hex">#FFC107</div>
+                    </div>
+                </div>
+                
+                <div class="color-swatch">
+                    <div class="color-sample" style="background: #FF5722;">
+                        <span>Aa</span>
+                    </div>
+                    <div class="color-info">
+                        <div class="color-name">Red-Orange</div>
+                        <div class="color-hex">#FF5722</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Icon Usage Example -->
+        <div class="example-section">
+            <h2>6. Icon Sizes</h2>
+            <p style="margin-bottom: 20px;">The Papagan icon works at various sizes. Here are examples:</p>
+            <div style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
+                <div style="text-align: center;">
+                    <img src="../icons/icon-64x64.png" alt="64x64" style="display: block; margin: 0 auto 10px;">
+                    <div>64×64px</div>
+                </div>
+                <div style="text-align: center;">
+                    <img src="../icons/icon-128x128.png" alt="128x128" style="display: block; margin: 0 auto 10px;">
+                    <div>128×128px</div>
+                </div>
+                <div style="text-align: center;">
+                    <img src="../icons/icon-256x256.png" alt="256x256" style="display: block; margin: 0 auto 10px;">
+                    <div>256×256px</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button (always visible) -->
+    <button class="floating-chat-btn" title="Chat with Papagan">
+        <img src="../logos/papagan-icon.svg" alt="Chat">
+    </button>
+</body>
+</html>

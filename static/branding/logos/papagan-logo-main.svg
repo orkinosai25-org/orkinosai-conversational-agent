@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <!-- Background -->
+  <defs>
+    <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E7D32;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="wingGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00BCD4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0097A7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="beakGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFC107;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA000;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Parrot Character -->
+  <g id="parrot">
+    <!-- Body -->
+    <ellipse cx="180" cy="200" rx="70" ry="90" fill="url(#bodyGradient)"/>
+    
+    <!-- Head -->
+    <circle cx="180" cy="140" r="55" fill="url(#bodyGradient)"/>
+    
+    <!-- Wings -->
+    <ellipse cx="130" cy="200" rx="40" ry="70" fill="url(#wingGradient)" transform="rotate(-20 130 200)"/>
+    <ellipse cx="230" cy="200" rx="40" ry="70" fill="url(#wingGradient)" transform="rotate(20 230 200)"/>
+    
+    <!-- Tail feathers -->
+    <path d="M 180 270 Q 160 320, 150 360 Q 165 340, 180 330 Z" fill="#FF5722"/>
+    <path d="M 180 270 Q 180 330, 180 370 Q 180 340, 180 330 Z" fill="#FF9800"/>
+    <path d="M 180 270 Q 200 320, 210 360 Q 195 340, 180 330 Z" fill="#FFEB3B"/>
+    
+    <!-- Beak -->
+    <path d="M 205 140 Q 240 140, 245 145 Q 240 150, 205 150 Z" fill="url(#beakGradient)"/>
+    <path d="M 205 140 L 245 145 L 205 150 Z" fill="#FF6F00" opacity="0.3"/>
+    
+    <!-- Eyes -->
+    <circle cx="190" cy="125" r="12" fill="white"/>
+    <circle cx="190" cy="125" r="8" fill="#212121"/>
+    <circle cx="193" cy="122" r="3" fill="white"/>
+    
+    <!-- Eye detail (sparkle) -->
+    <circle cx="195" cy="120" r="1.5" fill="white"/>
+    
+    <!-- Cheek spot (blush) -->
+    <ellipse cx="165" cy="145" rx="8" ry="6" fill="#FF4081" opacity="0.4"/>
+    
+    <!-- Crest feathers -->
+    <path d="M 155 100 Q 150 85, 155 75" stroke="#FF5722" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M 165 95 Q 165 80, 170 70" stroke="#FF9800" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M 175 92 Q 180 77, 185 67" stroke="#FFEB3B" stroke-width="4" fill="none" stroke-linecap="round"/>
+    
+    <!-- Feet -->
+    <g id="feet">
+      <path d="M 160 285 L 160 300 M 155 300 L 165 300" stroke="#FF6F00" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 200 285 L 200 300 M 195 300 L 205 300" stroke="#FF6F00" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    
+    <!-- Chat bubble decoration -->
+    <g id="chatBubble" transform="translate(250, 100)">
+      <ellipse cx="0" cy="0" rx="35" ry="25" fill="#00BCD4" opacity="0.8"/>
+      <path d="M -20 15 L -25 25 L -15 18 Z" fill="#00BCD4" opacity="0.8"/>
+      <text x="0" y="5" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white">...</text>
+    </g>
+  </g>
+  
+  <!-- Text: "Papagan" -->
+  <g id="brandName">
+    <text x="340" y="180" font-family="'Segoe UI', 'Arial', sans-serif" font-size="72" font-weight="700" fill="#2E7D32">
+      Papagan
+    </text>
+    
+    <!-- Subline: "The Chatter Parrot" -->
+    <text x="340" y="220" font-family="'Segoe UI', 'Arial', sans-serif" font-size="28" font-weight="400" fill="#00838F" style="font-style: italic;">
+      The Chatter Parrot
+    </text>
+  </g>
+</svg>
