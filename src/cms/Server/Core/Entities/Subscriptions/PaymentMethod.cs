@@ -1,6 +1,6 @@
-using OrkinosaiCMS.Core.Common;
+using PapaganCMS.Core.Common;
 
-namespace OrkinosaiCMS.Core.Entities.Subscriptions;
+namespace PapaganCMS.Core.Entities.Subscriptions;
 
 /// <summary>
 /// Represents a payment method for a customer

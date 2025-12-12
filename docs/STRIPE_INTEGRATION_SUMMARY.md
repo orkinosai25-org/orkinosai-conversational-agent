@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully ported complete Stripe payment tier selection and subscription management from the Mosaic repository to the orkinosai-conversational-agent Blazor CMS.
+Successfully ported complete Stripe payment tier selection and subscription management from the Mosaic repository to the papagan-conversational-agent Blazor CMS.
 
 ## Implementation Date
 
@@ -106,7 +106,7 @@ Located in: `src/cms/Server/Components/Pages/`
 
 ### 7. Configuration Files (3 files modified)
 
-**OrkinosaiCMS.csproj**
+**PapaganCMS.csproj**
 - Added Stripe.net v47.3.0
 - Added Newtonsoft.Json v13.0.3
 - Added Microsoft.AspNetCore.Mvc.NewtonsoftJson v10.0.0

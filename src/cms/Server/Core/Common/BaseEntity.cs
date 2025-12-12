@@ -1,4 +1,4 @@
-namespace OrkinosaiCMS.Core.Common;
+namespace PapaganCMS.Core.Common;
 
 /// <summary>
 /// Base entity class with common properties

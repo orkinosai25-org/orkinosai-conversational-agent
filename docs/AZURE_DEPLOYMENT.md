@@ -1,6 +1,6 @@
 # Azure Deployment Guide
 
-This guide covers deploying the Orkinosai Conversational Agent to Azure.
+This guide covers deploying the Papagan - The Chatter Parrot to Azure.
 
 ## Deployment Options
 

@@ -1,20 +1,28 @@
-/* Azure-style Variables */
+/* Papagan - The Chatter Parrot - Color Variables */
 :root {
-    --primary-color: #0078d4;
-    --primary-hover: #106ebe;
-    --secondary-color: #50e6ff;
+    /* Primary Papagan Colors */
+    --primary-color: #4CAF50;
+    --primary-hover: #2E7D32;
+    --secondary-color: #00BCD4;
     --background: #f3f2f1;
     --surface: #ffffff;
     --surface-hover: #f3f2f1;
     --text-primary: #323130;
     --text-secondary: #605e5c;
     --border: #edebe9;
-    --shadow: rgba(0, 0, 0, 0.1);
-    --success: #107c10;
+    --shadow: rgba(76, 175, 80, 0.2);
+    --success: #4CAF50;
     --error: #d13438;
     --panel-width: 280px;
     --top-bar-height: 60px;
     --bottom-bar-height: 40px;
+    
+    /* Papagan Brand Colors */
+    --papagan-green: #4CAF50;
+    --papagan-green-dark: #2E7D32;
+    --papagan-cyan: #00BCD4;
+    --papagan-teal: #0097A7;
+    --papagan-yellow: #FFC107;
 }
 
 /* Reset and Base Styles */

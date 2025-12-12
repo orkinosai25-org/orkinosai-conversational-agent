@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using OrkinosaiCMS.Core.Interfaces.Services;
+using PapaganCMS.Core.Interfaces.Services;
 
-namespace OrkinosaiCMS.Controllers;
+namespace PapaganCMS.Controllers;
 
 /// <summary>
 /// API Controller for handling Stripe webhooks

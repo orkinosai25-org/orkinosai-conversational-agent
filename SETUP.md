@@ -16,8 +16,8 @@ This guide provides comprehensive setup and configuration instructions for the O
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/orkinosai25-org/orkinosai-conversational-agent.git
-   cd orkinosai-conversational-agent
+   git clone https://github.com/orkinosai25-org/papagan-conversational-agent.git
+   cd papagan-conversational-agent
    ```
 
 2. **Install dependencies**

@@ -1,16 +1,16 @@
 # Architecture Overview
 
-This document describes the architecture and design of the Orkinosai Conversational Agent.
+This document describes the architecture and design of Papagan - The Chatter Parrot.
 
 ## Domain Partitioning: CMS vs Agent
 
-This project is architecturally partitioned into two distinct domains to facilitate code reusability and maintainability between the Orkinosai Conversational Agent and the main orkinosaicms project.
+This project is architecturally partitioned into two distinct domains to facilitate code reusability and maintainability between Papagan Conversational Agent and the main papagancms project.
 
 ### Domain Separation Strategy
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│              Orkinosai Conversational Agent Project                  │
+│              Papagan Conversational Agent Project                    │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
 │  ┌────────────────────────────┐  ┌────────────────────────────────┐│
@@ -40,16 +40,16 @@ This project is architecturally partitioned into two distinct domains to facilit
              │                                     │
              ▼                                     ▼
     ┌─────────────────┐                  ┌──────────────────┐
-    │  orkinosaicms   │                  │  Agent-Specific  │
+    │  papagancms     │                  │  Agent-Specific  │
     │  Main Project   │                  │   Features Only  │
     └─────────────────┘                  └──────────────────┘
 ```
 
 ### CMS Domain
 
-**Purpose**: Generic, reusable features that should be synchronized back to the main orkinosaicms project.
+**Purpose**: Generic, reusable features that should be synchronized back to the main papagancms project.
 
-**Current State**: Not yet implemented in this project. These features must be copied from orkinosaicms first.
+**Current State**: Not yet implemented in this project. These features must be copied from papagancms first.
 
 **Planned Components**:
 - **User Management**: User registration, authentication, profile management
@@ -75,9 +75,9 @@ This project is architecturally partitioned into two distinct domains to facilit
 - `src/cms/settings/` - Settings management
 
 **Development Rules**:
-1. **Copy First**: All CMS features must be copied from orkinosaicms before starting agent-specific development
+1. **Copy First**: All CMS features must be copied from papagancms before starting agent-specific development
 2. **Keep Generic**: CMS code must remain generic and not contain agent-specific logic
-3. **Sync Back**: Any modifications to CMS features must be synchronized back to orkinosaicms
+3. **Sync Back**: Any modifications to CMS features must be synchronized back to papagancms
 4. **Test Independently**: CMS features should have tests that don't depend on agent features
 5. **Document Changes**: All CMS changes must be documented for sync purposes
 
@@ -146,10 +146,10 @@ The current implementation includes only the **Agent Domain** core functionality
 
 1. **Initial Copy**: 
    ```bash
-   # Copy CMS features from orkinosaicms
+   # Copy CMS features from papagancms
    # Ensure no agent-specific code is included
-   git clone https://github.com/orkinosai25-org/orkinosaicms.git ../orkinosaicms
-   cp -r ../orkinosaicms/src/cms ./src/
+   git clone https://github.com/orkinosai25-org/papagancms.git ../papagancms
+   cp -r ../papagancms/src/cms ./src/
    ```
 
 2. **Adaptation**:

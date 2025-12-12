@@ -1,8 +1,8 @@
-# Orkinosai Conversational Agent - UI Guide
+# Papagan - The Chatter Parrot - UI Guide
 
 ## Overview
 
-The Orkinosai Conversational Agent features a modern, Azure-style dockable interface designed for intuitive interaction and easy customization. This guide will help you understand and use all the UI features.
+The Papagan - The Chatter Parrot features a modern, Azure-style dockable interface designed for intuitive interaction and easy customization. This guide will help you understand and use all the UI features.
 
 ## Main Interface Components
 

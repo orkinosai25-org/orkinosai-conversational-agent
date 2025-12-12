@@ -1,6 +1,6 @@
-# Hello World Demo - Orkinosai Conversational Agent
+# Hello World Demo - Papagan - The Chatter Parrot
 
-This document provides a quick start guide to demonstrate the basic conversation functionality of the Orkinosai Conversational Agent.
+This document provides a quick start guide to demonstrate the basic conversation functionality of the Papagan - The Chatter Parrot.
 
 ## Quick Start (No Azure Credentials Required)
 
@@ -20,7 +20,7 @@ python main.py
 
 You should see:
 ```
-Starting Orkinosai Conversational Agent v1.0.0
+Starting Papagan - The Chatter Parrot v1.0.0
 Server running on http://0.0.0.0:5000
 Logs: logs/agent.log
 ```
@@ -37,7 +37,7 @@ Navigate to: **http://localhost:5000**
 4. You should receive a response from the agent
 
 **Expected Response in Demo Mode:**
-> "Hello! I'm your Orkinosai Conversational Agent. I'm currently running in demo mode without Azure OpenAI credentials. How can I help you today?"
+> "Hello! I'm your Papagan - The Chatter Parrot. I'm currently running in demo mode without Azure OpenAI credentials. How can I help you today?"
 
 ## Testing via Command Line
 
@@ -52,7 +52,7 @@ curl http://localhost:5000/health
 ```json
 {
   "status": "healthy",
-  "agent": "Orkinosai Conversational Agent",
+  "agent": "Papagan - The Chatter Parrot",
   "version": "1.0.0"
 }
 ```
@@ -69,7 +69,7 @@ curl -X POST http://localhost:5000/chat \
 {
   "conversation_id": "default",
   "user_message": "Hello World",
-  "assistant_message": "Hello! I'm your Orkinosai Conversational Agent. I'm currently running in demo mode without Azure OpenAI credentials. How can I help you today?",
+  "assistant_message": "Hello! I'm your Papagan - The Chatter Parrot. I'm currently running in demo mode without Azure OpenAI credentials. How can I help you today?",
   "usage": {
     "prompt_tokens": 8,
     "completion_tokens": 22,
@@ -247,7 +247,7 @@ After verifying the "Hello World" demo works:
 
 ## Summary
 
-✅ **The Orkinosai Conversational Agent is fully functional and ready for testing!**
+✅ **The Papagan - The Chatter Parrot is fully functional and ready for testing!**
 
 - Chat UI is working correctly
 - Backend API responds to messages

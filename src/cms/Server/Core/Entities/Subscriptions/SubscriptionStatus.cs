@@ -1,4 +1,4 @@
-namespace OrkinosaiCMS.Core.Entities.Subscriptions;
+namespace PapaganCMS.Core.Entities.Subscriptions;
 
 /// <summary>
 /// Enumeration of subscription statuses

@@ -1,6 +1,6 @@
-using OrkinosaiCMS.Core.Interfaces.Services;
+using PapaganCMS.Core.Interfaces.Services;
 
-namespace OrkinosaiCMS.Infrastructure.Services;
+namespace PapaganCMS.Infrastructure.Services;
 
 /// <summary>
 /// Simple in-memory user service for demo purposes

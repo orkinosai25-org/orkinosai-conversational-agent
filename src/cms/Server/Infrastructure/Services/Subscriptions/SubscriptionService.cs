@@ -1,7 +1,7 @@
-using OrkinosaiCMS.Core.Entities.Subscriptions;
-using OrkinosaiCMS.Core.Interfaces.Services;
+using PapaganCMS.Core.Entities.Subscriptions;
+using PapaganCMS.Core.Interfaces.Services;
 
-namespace OrkinosaiCMS.Infrastructure.Services.Subscriptions;
+namespace PapaganCMS.Infrastructure.Services.Subscriptions;
 
 /// <summary>
 /// Simple in-memory implementation of subscription service

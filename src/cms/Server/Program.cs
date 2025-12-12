@@ -1,8 +1,8 @@
-using OrkinosaiCMS.Client.Pages;
-using OrkinosaiCMS.Components;
-using OrkinosaiCMS.Core.Interfaces.Services;
-using OrkinosaiCMS.Infrastructure.Services;
-using OrkinosaiCMS.Infrastructure.Services.Subscriptions;
+using PapaganCMS.Client.Pages;
+using PapaganCMS.Components;
+using PapaganCMS.Core.Interfaces.Services;
+using PapaganCMS.Infrastructure.Services;
+using PapaganCMS.Infrastructure.Services.Subscriptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
