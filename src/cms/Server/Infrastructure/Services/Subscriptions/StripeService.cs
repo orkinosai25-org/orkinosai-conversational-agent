@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using PapaganCMS.Core.Entities.Subscriptions;
+using OrkinosaiCMS.Core.Entities.Subscriptions;
 using PapaganCMS.Core.Interfaces.Services;
 using Stripe;
 using Stripe.Checkout;
@@ -64,7 +64,7 @@ public class StripeService : IStripeService
         }
     }
 
-    public async Task<Core.Entities.Subscriptions.Customer?> GetCustomerAsync(string stripeCustomerId)
+    public async Task<OrkinosaiCMS.Core.Entities.Subscriptions.Customer?> GetCustomerAsync(string stripeCustomerId)
     {
         try
         {
@@ -77,7 +77,7 @@ public class StripeService : IStripeService
         }
     }
 
-    public async Task<Core.Entities.Subscriptions.Subscription> CreateSubscriptionAsync(
+    public async Task<OrkinosaiCMS.Core.Entities.Subscriptions.Subscription> CreateSubscriptionAsync(
         string customerId, 
         string priceId, 
         SubscriptionTier tier, 
@@ -107,7 +107,7 @@ public class StripeService : IStripeService
             if (dbCustomer == null)
                 throw new InvalidOperationException($"Customer not found: {customerId}");
 
-            var dbSubscription = new Core.Entities.Subscriptions.Subscription
+            var dbSubscription = new OrkinosaiCMS.Core.Entities.Subscriptions.Subscription
             {
                 CustomerId = dbCustomer.Id,
                 StripeSubscriptionId = subscription.Id,
@@ -131,7 +131,7 @@ public class StripeService : IStripeService
         }
     }
 
-    public async Task<Core.Entities.Subscriptions.Subscription> UpdateSubscriptionAsync(
+    public async Task<OrkinosaiCMS.Core.Entities.Subscriptions.Subscription> UpdateSubscriptionAsync(
         string subscriptionId, 
         string newPriceId, 
         SubscriptionTier newTier)
@@ -209,7 +209,7 @@ public class StripeService : IStripeService
         }
     }
 
-    public async Task<Core.Entities.Subscriptions.Subscription?> GetSubscriptionAsync(string subscriptionId)
+    public async Task<OrkinosaiCMS.Core.Entities.Subscriptions.Subscription?> GetSubscriptionAsync(string subscriptionId)
     {
         try
         {

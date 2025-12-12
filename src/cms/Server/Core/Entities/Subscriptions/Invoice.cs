@@ -1,6 +1,6 @@
 using PapaganCMS.Core.Common;
 
-namespace PapaganCMS.Core.Entities.Subscriptions;
+namespace OrkinosaiCMS.Core.Entities.Subscriptions;
 
 /// <summary>
 /// Represents an invoice for a subscription

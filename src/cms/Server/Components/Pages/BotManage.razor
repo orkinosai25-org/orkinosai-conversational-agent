@@ -1,0 +1,716 @@
+@page "/bot/{BotId}"
+@using PapaganCMS.Shared.DTOs.Bots
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Manage Bot - Papagan</PageTitle>
+
+<div class="manage-container">
+    @if (bot == null)
+    {
+        <div class="loading">
+            <div class="spinner-border"></div>
+            <p>Loading bot...</p>
+        </div>
+    }
+    else
+    {
+        <div class="bot-header">
+            <button class="btn btn-link" @onclick="GoBack">← Back to Dashboard</button>
+            <h1>🤖 @bot.Name</h1>
+            <p class="bot-description">@bot.Description</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab @(activeTab == "train" ? "active" : "")" @onclick="@(() => activeTab = "train")">
+                📚 Training Data
+            </button>
+            <button class="tab @(activeTab == "settings" ? "active" : "")" @onclick="@(() => activeTab = "settings")">
+                ⚙️ Settings
+            </button>
+            <button class="tab @(activeTab == "embed" ? "active" : "")" @onclick="@(() => activeTab = "embed")">
+                🌐 Embed Code
+            </button>
+        </div>
+
+        @if (activeTab == "train")
+        {
+            <div class="tab-content">
+                <div class="training-section">
+                    <h2>📄 Upload Documents</h2>
+                    <p>Train your bot with PDFs, Word docs, or text files</p>
+
+                    <div class="upload-area">
+                        <InputFile OnChange="HandleFileUpload" multiple accept=".pdf,.doc,.docx,.txt" class="file-input" />
+                        <div class="upload-prompt">
+                            <span class="upload-icon">📁</span>
+                            <p>Click to upload or drag files here</p>
+                            <small>Supported: PDF, DOC, DOCX, TXT</small>
+                        </div>
+                    </div>
+
+                    @if (documents.Any())
+                    {
+                        <div class="documents-list">
+                            <h3>Uploaded Documents (@documents.Count)</h3>
+                            @foreach (var doc in documents)
+                            {
+                                <div class="document-item">
+                                    <span class="doc-icon">📄</span>
+                                    <div class="doc-info">
+                                        <strong>@doc.FileName</strong>
+                                        <small>Uploaded: @doc.UploadedAt.ToString("MMM dd, yyyy")</small>
+                                    </div>
+                                    <span class="doc-status">@doc.ProcessingStatus</span>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteDocument(doc.Id)">
+                                        🗑️
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="training-section">
+                    <h2>🔗 Add URLs</h2>
+                    <p>Let your bot learn from websites or documentation</p>
+
+                    <div class="url-input-group">
+                        <input type="url" class="form-control" @bind="newUrl" placeholder="https://example.com/docs" />
+                        <button class="btn btn-primary" @onclick="AddUrl" disabled="@string.IsNullOrWhiteSpace(newUrl)">
+                            Add URL
+                        </button>
+                    </div>
+
+                    @if (urls.Any())
+                    {
+                        <div class="urls-list">
+                            <h3>Training URLs (@urls.Count)</h3>
+                            @foreach (var url in urls)
+                            {
+                                <div class="url-item">
+                                    <span class="url-icon">🔗</span>
+                                    <div class="url-info">
+                                        <strong>@(url.Title ?? url.Url)</strong>
+                                        <small>@url.Url</small>
+                                    </div>
+                                    <span class="url-status">@url.ProcessingStatus</span>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteUrl(url.Id)">
+                                        🗑️
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else if (activeTab == "settings")
+        {
+            <div class="tab-content">
+                <div class="settings-section">
+                    <h2>Bot Configuration</h2>
+
+                    <EditForm Model="@updateDto" OnValidSubmit="@SaveSettings">
+                        <div class="form-group">
+                            <label>Bot Name</label>
+                            <InputText class="form-control" @bind-Value="updateDto.Name" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description</label>
+                            <InputTextArea class="form-control" @bind-Value="updateDto.Description" rows="3" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>System Prompt</label>
+                            <InputTextArea class="form-control" @bind-Value="updateDto.SystemPrompt" rows="5" />
+                            <small>This defines how your bot behaves and responds</small>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Temperature</label>
+                                <InputNumber class="form-control" @bind-Value="updateDto.Temperature" min="0" max="1" step="0.1" />
+                                <small>0 = Focused, 1 = Creative</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Max Tokens</label>
+                                <InputNumber class="form-control" @bind-Value="updateDto.MaxTokens" min="100" max="4000" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <InputCheckbox @bind-Value="IsActiveValue" />
+                                Active
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <InputCheckbox @bind-Value="IsPublicValue" />
+                                Public (Allow others to use this bot)
+                            </label>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(settingsMessage))
+                        {
+                            <div class="alert alert-success">
+                                @settingsMessage
+                            </div>
+                        }
+
+                        <button type="submit" class="btn btn-primary" disabled="@isSavingSettings">
+                            @if (isSavingSettings)
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                                <span> Saving...</span>
+                            }
+                            else
+                            {
+                                <span>Save Settings</span>
+                            }
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+        }
+        else if (activeTab == "embed")
+        {
+            <div class="tab-content">
+                <div class="embed-section">
+                    <h2>🌐 Embed on Your Website</h2>
+                    <p>Copy and paste this code into your website to add the chatbot widget</p>
+
+                    @if (string.IsNullOrEmpty(embedCode))
+                    {
+                        <button class="btn btn-primary" @onclick="GenerateEmbedCode">
+                            Generate Embed Code
+                        </button>
+                    }
+                    else
+                    {
+                        <div class="embed-preview">
+                            <h3>HTML Embed Code</h3>
+                            <pre class="code-block">@embedCode</pre>
+                            <button class="btn btn-secondary" @onclick="CopyEmbedCode">
+                                📋 Copy to Clipboard
+                            </button>
+                        </div>
+
+                        <div class="embed-options">
+                            <h3>Widget Customization</h3>
+
+                            <div class="form-group">
+                                <label>Widget Color</label>
+                                <input type="color" class="form-control color-picker" @bind="updateDto.WidgetColor" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Widget Position</label>
+                                <select class="form-control" @bind="updateDto.WidgetPosition">
+                                    <option value="bottom-right">Bottom Right</option>
+                                    <option value="bottom-left">Bottom Left</option>
+                                    <option value="top-right">Top Right</option>
+                                    <option value="top-left">Top Left</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-primary" @onclick="UpdateWidgetSettings">
+                                Update Widget Settings
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .manage-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .bot-header {
+        margin-bottom: 40px;
+    }
+
+    .bot-header h1 {
+        font-size: 2.5em;
+        margin: 10px 0;
+        color: #333;
+    }
+
+    .bot-description {
+        color: #666;
+        font-size: 1.1em;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 10px;
+        border-bottom: 2px solid #e0e0e0;
+        margin-bottom: 30px;
+    }
+
+    .tab {
+        padding: 12px 24px;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        font-size: 1.1em;
+        font-weight: 500;
+        color: #666;
+        transition: all 0.3s;
+    }
+
+    .tab:hover {
+        color: #4CAF50;
+    }
+
+    .tab.active {
+        color: #4CAF50;
+        border-bottom-color: #4CAF50;
+    }
+
+    .tab-content {
+        animation: fadeIn 0.3s;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .training-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .training-section h2 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .upload-area {
+        position: relative;
+        border: 2px dashed #4CAF50;
+        border-radius: 8px;
+        padding: 40px;
+        text-align: center;
+        background: #f9fdf9;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .upload-area:hover {
+        background: #f0fdf0;
+        border-color: #2E7D32;
+    }
+
+    .file-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .upload-icon {
+        font-size: 3em;
+        display: block;
+        margin-bottom: 15px;
+    }
+
+    .upload-prompt p {
+        margin: 10px 0;
+        font-size: 1.1em;
+        color: #333;
+    }
+
+    .upload-prompt small {
+        color: #666;
+    }
+
+    .documents-list, .urls-list {
+        margin-top: 30px;
+    }
+
+    .document-item, .url-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        margin: 10px 0;
+    }
+
+    .doc-icon, .url-icon {
+        font-size: 1.5em;
+    }
+
+    .doc-info, .url-info {
+        flex: 1;
+    }
+
+    .doc-info strong, .url-info strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .doc-info small, .url-info small {
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    .doc-status, .url-status {
+        padding: 4px 12px;
+        background: #e3f2fd;
+        color: #1976d2;
+        border-radius: 12px;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
+
+    .url-input-group {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+    }
+
+    .url-input-group .form-control {
+        flex: 1;
+    }
+
+    .settings-section, .embed-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1em;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #4CAF50;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+
+    .form-group small {
+        display: block;
+        margin-top: 5px;
+        color: #666;
+        font-size: 0.875em;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+    }
+
+    .color-picker {
+        height: 50px;
+    }
+
+    .code-block {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 20px;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 20px 0;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9em;
+        line-height: 1.5;
+    }
+
+    .embed-options {
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.9em;
+    }
+
+    .btn-primary {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background: #2E7D32;
+    }
+
+    .btn-secondary {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #bdbdbd;
+    }
+
+    .btn-danger {
+        background: #f44336;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #d32f2f;
+    }
+
+    .btn-link {
+        background: none;
+        color: #4CAF50;
+        text-decoration: none;
+        padding: 5px 0;
+    }
+
+    .btn-link:hover {
+        text-decoration: underline;
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .alert-success {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #a5d6a7;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 60px 20px;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public string BotId { get; set; } = string.Empty;
+
+    private BotDto? bot;
+    private UpdateBotDto updateDto = new() { IsActive = true, IsPublic = false };
+    private List<TrainingDocumentDto> documents = new();
+    private List<TrainingUrlDto> urls = new();
+    private string activeTab = "train";
+    private string newUrl = string.Empty;
+    private string? embedCode;
+    private string? settingsMessage;
+    private bool isSavingSettings = false;
+
+    // Helper properties for checkboxes (since InputCheckbox needs non-nullable bool)
+    private bool IsActiveValue
+    {
+        get => updateDto.IsActive ?? true;
+        set => updateDto.IsActive = value;
+    }
+
+    private bool IsPublicValue
+    {
+        get => updateDto.IsPublic ?? false;
+        set => updateDto.IsPublic = value;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBot();
+        await LoadDocuments();
+        await LoadUrls();
+    }
+
+    private async Task LoadBot()
+    {
+        var response = await Http.GetAsync($"/api/bot/{BotId}");
+        if (response.IsSuccessStatusCode)
+        {
+            bot = await response.Content.ReadFromJsonAsync<BotDto>();
+            if (bot != null)
+            {
+                updateDto = new UpdateBotDto
+                {
+                    Name = bot.Name,
+                    Description = bot.Description,
+                    SystemPrompt = bot.SystemPrompt,
+                    Temperature = bot.Temperature,
+                    MaxTokens = bot.MaxTokens,
+                    IsActive = bot.IsActive,
+                    IsPublic = bot.IsPublic,
+                    WidgetColor = bot.WidgetColor ?? "#4CAF50",
+                    WidgetPosition = bot.WidgetPosition ?? "bottom-right"
+                };
+            }
+        }
+    }
+
+    private async Task LoadDocuments()
+    {
+        var response = await Http.GetAsync($"/api/bot/{BotId}/documents");
+        if (response.IsSuccessStatusCode)
+        {
+            documents = await response.Content.ReadFromJsonAsync<List<TrainingDocumentDto>>() ?? new();
+        }
+    }
+
+    private async Task LoadUrls()
+    {
+        var response = await Http.GetAsync($"/api/bot/{BotId}/urls");
+        if (response.IsSuccessStatusCode)
+        {
+            urls = await response.Content.ReadFromJsonAsync<List<TrainingUrlDto>>() ?? new();
+        }
+    }
+
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        // TODO: Implement actual file upload to server/blob storage
+        // For now, just create a placeholder
+        foreach (var file in e.GetMultipleFiles())
+        {
+            var doc = new TrainingDocumentDto
+            {
+                Id = Guid.NewGuid().ToString(),
+                FileName = file.Name,
+                FileSize = file.Size,
+                ContentType = file.ContentType,
+                ProcessingStatus = "pending",
+                UploadedAt = DateTime.UtcNow
+            };
+            documents.Insert(0, doc);
+        }
+    }
+
+    private async Task DeleteDocument(string docId)
+    {
+        var response = await Http.DeleteAsync($"/api/bot/documents/{docId}");
+        if (response.IsSuccessStatusCode)
+        {
+            documents.RemoveAll(d => d.Id == docId);
+        }
+    }
+
+    private async Task AddUrl()
+    {
+        if (string.IsNullOrWhiteSpace(newUrl)) return;
+
+        var dto = new AddTrainingUrlDto { Url = newUrl };
+        var response = await Http.PostAsJsonAsync($"/api/bot/{BotId}/urls", dto);
+        if (response.IsSuccessStatusCode)
+        {
+            var url = await response.Content.ReadFromJsonAsync<TrainingUrlDto>();
+            if (url != null)
+            {
+                urls.Insert(0, url);
+                newUrl = string.Empty;
+            }
+        }
+    }
+
+    private async Task DeleteUrl(string urlId)
+    {
+        var response = await Http.DeleteAsync($"/api/bot/urls/{urlId}");
+        if (response.IsSuccessStatusCode)
+        {
+            urls.RemoveAll(u => u.Id == urlId);
+        }
+    }
+
+    private async Task SaveSettings()
+    {
+        isSavingSettings = true;
+        settingsMessage = null;
+
+        var response = await Http.PutAsJsonAsync($"/api/bot/{BotId}", updateDto);
+        if (response.IsSuccessStatusCode)
+        {
+            bot = await response.Content.ReadFromJsonAsync<BotDto>();
+            settingsMessage = "Settings saved successfully!";
+            await Task.Delay(3000);
+            settingsMessage = null;
+        }
+
+        isSavingSettings = false;
+    }
+
+    private async Task GenerateEmbedCode()
+    {
+        var response = await Http.GetAsync($"/api/bot/{BotId}/embed-code");
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+            embedCode = result?["embedCode"];
+        }
+    }
+
+    private async Task UpdateWidgetSettings()
+    {
+        await SaveSettings();
+        await GenerateEmbedCode();
+    }
+
+    private async Task CopyEmbedCode()
+    {
+        // TODO: Implement clipboard copy
+        // await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", embedCode);
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/dashboard");
+    }
+}

@@ -1,0 +1,449 @@
+@page "/onboarding"
+@using PapaganCMS.Shared.DTOs.Onboarding
+@using PapaganCMS.Shared.DTOs.Auth
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Welcome to Papagan - Get Started</PageTitle>
+
+<div class="onboarding-container">
+    <div class="onboarding-card">
+        @if (currentStep == "welcome")
+        {
+            <div class="step-content">
+                <h1>🦜 Welcome to Papagan!</h1>
+                <p class="subtitle">Let's get your AI chatbot platform set up in just a few steps.</p>
+
+                <div class="microsoft-announcement">
+                    <img src="/images/microsoft-for-startups-badge.png" alt="Microsoft for Startups" style="max-width: 150px;" />
+                    <h3>We're proud to announce</h3>
+                    <p>Papagan has joined Microsoft for Startups! This partnership enables us to deliver enterprise-grade AI chatbot solutions powered by Azure OpenAI and Microsoft's cloud infrastructure.</p>
+                    <p><strong>Benefits for you:</strong></p>
+                    <ul>
+                        <li>✅ Powered by Azure OpenAI Service</li>
+                        <li>✅ Enterprise-grade security and compliance</li>
+                        <li>✅ 99.9% uptime SLA</li>
+                        <li>✅ Global scalability</li>
+                    </ul>
+                </div>
+
+                <button class="btn btn-primary" @onclick="NextStep">Get Started</button>
+                <button class="btn btn-link" @onclick="SkipOnboarding">Skip for now</button>
+            </div>
+        }
+        else if (currentStep == "organization")
+        {
+            <div class="step-content">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 33%;"></div>
+                </div>
+                <h2>📊 Tell us about your organization</h2>
+                <p class="subtitle">This helps us customize your experience.</p>
+
+                <EditForm Model="@orgSetup" OnValidSubmit="@SaveOrganization">
+                    <div class="form-group">
+                        <label>Organization Name *</label>
+                        <InputText class="form-control" @bind-Value="orgSetup.Name" placeholder="Acme Corp" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <InputTextArea class="form-control" @bind-Value="orgSetup.Description" placeholder="What does your organization do?" rows="3" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Website</label>
+                        <InputText class="form-control" @bind-Value="orgSetup.Website" placeholder="https://example.com" />
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" @onclick="PreviousStep">Back</button>
+                        <button type="submit" class="btn btn-primary">Continue</button>
+                    </div>
+                </EditForm>
+            </div>
+        }
+        else if (currentStep == "bot")
+        {
+            <div class="step-content">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 66%;"></div>
+                </div>
+                <h2>🤖 Create your first chatbot</h2>
+                <p class="subtitle">Let's build your AI assistant!</p>
+
+                <EditForm Model="@botSetup" OnValidSubmit="@SaveBot">
+                    <div class="form-group">
+                        <label>Bot Name *</label>
+                        <InputText class="form-control" @bind-Value="botSetup.Name" placeholder="Customer Support Bot" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <InputTextArea class="form-control" @bind-Value="botSetup.Description" placeholder="Describe what your bot will do" rows="3" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Purpose</label>
+                        <InputTextArea class="form-control" @bind-Value="botSetup.Purpose" placeholder="Help customers with product questions" rows="2" />
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-secondary" @onclick="PreviousStep">Back</button>
+                        <button type="submit" class="btn btn-primary">Create Bot</button>
+                    </div>
+                </EditForm>
+            </div>
+        }
+        else if (currentStep == "complete")
+        {
+            <div class="step-content">
+                <div class="success-icon">✅</div>
+                <h1>All set!</h1>
+                <p class="subtitle">Your Papagan account is ready to go.</p>
+
+                <div class="next-steps">
+                    <h3>Next Steps:</h3>
+                    <div class="step-card">
+                        <span class="icon">📄</span>
+                        <div>
+                            <strong>Upload Documents</strong>
+                            <p>Train your bot with PDFs, Word docs, or text files</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <span class="icon">🔗</span>
+                        <div>
+                            <strong>Add URLs</strong>
+                            <p>Let your bot learn from your website or documentation</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <span class="icon">💬</span>
+                        <div>
+                            <strong>Test Your Bot</strong>
+                            <p>Chat with your bot to see how it responds</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <span class="icon">🌐</span>
+                        <div>
+                            <strong>Embed on Your Site</strong>
+                            <p>Get the embed code to add your bot to your website</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-lg" @onclick="GoToDashboard">Go to Dashboard</button>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger mt-3">
+                @errorMessage
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .onboarding-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #4CAF50 0%, #00BCD4 100%);
+        padding: 20px;
+    }
+
+    .onboarding-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        padding: 50px;
+        max-width: 700px;
+        width: 100%;
+    }
+
+    .step-content {
+        text-align: center;
+    }
+
+    .step-content h1 {
+        font-size: 2.5em;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .step-content h2 {
+        font-size: 2em;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .subtitle {
+        font-size: 1.2em;
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+    .microsoft-announcement {
+        background: #f5f5f5;
+        padding: 30px;
+        border-radius: 8px;
+        margin: 30px 0;
+        text-align: left;
+    }
+
+    .microsoft-announcement img {
+        display: block;
+        margin: 0 auto 20px;
+    }
+
+    .microsoft-announcement h3 {
+        color: #4CAF50;
+        margin-bottom: 15px;
+    }
+
+    .microsoft-announcement ul {
+        list-style: none;
+        padding: 0;
+        margin-top: 15px;
+    }
+
+    .microsoft-announcement li {
+        margin: 8px 0;
+        font-size: 1.05em;
+    }
+
+    .progress-bar {
+        height: 6px;
+        background: #e0e0e0;
+        border-radius: 3px;
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: #4CAF50;
+        transition: width 0.3s;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1em;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        border-radius: 6px;
+        font-size: 1.1em;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #2E7D32;
+    }
+
+    .btn-secondary {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #bdbdbd;
+    }
+
+    .btn-link {
+        background: transparent;
+        color: #666;
+        text-decoration: underline;
+    }
+
+    .btn-lg {
+        padding: 16px 40px;
+        font-size: 1.2em;
+    }
+
+    .success-icon {
+        font-size: 5em;
+        margin-bottom: 20px;
+    }
+
+    .next-steps {
+        text-align: left;
+        margin: 30px 0;
+    }
+
+    .step-card {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+    }
+
+    .step-card .icon {
+        font-size: 2em;
+    }
+
+    .step-card strong {
+        display: block;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .step-card p {
+        margin: 0;
+        color: #666;
+        font-size: 0.95em;
+    }
+
+    .alert {
+        padding: 12px;
+        border-radius: 6px;
+        margin-top: 20px;
+    }
+
+    .alert-danger {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ef9a9a;
+    }
+</style>
+
+@code {
+    private string currentStep = "welcome";
+    private string? errorMessage;
+    private OrganizationSetupDto orgSetup = new();
+    private BotSetupDto botSetup = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if user is logged in
+        try
+        {
+            var response = await Http.GetAsync("/api/auth/current-user");
+            if (!response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            var user = await response.Content.ReadFromJsonAsync<UserDto>();
+            if (user?.HasCompletedOnboarding == true)
+            {
+                Navigation.NavigateTo("/dashboard");
+            }
+        }
+        catch
+        {
+            Navigation.NavigateTo("/login");
+        }
+    }
+
+    private void NextStep()
+    {
+        if (currentStep == "welcome") currentStep = "organization";
+        else if (currentStep == "organization") currentStep = "bot";
+        else if (currentStep == "bot") currentStep = "complete";
+    }
+
+    private void PreviousStep()
+    {
+        if (currentStep == "organization") currentStep = "welcome";
+        else if (currentStep == "bot") currentStep = "organization";
+    }
+
+    private async Task SaveOrganization()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("/api/onboarding/setup-organization", orgSetup);
+            if (response.IsSuccessStatusCode)
+            {
+                await CompleteStep("organization");
+                NextStep();
+            }
+            else
+            {
+                errorMessage = "Failed to save organization";
+            }
+        }
+        catch
+        {
+            errorMessage = "An error occurred";
+        }
+    }
+
+    private async Task SaveBot()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("/api/onboarding/setup-bot", botSetup);
+            if (response.IsSuccessStatusCode)
+            {
+                await CompleteStep("bot");
+                NextStep();
+            }
+            else
+            {
+                errorMessage = "Failed to create bot";
+            }
+        }
+        catch
+        {
+            errorMessage = "An error occurred";
+        }
+    }
+
+    private async Task CompleteStep(string step)
+    {
+        await Http.PostAsJsonAsync("/api/onboarding/complete-step", new CompleteStepDto { Step = step });
+    }
+
+    private async Task SkipOnboarding()
+    {
+        await Http.PostAsync("/api/onboarding/skip", null);
+        Navigation.NavigateTo("/dashboard");
+    }
+
+    private void GoToDashboard()
+    {
+        Navigation.NavigateTo("/dashboard");
+    }
+}

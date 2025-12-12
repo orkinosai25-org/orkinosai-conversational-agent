@@ -1,0 +1,251 @@
+@page "/register"
+@using PapaganCMS.Shared.DTOs.Auth
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Register - Papagan</PageTitle>
+
+<div class="register-container">
+    <div class="register-card">
+        <div class="logo-section">
+            <h1>🦜 Papagan</h1>
+            <p class="tagline">Create Your AI Chatbot Account</p>
+        </div>
+
+        <div class="microsoft-badge">
+            <img src="/images/microsoft-for-startups-badge.png" alt="Microsoft for Startups" style="max-width: 200px; margin: 20px auto; display: block;" />
+            <p style="text-align: center; font-size: 0.9em; color: #666;">
+                Join our Microsoft for Startups powered platform
+            </p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">
+                @errorMessage
+            </div>
+        }
+
+        <EditForm Model="@registerDto" OnValidSubmit="@HandleRegister">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <InputText id="firstName" class="form-control" @bind-Value="registerDto.FirstName" placeholder="John" />
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <InputText id="lastName" class="form-control" @bind-Value="registerDto.LastName" placeholder="Doe" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <InputText id="email" class="form-control" @bind-Value="registerDto.Email" placeholder="your@email.com" />
+            </div>
+
+            <div class="form-group">
+                <label for="organizationName">Organization Name (Optional)</label>
+                <InputText id="organizationName" class="form-control" @bind-Value="registerDto.OrganizationName" placeholder="Your Company" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password *</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="registerDto.Password" placeholder="Min 8 characters" />
+                <small class="form-text">Must contain uppercase, lowercase, and number</small>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password *</label>
+                <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="registerDto.ConfirmPassword" placeholder="Re-enter password" />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span> Creating account...</span>
+                }
+                else
+                {
+                    <span>Create Account</span>
+                }
+            </button>
+        </EditForm>
+
+        <div class="form-footer">
+            <p>Already have an account? <a href="/login">Login here</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .register-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #4CAF50 0%, #00BCD4 100%);
+        padding: 20px;
+    }
+
+    .register-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        padding: 40px;
+        max-width: 500px;
+        width: 100%;
+    }
+
+    .logo-section {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .logo-section h1 {
+        font-size: 2.5em;
+        margin: 0;
+        color: #4CAF50;
+    }
+
+    .tagline {
+        color: #666;
+        margin-top: 10px;
+        font-size: 1.1em;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1em;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #4CAF50;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+
+    .form-text {
+        display: block;
+        margin-top: 5px;
+        color: #666;
+        font-size: 0.875em;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 14px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1em;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background: #2E7D32;
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .form-footer {
+        margin-top: 25px;
+        text-align: center;
+    }
+
+    .form-footer a {
+        color: #4CAF50;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .form-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .alert {
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+
+    .alert-danger {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ef9a9a;
+    }
+</style>
+
+@code {
+    private RegisterDto registerDto = new();
+    private string? errorMessage;
+    private bool isLoading;
+
+    private async Task HandleRegister()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            var response = await Http.PostAsJsonAsync("/api/auth/register", registerDto);
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                if (result?.Success == true)
+                {
+                    // Registration successful, navigate to onboarding
+                    await Task.Delay(500);
+                    Navigation.NavigateTo("/onboarding");
+                }
+                else
+                {
+                    errorMessage = result?.Message ?? "Registration failed";
+                }
+            }
+            else
+            {
+                var result = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                errorMessage = result?.Message ?? "Registration failed";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred. Please try again.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

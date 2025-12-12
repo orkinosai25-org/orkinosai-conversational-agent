@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PapaganCMS.Core.Entities.Subscriptions;
+using OrkinosaiCMS.Core.Entities.Subscriptions;
+using OrkinosaiCMS.Core.Interfaces.Services;
 using PapaganCMS.Core.Interfaces.Services;
 using PapaganCMS.Shared.DTOs.Subscriptions;
 
@@ -16,14 +17,14 @@ public class SubscriptionController : ControllerBase
     private readonly ISubscriptionService _subscriptionService;
     private readonly ICustomerService _customerService;
     private readonly IStripeService _stripeService;
-    private readonly IUserService _userService;
+    private readonly OrkinosaiCMS.Core.Interfaces.Services.IUserService _userService;
     private readonly ILogger<SubscriptionController> _logger;
 
     public SubscriptionController(
         ISubscriptionService subscriptionService,
         ICustomerService customerService,
         IStripeService stripeService,
-        IUserService userService,
+        OrkinosaiCMS.Core.Interfaces.Services.IUserService userService,
         ILogger<SubscriptionController> logger)
     {
         _subscriptionService = subscriptionService;
