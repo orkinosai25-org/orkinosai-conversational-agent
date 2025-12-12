@@ -29,6 +29,9 @@ from werkzeug.utils import secure_filename
 
 from src.config import get_settings
 from src.agent import ConversationManager
+from src.cms_module import UserService, UserCreate, UserLogin
+from src.cms_module.services import OnboardingService
+from src.cms_module.models.onboarding import OnboardingStepData
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +65,12 @@ def create_app(config_path: Optional[str] = None) -> Flask:
     
     # Initialize conversation manager
     conversation_manager = ConversationManager(settings)
+    
+    # Initialize user service for authentication
+    user_service = UserService()
+    
+    # Initialize onboarding service
+    onboarding_service = OnboardingService()
     
     # Configure logging
     logging.basicConfig(
@@ -187,86 +196,280 @@ def create_app(config_path: Optional[str] = None) -> Flask:
     # Authentication Endpoints
     @app.route("/auth/register", methods=["POST"])
     def register():
-        """Register a new user."""
+        """Register a new user with proper password hashing and JWT tokens."""
         try:
             data = request.get_json()
             
-            if not data or "email" not in data or "password" not in data:
-                return jsonify({"error": "Email and password required"}), 400
+            if not data:
+                return jsonify({"error": "Request body is required"}), 400
             
-            email = data["email"]
+            # Validate required fields
+            required_fields = ["email", "password", "name"]
+            missing_fields = [f for f in required_fields if f not in data]
+            if missing_fields:
+                return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
             
-            # Check if user already exists
-            if email in users_db:
-                return jsonify({"error": "User already exists"}), 400
+            # Create UserCreate model (this will validate the data)
+            try:
+                user_create = UserCreate(
+                    email=data["email"],
+                    password=data["password"],
+                    name=data["name"],
+                    phone=data.get("phone"),
+                    organization_name=data.get("organization_name")
+                )
+            except Exception as validation_error:
+                return jsonify({"error": str(validation_error)}), 400
             
-            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
-            # TODO: Hash password with bcrypt before storage
-            # TODO: Implement proper password validation rules
-            user_id = str(uuid.uuid4())
-            users_db[email] = {
-                "id": user_id,
-                "email": email,
-                "name": data.get("name", email.split("@")[0]),
-                "password": data["password"]  # SECURITY RISK: Plain text password!
-            }
+            # Register user using the CMS user service
+            response = user_service.register_user(user_create)
             
-            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
-            # TODO: Implement JWT tokens with expiration (e.g., PyJWT library)
-            # TODO: Add refresh token mechanism
-            token = str(uuid.uuid4())
+            if not response.success:
+                return jsonify({"error": response.message}), 400
             
             return jsonify({
-                "message": "User registered successfully",
-                "token": token,
+                "message": response.message,
+                "token": response.token,
                 "user": {
-                    "id": user_id,
-                    "email": email,
-                    "name": users_db[email]["name"]
+                    "id": response.user.id,
+                    "email": response.user.email,
+                    "name": response.user.name,
+                    "phone": response.user.phone,
+                    "organization_id": response.user.organization_id,
+                    "organization_name": response.user.organization_name,
+                    "is_verified": response.user.is_verified,
+                    "onboarding_completed": response.user.onboarding_completed
                 }
             }), 201
             
         except Exception as e:
             logger.error(f"Registration error: {str(e)}")
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "Internal server error"}), 500
     
     @app.route("/auth/login", methods=["POST"])
     def login():
-        """Login a user."""
+        """Login a user with proper password verification and JWT tokens."""
         try:
             data = request.get_json()
             
-            if not data or "email" not in data or "password" not in data:
+            if not data:
+                return jsonify({"error": "Request body is required"}), 400
+            
+            # Validate required fields
+            if "email" not in data or "password" not in data:
                 return jsonify({"error": "Email and password required"}), 400
             
-            email = data["email"]
-            password = data["password"]
+            # Create UserLogin model
+            try:
+                user_login = UserLogin(
+                    email=data["email"],
+                    password=data["password"]
+                )
+            except Exception as validation_error:
+                return jsonify({"error": str(validation_error)}), 400
             
-            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
-            # TODO: Use bcrypt.checkpw() for constant-time password comparison
-            # TODO: Implement rate limiting to prevent brute force attacks
-            # TODO: Add account lockout after failed attempts
-            if email not in users_db or users_db[email]["password"] != password:
-                return jsonify({"error": "Invalid credentials"}), 401
+            # Login user using the CMS user service
+            response = user_service.login_user(user_login)
             
-            # SECURITY WARNING: DEMO ONLY - DO NOT USE IN PRODUCTION
-            # TODO: Implement JWT tokens with expiration
-            token = str(uuid.uuid4())
+            if not response.success:
+                return jsonify({"error": response.message}), 401
             
-            user = users_db[email]
             return jsonify({
-                "message": "Login successful",
-                "token": token,
+                "message": response.message,
+                "token": response.token,
                 "user": {
-                    "id": user["id"],
-                    "email": user["email"],
-                    "name": user["name"]
+                    "id": response.user.id,
+                    "email": response.user.email,
+                    "name": response.user.name,
+                    "phone": response.user.phone,
+                    "organization_id": response.user.organization_id,
+                    "organization_name": response.user.organization_name,
+                    "is_verified": response.user.is_verified,
+                    "onboarding_completed": response.user.onboarding_completed,
+                    "last_login": response.user.last_login.isoformat() if response.user.last_login else None
                 }
             })
             
         except Exception as e:
             logger.error(f"Login error: {str(e)}")
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "Internal server error"}), 500
+    
+    # Onboarding Endpoints
+    @app.route("/onboarding/start", methods=["POST"])
+    def start_onboarding():
+        """Start onboarding for a user"""
+        try:
+            data = request.get_json()
+            
+            if not data or "user_id" not in data:
+                return jsonify({"error": "user_id required"}), 400
+            
+            user_id = data["user_id"]
+            response = onboarding_service.start_onboarding(user_id)
+            
+            if not response.success:
+                return jsonify({"error": response.message}), 400
+            
+            return jsonify({
+                "message": response.message,
+                "progress": {
+                    "user_id": response.progress.user_id,
+                    "current_step": response.progress.current_step.value,
+                    "completed_steps": [s.value for s in response.progress.completed_steps],
+                    "status": response.progress.status.value,
+                    "started_at": response.progress.started_at.isoformat() if response.progress.started_at else None
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Error starting onboarding: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+    
+    @app.route("/onboarding/progress/<user_id>", methods=["GET"])
+    def get_onboarding_progress(user_id: str):
+        """Get onboarding progress for a user"""
+        try:
+            progress = onboarding_service.get_onboarding_progress(user_id)
+            
+            if not progress:
+                return jsonify({"error": "Onboarding not started"}), 404
+            
+            return jsonify({
+                "user_id": progress.user_id,
+                "current_step": progress.current_step.value,
+                "completed_steps": [s.value for s in progress.completed_steps],
+                "status": progress.status.value,
+                "started_at": progress.started_at.isoformat() if progress.started_at else None,
+                "completed_at": progress.completed_at.isoformat() if progress.completed_at else None,
+                "data": progress.data
+            })
+            
+        except Exception as e:
+            logger.error(f"Error getting onboarding progress: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+    
+    @app.route("/onboarding/step/complete", methods=["POST"])
+    def complete_onboarding_step():
+        """Complete an onboarding step"""
+        try:
+            data = request.get_json()
+            
+            if not data or "user_id" not in data or "step" not in data:
+                return jsonify({"error": "user_id and step required"}), 400
+            
+            user_id = data["user_id"]
+            step_data = OnboardingStepData(
+                step=data["step"],
+                data=data.get("data", {})
+            )
+            
+            response = onboarding_service.complete_step(user_id, step_data)
+            
+            if not response.success:
+                return jsonify({"error": response.message}), 400
+            
+            return jsonify({
+                "message": response.message,
+                "progress": {
+                    "user_id": response.progress.user_id,
+                    "current_step": response.progress.current_step.value,
+                    "completed_steps": [s.value for s in response.progress.completed_steps],
+                    "status": response.progress.status.value
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Error completing step: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+    
+    @app.route("/onboarding/skip", methods=["POST"])
+    def skip_onboarding():
+        """Skip onboarding for a user"""
+        try:
+            data = request.get_json()
+            
+            if not data or "user_id" not in data:
+                return jsonify({"error": "user_id required"}), 400
+            
+            user_id = data["user_id"]
+            response = onboarding_service.skip_onboarding(user_id)
+            
+            if not response.success:
+                return jsonify({"error": response.message}), 400
+            
+            return jsonify({
+                "message": response.message,
+                "progress": {
+                    "user_id": response.progress.user_id,
+                    "status": response.progress.status.value
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Error skipping onboarding: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+    
+    @app.route("/profile/<user_id>", methods=["GET"])
+    def get_user_profile(user_id: str):
+        """Get user profile"""
+        try:
+            profile = onboarding_service.get_profile(user_id)
+            
+            if not profile:
+                return jsonify({"error": "Profile not found"}), 404
+            
+            return jsonify({
+                "user_id": profile.user_id,
+                "job_title": profile.job_title,
+                "department": profile.department,
+                "bio": profile.bio,
+                "avatar_url": profile.avatar_url,
+                "preferences": {
+                    "theme": profile.preferences.theme,
+                    "language": profile.preferences.language,
+                    "notifications_enabled": profile.preferences.notifications_enabled,
+                    "email_notifications": profile.preferences.email_notifications,
+                    "chat_history_enabled": profile.preferences.chat_history_enabled,
+                    "timezone": profile.preferences.timezone
+                },
+                "updated_at": profile.updated_at.isoformat()
+            })
+            
+        except Exception as e:
+            logger.error(f"Error getting profile: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+    
+    @app.route("/profile/<user_id>", methods=["PUT"])
+    def update_user_profile(user_id: str):
+        """Update user profile"""
+        try:
+            data = request.get_json()
+            
+            if not data:
+                return jsonify({"error": "Request body required"}), 400
+            
+            response = onboarding_service.update_profile(user_id, data)
+            
+            if not response.success:
+                return jsonify({"error": response.message}), 400
+            
+            return jsonify({
+                "message": response.message,
+                "profile": {
+                    "user_id": response.profile.user_id,
+                    "job_title": response.profile.job_title,
+                    "department": response.profile.department,
+                    "bio": response.profile.bio,
+                    "preferences": {
+                        "theme": response.profile.preferences.theme,
+                        "language": response.profile.preferences.language
+                    }
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Error updating profile: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
     
     # Training Endpoints
     @app.route("/training/url", methods=["POST"])
