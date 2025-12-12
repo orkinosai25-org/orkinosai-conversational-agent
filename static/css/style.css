@@ -253,6 +253,7 @@ body {
 
 .microsoft-badge img {
     display: inline-block;
+    max-width: 250px;
     transition: transform 0.2s;
     opacity: 0.9;
 }
