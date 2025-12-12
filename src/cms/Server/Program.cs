@@ -1,5 +1,8 @@
 using OrkinosaiCMS.Client.Pages;
 using OrkinosaiCMS.Components;
+using OrkinosaiCMS.Core.Interfaces.Services;
+using OrkinosaiCMS.Infrastructure.Services;
+using OrkinosaiCMS.Infrastructure.Services.Subscriptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +11,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+// Add API controllers
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(); // Required for Stripe webhook processing
+
 // Configure HttpClient for chat agent backend
 var backendUrl = builder.Configuration["ChatAgent:BackendUrl"] ?? "http://localhost:5000";
 builder.Services.AddHttpClient("ChatBackend", client =>
@@ -15,6 +22,12 @@ builder.Services.AddHttpClient("ChatBackend", client =>
     client.BaseAddress = new Uri(backendUrl);
     client.Timeout = TimeSpan.FromSeconds(30);
 });
+
+// Register subscription services
+builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<ICustomerService, CustomerService>();
+builder.Services.AddSingleton<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IStripeService, StripeService>();
 
 var app = builder.Build();
 
@@ -39,5 +52,8 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(OrkinosaiCMS.Client._Imports).Assembly);
+
+// Map API controllers
+app.MapControllers();
 
 app.Run();
