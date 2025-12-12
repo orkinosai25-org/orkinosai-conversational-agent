@@ -22,13 +22,13 @@
         </div>
 
         <div class="tabs">
-            <button class="tab @(activeTab == "train" ? "active" : "")" @onclick="() => activeTab = "train"">
+            <button class="tab @(activeTab == "train" ? "active" : "")" @onclick="@(() => activeTab = "train")">
                 📚 Training Data
             </button>
-            <button class="tab @(activeTab == "settings" ? "active" : "")" @onclick="() => activeTab = "settings"">
+            <button class="tab @(activeTab == "settings" ? "active" : "")" @onclick="@(() => activeTab = "settings")">
                 ⚙️ Settings
             </button>
-            <button class="tab @(activeTab == "embed" ? "active" : "")" @onclick="() => activeTab = "embed"">
+            <button class="tab @(activeTab == "embed" ? "active" : "")" @onclick="@(() => activeTab = "embed")">
                 🌐 Embed Code
             </button>
         </div>
@@ -143,14 +143,14 @@
 
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <InputCheckbox @bind-Value="updateDto.IsActive" />
+                                <InputCheckbox @bind-Value="IsActiveValue" />
                                 Active
                             </label>
                         </div>
 
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <InputCheckbox @bind-Value="updateDto.IsPublic" />
+                                <InputCheckbox @bind-Value="IsPublicValue" />
                                 Public (Allow others to use this bot)
                             </label>
                         </div>
@@ -545,7 +545,7 @@
     public string BotId { get; set; } = string.Empty;
 
     private BotDto? bot;
-    private UpdateBotDto updateDto = new();
+    private UpdateBotDto updateDto = new() { IsActive = true, IsPublic = false };
     private List<TrainingDocumentDto> documents = new();
     private List<TrainingUrlDto> urls = new();
     private string activeTab = "train";
@@ -553,6 +553,19 @@
     private string? embedCode;
     private string? settingsMessage;
     private bool isSavingSettings = false;
+
+    // Helper properties for checkboxes (since InputCheckbox needs non-nullable bool)
+    private bool IsActiveValue
+    {
+        get => updateDto.IsActive ?? true;
+        set => updateDto.IsActive = value;
+    }
+
+    private bool IsPublicValue
+    {
+        get => updateDto.IsPublic ?? false;
+        set => updateDto.IsPublic = value;
+    }
 
     protected override async Task OnInitializedAsync()
     {

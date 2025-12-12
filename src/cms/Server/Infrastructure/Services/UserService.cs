@@ -1,4 +1,4 @@
-using PapaganCMS.Core.Interfaces.Services;
+using OrkinosaiCMS.Core.Interfaces.Services;
 
 namespace PapaganCMS.Infrastructure.Services;
 

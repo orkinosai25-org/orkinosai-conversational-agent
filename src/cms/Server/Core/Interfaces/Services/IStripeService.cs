@@ -1,4 +1,4 @@
-using PapaganCMS.Core.Entities.Subscriptions;
+using OrkinosaiCMS.Core.Entities.Subscriptions;
 
 namespace PapaganCMS.Core.Interfaces.Services;
 

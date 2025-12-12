@@ -1,4 +1,4 @@
-namespace PapaganCMS.Core.Entities.Subscriptions;
+namespace OrkinosaiCMS.Core.Entities.Subscriptions;
 
 /// <summary>
 /// Enumeration of subscription tiers

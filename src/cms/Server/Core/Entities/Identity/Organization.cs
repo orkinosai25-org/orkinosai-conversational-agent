@@ -1,12 +1,14 @@
-using PapaganCMS.Core.Common;
-
 namespace PapaganCMS.Core.Entities.Identity;
 
 /// <summary>
 /// Organization entity for multi-tenant support
 /// </summary>
-public class Organization : BaseEntity
+public class Organization
 {
+    public string Id { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? Website { get; set; }

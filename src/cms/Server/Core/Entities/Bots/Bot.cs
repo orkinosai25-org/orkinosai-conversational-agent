@@ -1,12 +1,14 @@
-using PapaganCMS.Core.Common;
-
 namespace PapaganCMS.Core.Entities.Identity;
 
 /// <summary>
 /// Bot entity representing a trained chatbot instance
 /// </summary>
-public class Bot : BaseEntity
+public class Bot
 {
+    public string Id { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string UserId { get; set; } = string.Empty;
@@ -38,8 +40,12 @@ public class Bot : BaseEntity
 /// <summary>
 /// Training document uploaded by user
 /// </summary>
-public class TrainingDocument : BaseEntity
+public class TrainingDocument
 {
+    public string Id { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    
     public string BotId { get; set; } = string.Empty;
     public string FileName { get; set; } = string.Empty;
     public string? FileUrl { get; set; }
@@ -55,8 +61,12 @@ public class TrainingDocument : BaseEntity
 /// <summary>
 /// URL used for training the bot
 /// </summary>
-public class TrainingUrl : BaseEntity
+public class TrainingUrl
 {
+    public string Id { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    
     public string BotId { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
     public string? Title { get; set; }

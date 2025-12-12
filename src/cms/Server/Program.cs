@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using OrkinosaiCMS.Core.Interfaces.Services;
 using PapaganCMS.Client.Pages;
 using PapaganCMS.Components;
 using PapaganCMS.Core.Entities.Identity;
@@ -76,8 +77,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBotService, BotService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 
-// Register subscription services
-builder.Services.AddSingleton<IUserService, UserService>();
+// Register subscription services (using OrkinosaiCMS namespace)
+builder.Services.AddSingleton<OrkinosaiCMS.Core.Interfaces.Services.IUserService, UserService>();
 builder.Services.AddSingleton<ICustomerService, CustomerService>();
 builder.Services.AddSingleton<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
@@ -108,7 +109,7 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(OrkinosaiCMS.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(PapaganCMS.Client._Imports).Assembly);
 
 // Map API controllers
 app.MapControllers();
