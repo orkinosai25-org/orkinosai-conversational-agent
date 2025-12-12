@@ -1,8 +1,8 @@
-# Zoota Conversational Agent - Engineering Backlog
+# Papagan (The Chatter Parrot) - Engineering Backlog
 
 ## Overview
 
-This document outlines the engineering backlog for implementing features across all pricing tiers of the Zoota Conversational Agent. Each epic is broken down into user stories with clear acceptance criteria, technical requirements, and tier associations.
+This document outlines the engineering backlog for implementing features across all pricing tiers of Papagan. Each epic is broken down into user stories with clear acceptance criteria, technical requirements, and tier associations.
 
 **Legend:**
 - 🆓 Free Tier
@@ -27,7 +27,7 @@ This document outlines the engineering backlog for implementing features across 
 
 #### Story 1.1: SharePoint Authentication & Connection
 **As a** Pro tier user  
-**I want to** connect my SharePoint site to Zoota  
+**I want to** connect my SharePoint site to Papagan  
 **So that** I can index and search SharePoint documents in conversations
 
 **Acceptance Criteria:**
@@ -546,7 +546,7 @@ This document outlines the engineering backlog for implementing features across 
 
 #### Story 4.5: BI Tool Integration
 **As an** Enterprise tier administrator  
-**I want to** connect BI tools to Zoota analytics  
+**I want to** connect BI tools to Papagan analytics  
 **So that** I can create custom dashboards in my existing tools
 
 **Acceptance Criteria:**
@@ -751,8 +751,8 @@ This document outlines the engineering backlog for implementing features across 
 - Create widget CDN for fast loading
 
 **Tier Features:**
-- 🆓 Free: Fixed branding with Zoota logo
-- 🚀 Starter: Custom colors, Zoota badge
+- 🆓 Free: Fixed branding with Papagan logo
+- 🚀 Starter: Custom colors, Papagan badge
 - 💼 Pro: Full customization, removable badge
 - 🏢 Business: White-label
 - 🌟 Enterprise: Complete white-label
@@ -1020,7 +1020,7 @@ This document outlines the engineering backlog for implementing features across 
 #### Story 8.2: Custom Domain Support
 **As a** Business tier user  
 **I want to** use my own domain  
-**So that** users see my brand, not Zoota
+**So that** users see my brand, not Papagan
 
 **Acceptance Criteria:**
 - [ ] User can add custom domain (CNAME)
@@ -1078,7 +1078,7 @@ This document outlines the engineering backlog for implementing features across 
 - [ ] Can customize error messages
 - [ ] Can add custom metadata to responses
 - [ ] Supports custom API documentation
-- [ ] Can hide Zoota branding in API
+- [ ] Can hide Papagan branding in API
 
 **Technical Requirements:**
 - Implement response customization system
@@ -1216,7 +1216,7 @@ This document outlines the engineering backlog for implementing features across 
 **So that** I don't manage permissions in two places
 
 **Acceptance Criteria:**
-- [ ] Maps identity provider groups to Zoota roles
+- [ ] Maps identity provider groups to Papagan roles
 - [ ] Automatic role updates on login
 - [ ] Supports custom attribute mapping
 - [ ] Shows sync status in admin panel

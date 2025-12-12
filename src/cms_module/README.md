@@ -1,6 +1,6 @@
 # CMS Module - User Management and Onboarding
 
-This module provides comprehensive CMS (Content Management System) functionality for the Orkinosai Conversational Agent, with a focus on user registration, authentication, and onboarding.
+This module provides comprehensive CMS (Content Management System) functionality for the Papagan - The Chatter Parrot, with a focus on user registration, authentication, and onboarding.
 
 ## Features
 
@@ -369,7 +369,7 @@ if response.success:
 
 ## Migration Notes
 
-This module was migrated from the orkinosaiCMS repository and adapted to work with the Orkinosai Conversational Agent. Key improvements:
+This module was migrated from the orkinosaiCMS repository and adapted to work with the Papagan - The Chatter Parrot. Key improvements:
 
 1. **Security**: Replaced plain-text passwords with bcrypt hashing
 2. **Authentication**: Replaced UUID tokens with JWT tokens

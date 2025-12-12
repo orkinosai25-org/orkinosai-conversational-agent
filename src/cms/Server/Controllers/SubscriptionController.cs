@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OrkinosaiCMS.Core.Entities.Subscriptions;
-using OrkinosaiCMS.Core.Interfaces.Services;
-using OrkinosaiCMS.Shared.DTOs.Subscriptions;
+using PapaganCMS.Core.Entities.Subscriptions;
+using PapaganCMS.Core.Interfaces.Services;
+using PapaganCMS.Shared.DTOs.Subscriptions;
 
-namespace OrkinosaiCMS.Controllers;
+namespace PapaganCMS.Controllers;
 
 /// <summary>
 /// API Controller for subscription management

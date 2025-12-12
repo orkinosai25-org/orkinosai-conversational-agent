@@ -1,6 +1,6 @@
-using OrkinosaiCMS.Core.Entities.Subscriptions;
+using PapaganCMS.Core.Entities.Subscriptions;
 
-namespace OrkinosaiCMS.Core.Interfaces.Services;
+namespace PapaganCMS.Core.Interfaces.Services;
 
 /// <summary>
 /// Service interface for subscription management

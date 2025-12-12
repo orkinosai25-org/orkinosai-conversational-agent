@@ -1,6 +1,6 @@
 # Stripe Integration Setup Guide
 
-This guide will walk you through setting up Stripe payment processing for the Orkinosai CMS subscription tiers.
+This guide will walk you through setting up Stripe payment processing for the Papagan CMS subscription tiers.
 
 ## Prerequisites
 
@@ -275,7 +275,7 @@ Update `appsettings.Development.json`:
   "Logging": {
     "LogLevel": {
       "Default": "Information",
-      "OrkinosaiCMS.Infrastructure.Services.Subscriptions": "Debug"
+      "PapaganCMS.Infrastructure.Services.Subscriptions": "Debug"
     }
   }
 }

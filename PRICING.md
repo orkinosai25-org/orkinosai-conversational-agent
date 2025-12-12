@@ -1,8 +1,8 @@
-# Zoota Conversational Agent - SaaS Pricing Tiers
+# Papagan (The Chatter Parrot) - SaaS Pricing Tiers
 
 ## Overview
 
-Zoota Conversational Agent offers flexible pricing tiers designed to scale with your business needs, from individual developers to large enterprises. Each tier provides progressively more features, integrations, and support.
+Papagan offers flexible pricing tiers designed to scale with your business needs, from individual developers to large enterprises. Each tier provides progressively more features, integrations, and support.
 
 ---
 
@@ -36,7 +36,7 @@ Perfect for developers, students, and small projects wanting to explore conversa
 
 #### Integrations
 - **API Access**: ❌ Not available
-- **Web Widget**: ✅ Basic embeddable widget (with Zoota branding)
+- **Web Widget**: ✅ Basic embeddable widget (with Papagan branding)
 - **M365/SharePoint**: ❌ Not available
 - **Google Drive**: ❌ Not available
 - **Salesforce**: ❌ Not available
@@ -57,7 +57,7 @@ Perfect for developers, students, and small projects wanting to explore conversa
 - **Analytics**: Basic usage stats only
 
 #### Branding & Customization
-- **Widget Branding**: Zoota branding (non-removable)
+- **Widget Branding**: Papagan branding (non-removable)
 - **Custom Colors**: ❌ Not available
 - **Custom Logo**: ❌ Not available
 - **Custom Domain**: ❌ Not available
@@ -107,7 +107,7 @@ Ideal for small businesses and startups building customer-facing AI assistants.
 
 #### Integrations
 - **API Access**: ✅ REST API (1,000 calls/day)
-- **Web Widget**: ✅ Embeddable widget (Zoota branding)
+- **Web Widget**: ✅ Embeddable widget (Papagan branding)
 - **M365/SharePoint**: ❌ Not available
 - **Google Drive**: ✅ Read-only access (100 files)
 - **Salesforce**: ❌ Not available
@@ -128,7 +128,7 @@ Ideal for small businesses and startups building customer-facing AI assistants.
 - **Analytics**: Conversation analytics, token usage, model distribution
 
 #### Branding & Customization
-- **Widget Branding**: Zoota branding (non-removable)
+- **Widget Branding**: Papagan branding (non-removable)
 - **Custom Colors**: ✅ Primary and secondary colors
 - **Custom Logo**: ❌ Not available
 - **Custom Domain**: ❌ Not available
@@ -199,10 +199,10 @@ Perfect for growing teams and businesses requiring advanced AI capabilities and 
 - **Analytics**: Advanced analytics with custom dashboards, export capabilities
 
 #### Branding & Customization
-- **Widget Branding**: ✅ Custom branding (Zoota badge removable)
+- **Widget Branding**: ✅ Custom branding (Papagan badge removable)
 - **Custom Colors**: ✅ Full color palette customization
 - **Custom Logo**: ✅ Upload custom logo
-- **Custom Domain**: ✅ Subdomain (yourcompany.zoota.ai)
+- **Custom Domain**: ✅ Subdomain (yourcompany.papagan.ai)
 - **White-Label**: ❌ Not available
 - **Custom CSS**: ✅ Full CSS customization
 
@@ -530,12 +530,12 @@ We offer a 30-day money-back guarantee on annual plans. Monthly plans are non-re
 
 For custom Enterprise plans, volume discounts, or questions:
 
-- **Email**: sales@zoota.ai
-- **Phone**: 1-800-ZOOTA-AI
-- **Schedule Demo**: https://zoota.ai/demo
-- **Request Quote**: https://zoota.ai/contact
+- **Email**: sales@papagan.ai
+- **Phone**: 1-800-PAPAGAN
+- **Schedule Demo**: https://papagan.ai/demo
+- **Request Quote**: https://papagan.ai/contact
 
 ---
 
 *Last Updated: December 2024*
-*Pricing subject to change. See zoota.ai/pricing for current pricing.*
+*Pricing subject to change. See papagan.ai/pricing for current pricing.*

@@ -46,7 +46,7 @@ class AzureConfig(BaseModel):
 
 class AgentConfig(BaseModel):
     """Conversational agent configuration."""
-    name: str = Field(default="Orkinosai Conversational Agent")
+    name: str = Field(default="Papagan - The Chatter Parrot")
     version: str = Field(default="1.0.0")
     max_history: int = Field(default=10, description="Maximum conversation history")
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
@@ -102,7 +102,7 @@ class Settings(BaseModel):
                     }
                 },
                 "agent": {
-                    "name": "Orkinosai Conversational Agent",
+                    "name": "Papagan - The Chatter Parrot",
                     "version": "1.0.0",
                     "max_history": 10,
                     "temperature": 0.7,

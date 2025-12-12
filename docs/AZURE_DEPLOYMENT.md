@@ -1,6 +1,6 @@
 # Azure Deployment Guide
 
-This guide covers deploying the Orkinosai Conversational Agent to Azure.
+This guide covers deploying the Papagan - The Chatter Parrot to Azure.
 
 ## Deployment Options
 
@@ -21,19 +21,19 @@ Best for: Production web applications with auto-scaling
    az login
    
    # Create resource group
-   az group create --name orkinosai-rg --location eastus
+   az group create --name papagan-rg --location eastus
    
    # Create App Service plan
    az appservice plan create \
      --name orkinosai-plan \
-     --resource-group orkinosai-rg \
+     --resource-group papagan-rg \
      --sku B1 \
      --is-linux
    
    # Create web app
    az webapp create \
      --name orkinosai-agent \
-     --resource-group orkinosai-rg \
+     --resource-group papagan-rg \
      --plan orkinosai-plan \
      --runtime "PYTHON:3.11"
    ```
@@ -42,7 +42,7 @@ Best for: Production web applications with auto-scaling
    ```bash
    az webapp config appsettings set \
      --name orkinosai-agent \
-     --resource-group orkinosai-rg \
+     --resource-group papagan-rg \
      --settings \
        AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com/" \
        AZURE_OPENAI_API_KEY="your-api-key" \
@@ -56,7 +56,7 @@ Best for: Production web applications with auto-scaling
    
    az webapp deployment source config-zip \
      --name orkinosai-agent \
-     --resource-group orkinosai-rg \
+     --resource-group papagan-rg \
      --src app.zip
    ```
 
@@ -87,7 +87,7 @@ Best for: Microservices, containerized applications
    # Create container registry
    az acr create \
      --name orkinosaiacr \
-     --resource-group orkinosai-rg \
+     --resource-group papagan-rg \
      --sku Basic
    
    # Build and push
@@ -100,7 +100,7 @@ Best for: Microservices, containerized applications
    ```bash
    az containerapp create \
      --name orkinosai-agent \
-     --resource-group orkinosai-rg \
+     --resource-group papagan-rg \
      --image orkinosaiacr.azurecr.io/orkinosai-agent:v1 \
      --environment mycontainerenv \
      --target-port 5000 \
@@ -147,7 +147,7 @@ Enable managed identity in Azure:
 ```bash
 az webapp identity assign \
   --name orkinosai-agent \
-  --resource-group orkinosai-rg
+  --resource-group papagan-rg
 ```
 
 ### Use Azure Key Vault
@@ -158,7 +158,7 @@ Store secrets in Key Vault:
 # Create Key Vault
 az keyvault create \
   --name orkinosai-kv \
-  --resource-group orkinosai-rg \
+  --resource-group papagan-rg \
   --location eastus
 
 # Add secrets
@@ -178,7 +178,7 @@ Reference in App Service:
 ```bash
 az webapp config appsettings set \
   --name orkinosai-agent \
-  --resource-group orkinosai-rg \
+  --resource-group papagan-rg \
   --settings \
     AZURE_OPENAI_API_KEY="@Microsoft.KeyVault(SecretUri=https://orkinosai-kv.vault.azure.net/secrets/openai-api-key/)"
 ```
@@ -192,14 +192,14 @@ az webapp config appsettings set \
    az monitor app-insights component create \
      --app orkinosai-insights \
      --location eastus \
-     --resource-group orkinosai-rg
+     --resource-group papagan-rg
    ```
 
 2. **Connect to App Service**
    ```bash
    az webapp config appsettings set \
      --name orkinosai-agent \
-     --resource-group orkinosai-rg \
+     --resource-group papagan-rg \
      --settings \
        APPLICATIONINSIGHTS_CONNECTION_STRING="your-connection-string"
    ```
@@ -210,7 +210,7 @@ Monitor logs in real-time:
 ```bash
 az webapp log tail \
   --name orkinosai-agent \
-  --resource-group orkinosai-rg
+  --resource-group papagan-rg
 ```
 
 ## Scaling
@@ -219,7 +219,7 @@ az webapp log tail \
 
 ```bash
 az monitor autoscale create \
-  --resource-group orkinosai-rg \
+  --resource-group papagan-rg \
   --resource orkinosai-agent \
   --resource-type Microsoft.Web/sites \
   --name autoscale-rules \
@@ -228,7 +228,7 @@ az monitor autoscale create \
   --count 1
 
 az monitor autoscale rule create \
-  --resource-group orkinosai-rg \
+  --resource-group papagan-rg \
   --autoscale-name autoscale-rules \
   --condition "CpuPercentage > 70 avg 5m" \
   --scale out 1
@@ -284,17 +284,17 @@ jobs:
 
 ### Check Logs
 ```bash
-az webapp log tail --name orkinosai-agent --resource-group orkinosai-rg
+az webapp log tail --name orkinosai-agent --resource-group papagan-rg
 ```
 
 ### SSH into Container
 ```bash
-az webapp ssh --name orkinosai-agent --resource-group orkinosai-rg
+az webapp ssh --name orkinosai-agent --resource-group papagan-rg
 ```
 
 ### Restart Application
 ```bash
-az webapp restart --name orkinosai-agent --resource-group orkinosai-rg
+az webapp restart --name orkinosai-agent --resource-group papagan-rg
 ```
 
 ## Support

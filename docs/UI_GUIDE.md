@@ -1,8 +1,8 @@
-# Orkinosai Conversational Agent - UI Guide
+# Papagan - The Chatter Parrot - UI Guide
 
 ## Overview
 
-The Orkinosai Conversational Agent features a modern, Azure-style dockable interface designed for intuitive interaction and easy customization. This guide will help you understand and use all the UI features.
+The Papagan - The Chatter Parrot features a modern, Azure-style dockable interface designed for intuitive interaction and easy customization. This guide will help you understand and use all the UI features.
 
 ## Main Interface Components
 
@@ -10,7 +10,7 @@ The Orkinosai Conversational Agent features a modern, Azure-style dockable inter
 
 The top bar provides quick access to all major features:
 
-- **Brand Logo & Name**: Always visible, shows "Orkinosai Agent"
+- **Brand Logo & Name**: Always visible, shows "Papagan Agent"
 - **Menu Button**: Opens/closes the left conversation panel
 - **Training Button**: Opens the training panel for URL learning
 - **Documents Button**: Opens the document upload panel

@@ -1,7 +1,7 @@
 # CMS Migration Summary
 
 ## Overview
-Successfully migrated and integrated complete CMS functionality from `orkinosai25-org/orkinosaiCMS` into `orkinosai25-org/orkinosai-conversational-agent`, focusing on user registration as the foundation for later training features.
+Successfully migrated and integrated complete CMS functionality from `orkinosai25-org/orkinosaiCMS` into `orkinosai25-org/papagan-conversational-agent`, focusing on user registration as the foundation for later training features.
 
 ## What Was Accomplished
 

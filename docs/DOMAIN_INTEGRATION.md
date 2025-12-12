@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides practical instructions for developers working with the CMS and Agent domains in the Orkinosai Conversational Agent project.
+This guide provides practical instructions for developers working with the CMS and Agent domains in the Papagan Conversational Agent project.
 
 ## Quick Reference
 
@@ -47,14 +47,14 @@ Ask yourself these questions:
 
 ```python
 # ❌ DON'T start from scratch
-# ✅ DO check if it exists in orkinosaicms first
+# ✅ DO check if it exists in papagancms first
 ```
 
 **Process**:
 1. Check `docs/CMS_FEATURES_INVENTORY.md` to see if feature is listed
-2. If listed but not copied, wait for it to be copied from orkinosaicms
+2. If listed but not copied, wait for it to be copied from papagancms
 3. If not listed, verify it truly belongs in CMS domain
-4. If it's generic and reusable, consider adding to orkinosaicms first
+4. If it's generic and reusable, consider adding to papagancms first
 
 #### 2. Writing CMS Code
 
@@ -114,7 +114,7 @@ CMS Domain: User Management Service
 This module provides generic user management functionality
 that can be reused across multiple applications.
 
-Note: This code is synchronized with orkinosaicms.
+Note: This code is synchronized with papagancms.
 Any modifications must be synced back to the main CMS project.
 """
 ```
@@ -413,7 +413,7 @@ def test_user_to_conversation_flow():
 ### Before Implementation
 
 - [ ] Determine if feature is CMS or Agent domain
-- [ ] Check if similar feature exists in orkinosaicms
+- [ ] Check if similar feature exists in papagancms
 - [ ] Review dependencies on other domains
 - [ ] Plan integration approach
 
@@ -428,7 +428,7 @@ def test_user_to_conversation_flow():
 
 - [ ] Run all tests (CMS and Agent)
 - [ ] Update relevant documentation
-- [ ] If CMS feature: Plan sync back to orkinosaicms
+- [ ] If CMS feature: Plan sync back to papagancms
 - [ ] Code review focusing on domain boundaries
 
 ---
@@ -510,6 +510,6 @@ class ConversationCleanup:
 
 ## References
 
-- Main CMS Repository: https://github.com/orkinosai25-org/orkinosaicms
+- Main CMS Repository: https://github.com/orkinosai25-org/papagancms
 - Domain-Driven Design Principles
 - Microservices Architecture Patterns

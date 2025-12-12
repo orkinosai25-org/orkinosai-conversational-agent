@@ -1,23 +1,25 @@
-﻿@page "/"
+@page "/"
 @rendermode InteractiveServer
 
-<PageTitle>Orkinosai CMS - Home</PageTitle>
+<PageTitle>Papagan CMS - Home</PageTitle>
 
 <div class="home-container">
     <div class="hero-section">
-        <h1><i class="fas fa-robot"></i> Orkinosai CMS</h1>
+        <div style="margin-bottom: 20px;">
+            <img src="/branding/logos/papagan-logo-main.svg" alt="Papagan - The Chatter Parrot" style="max-width: 300px; height: auto;">
+        </div>
         <p class="subtitle">Content Management System with Integrated AI Chat Agent</p>
         <p class="description">
-            Welcome to Orkinosai CMS - a modern Blazor-based content management system 
+            Welcome to Papagan CMS - a modern Blazor-based content management system 
             with an integrated conversational AI agent. Manage your content and chat 
-            with our AI assistant all in one place.
+            with our friendly AI parrot assistant all in one place.
         </p>
         
         <!-- Prominent Conversation Agent Button -->
         <div class="hero-actions">
             <button class="btn-conversation-agent" @onclick="OpenChatPanel">
-                <i class="fas fa-robot"></i>
-                <span>Conversation Agent</span>
+                <i class="fas fa-comment"></i>
+                <span>Chat with Papagan</span>
                 <i class="fas fa-chevron-right"></i>
             </button>
         </div>

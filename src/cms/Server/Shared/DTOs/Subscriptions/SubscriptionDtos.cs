@@ -1,4 +1,4 @@
-namespace OrkinosaiCMS.Shared.DTOs.Subscriptions;
+namespace PapaganCMS.Shared.DTOs.Subscriptions;
 
 /// <summary>
 /// DTO for subscription information
