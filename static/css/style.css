@@ -245,6 +245,23 @@ body {
     font-size: 0.9rem;
 }
 
+/* Microsoft Badge */
+.microsoft-badge {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.microsoft-badge img {
+    max-width: 250px;
+    transition: transform 0.2s;
+    opacity: 0.9;
+}
+
+.microsoft-badge img:hover {
+    transform: scale(1.05);
+    opacity: 1;
+}
+
 /* Chat Interface */
 .chat-interface {
     display: flex;
