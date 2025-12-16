@@ -57,13 +57,14 @@ jobs:
           name: .net-app
 
       # Deploy to Azure Web App using publish profile (MOSAIC template approach)
-      # Uses the WEB-APP-PUBLISH-PROFILE-PAPAGAN secret as per requirements
+      # This deployment step exactly mirrors the working MOSAIC deploy.yml pattern:
+      # - Uses only app-name and publish-profile parameters (no slot-name for default production slot)
+      # - No Azure login step required (publish profile handles authentication)
+      # - Simple, minimal configuration following Azure best practices
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'papagan'
-          slot-name: 'Production'
-          package: .
           publish-profile: ${{ secrets.WEB-APP-PUBLISH-PROFILE-PAPAGAN }}
-          
+          package: .
