@@ -54,7 +54,7 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v1
         with:
-          publish-profile: ${{ secrets.WEB-APP-PUBLISH-PROFILE-PAPAGAN }}
+          creds: ${{ secrets.WEB-APP-PUBLISH-PROFILE-PAPAGAN }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
