@@ -38,8 +38,11 @@ jobs:
   deploy:
     runs-on: windows-latest
     needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - name: Download artifact from build job
