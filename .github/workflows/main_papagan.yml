@@ -60,10 +60,11 @@ jobs:
       # Uses the WEB-APP-PUBLISH-PROFILE-PAPAGAN secret as per requirements
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
           app-name: 'papagan'
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.WEB-APP-PUBLISH-PROFILE-PAPAGAN }}
+
           
