@@ -38,14 +38,23 @@ jobs:
   deploy:
     runs-on: windows-latest
     needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       contents: read #This is required for actions/checkout
+      id-token: write #This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+      
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          publish-profile: ${{ secrets.WEB-APP-PUBLISH-PROFILE-PAPAGAN }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -54,5 +63,4 @@ jobs:
           app-name: 'papagan'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.WEB-APP-PUBLISH-PROFILE-PAPAGAN }}
           
