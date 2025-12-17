@@ -58,9 +58,10 @@ jobs:
 
       # Deploy to Azure Web App using publish profile (MOSAIC template approach)
       # Uses the WEB-APP-PUBLISH-PROFILE-PAPAGAN secret as per requirements
+      # Using v2 instead of v3 because v3 has a bug requiring Azure login even with publish-profile
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
           app-name: 'papagan'
           slot-name: 'Production'
