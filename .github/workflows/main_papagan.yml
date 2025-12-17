@@ -58,7 +58,7 @@ jobs:
 
       # Deploy to Azure Web App using publish profile
       # Using v3 which properly supports publish-profile without requiring Azure login
-      # The WEB-APP-PUBLISH-PROFILE-PAPAGAN secret should contain the publish profile XML from Azure Portal
+      # Uses the AZUREAPPSERVICE_PUBLISHPROFILE secret added by the user
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -66,6 +66,6 @@ jobs:
           app-name: 'papagan'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.WEB-APP-PUBLISH-PROFILE-PAPAGAN }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
 
           
