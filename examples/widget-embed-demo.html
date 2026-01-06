@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papagan Widget - Embedded Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f7fafc;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        /* Main content */
+        .main-content {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .content-section {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content-section h2 {
+            color: #2d3748;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .content-section p {
+            color: #4a5568;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        
+        .content-section ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .content-section li {
+            color: #4a5568;
+            line-height: 1.8;
+            margin: 10px 0;
+        }
+        
+        /* Widget container */
+        .widget-container {
+            grid-column: 1 / -1;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .widget-container h2 {
+            color: #2d3748;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        /* Chat widget iframe */
+        .chat-widget-frame {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Instructions box */
+        .instructions {
+            background: #edf2f7;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .instructions p {
+            color: #4a5568;
+            margin: 5px 0;
+        }
+        
+        /* Status badge */
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .status-online {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-offline {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        /* Code snippet */
+        .code-snippet {
+            background: #2d3748;
+            color: #68d391;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .highlight {
+            color: #fbd38d;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #718096;
+            margin-top: 40px;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🦜 Papagan Chat Widget</h1>
+        <p>Live Embedded Demo - See the AI Chat in Action!</p>
+        <div id="connection-status" style="margin-top: 15px;">
+            <span class="status-badge status-offline">⏳ Checking connection...</span>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Left Section -->
+        <div class="content-section">
+            <h2>🎯 About This Demo</h2>
+            <p>This page demonstrates the Papagan chat widget <strong>embedded directly</strong> on a website. The widget below is fully functional and ready to use.</p>
+            
+            <div class="instructions">
+                <h3>🧪 Try It Out:</h3>
+                <p>1. Type <strong>"Hello"</strong> in the chat to get started</p>
+                <p>2. Ask <strong>"What can you do?"</strong> to learn about features</p>
+                <p>3. Try <strong>"Help"</strong> for assistance</p>
+                <p>4. Explore the training and document upload features</p>
+            </div>
+            
+            <h3 style="color: #2d3748; margin-top: 30px; margin-bottom: 15px;">✨ Key Features</h3>
+            <ul>
+                <li><strong>Zero Configuration</strong>: Works immediately in demo mode</li>
+                <li><strong>Azure OpenAI Ready</strong>: Full AI capabilities when configured</li>
+                <li><strong>Conversational Memory</strong>: Maintains context across messages</li>
+                <li><strong>Document Training</strong>: Upload PDFs, DOCs, and more</li>
+                <li><strong>URL Learning</strong>: Train from web content</li>
+                <li><strong>Responsive Design</strong>: Works on all devices</li>
+            </ul>
+        </div>
+        
+        <!-- Right Section -->
+        <div class="content-section">
+            <h2>📦 Integration Code</h2>
+            <p>To embed this widget on your website, use one of these methods:</p>
+            
+            <h3 style="color: #2d3748; margin-top: 25px; margin-bottom: 15px;">Method 1: IFrame Embed</h3>
+            <div class="code-snippet">
+<span class="highlight">&lt;iframe</span><br>
+&nbsp;&nbsp;src=<span class="highlight">"http://localhost:5000"</span><br>
+&nbsp;&nbsp;width=<span class="highlight">"100%"</span><br>
+&nbsp;&nbsp;height=<span class="highlight">"600px"</span><br>
+&nbsp;&nbsp;style=<span class="highlight">"border: none; border-radius: 12px;"</span><br>
+<span class="highlight">&gt;&lt;/iframe&gt;</span>
+            </div>
+            
+            <h3 style="color: #2d3748; margin-top: 25px; margin-bottom: 15px;">Method 2: Popup/Overlay</h3>
+            <p>Use JavaScript to open the chat in a modal or fixed overlay:</p>
+            <div class="code-snippet">
+<span class="highlight">function openChat() {</span><br>
+&nbsp;&nbsp;window.open(<span class="highlight">'http://localhost:5000'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">'papagan-chat'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">'width=1200,height=800'</span>);<br>
+<span class="highlight">}</span>
+            </div>
+            
+            <h3 style="color: #2d3748; margin-top: 25px; margin-bottom: 15px;">Method 3: Full Page</h3>
+            <p>Link directly to the chat interface:</p>
+            <div class="code-snippet">
+<span class="highlight">&lt;a href="http://localhost:5000"&gt;</span><br>
+&nbsp;&nbsp;Chat with Papagan<br>
+<span class="highlight">&lt;/a&gt;</span>
+            </div>
+        </div>
+        
+        <!-- Widget Container (Full Width) -->
+        <div class="widget-container">
+            <h2>💬 Live Chat Widget</h2>
+            <p style="text-align: center; color: #718096; margin-bottom: 20px;">
+                The chat interface is embedded below. Start chatting to test the AI!
+            </p>
+            <iframe 
+                id="chat-frame"
+                class="chat-widget-frame"
+                src="http://localhost:5000"
+                title="Papagan Chat Widget">
+            </iframe>
+        </div>
+        
+        <!-- Additional Info -->
+        <div class="content-section">
+            <h2>🚀 Getting Started</h2>
+            <p>To run Papagan on your own server:</p>
+            
+            <h3 style="color: #2d3748; margin-top: 20px; margin-bottom: 10px;">1. Install Dependencies</h3>
+            <div class="code-snippet">
+pip install -r requirements.txt
+            </div>
+            
+            <h3 style="color: #2d3748; margin-top: 20px; margin-bottom: 10px;">2. Start the Server</h3>
+            <div class="code-snippet">
+python main.py
+            </div>
+            
+            <h3 style="color: #2d3748; margin-top: 20px; margin-bottom: 10px;">3. Open in Browser</h3>
+            <p>Navigate to <code style="background: #edf2f7; padding: 4px 8px; border-radius: 4px;">http://localhost:5000</code></p>
+            
+            <p style="margin-top: 20px;">The application works immediately in demo mode. To enable full Azure OpenAI capabilities, configure your credentials in <code style="background: #edf2f7; padding: 4px 8px; border-radius: 4px;">appsettings.json</code>.</p>
+        </div>
+        
+        <div class="content-section">
+            <h2>⚙️ Configuration Options</h2>
+            <p>Customize the chat widget behavior:</p>
+            <ul>
+                <li><strong>Temperature</strong>: Control response creativity (0.0 - 1.0)</li>
+                <li><strong>Max Tokens</strong>: Set maximum response length</li>
+                <li><strong>System Prompt</strong>: Define the AI's personality and role</li>
+                <li><strong>History Length</strong>: Number of past messages to remember</li>
+                <li><strong>CORS Origins</strong>: Whitelist domains for widget embedding</li>
+            </ul>
+            
+            <p style="margin-top: 20px;">All settings can be configured in <code style="background: #edf2f7; padding: 4px 8px; border-radius: 4px;">appsettings.json</code> or via environment variables.</p>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+        <p>Made with ❤️ by Papagan - The Chatter Parrot</p>
+        <p style="margin-top: 10px; font-size: 0.9em;">
+            Powered by Azure OpenAI | 
+            <a href="https://github.com/orkinosai25-org/orkinosai-conversational-agent" style="color: #667eea; text-decoration: none;">View on GitHub</a>
+        </p>
+    </div>
+    
+    <script>
+        // Check backend connection status
+        async function checkConnection() {
+            try {
+                const response = await fetch('http://localhost:5000/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    const statusEl = document.getElementById('connection-status');
+                    statusEl.innerHTML = `<span class="status-badge status-online">✅ Connected to ${data.agent}</span>`;
+                } else {
+                    throw new Error('Backend not responding');
+                }
+            } catch (error) {
+                const statusEl = document.getElementById('connection-status');
+                statusEl.innerHTML = `<span class="status-badge status-offline">❌ Backend offline - Start with: python main.py</span>`;
+            }
+        }
+        
+        // Check on load
+        checkConnection();
+        
+        // Check periodically
+        setInterval(checkConnection, 10000);
+    </script>
+</body>
+</html>
