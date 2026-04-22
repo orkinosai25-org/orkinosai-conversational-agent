@@ -21,7 +21,7 @@ See requirements.txt for security-related packages to add for production.
 import logging
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
@@ -101,7 +101,7 @@ def create_app(config_path: Optional[str] = None) -> Flask:
                 "urls": [],
                 "documents": []
             },
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
     
     # Serve UI
