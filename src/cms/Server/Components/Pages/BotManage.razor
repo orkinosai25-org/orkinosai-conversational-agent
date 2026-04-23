@@ -189,28 +189,35 @@
                         <button type="button" class="btn btn-link" @onclick="@(() => activeTab = "train")">Open training</button>
                     </p>
 
+                    <div class="embed-preview">
+                        <h3>🔗 Link-Only Deployment (No Code Required)</h3>
+                        <p>Share this link directly — no website changes needed. Add it as a button, menu item, or WhatsApp auto-reply.</p>
+                        <pre class="code-block">@chatPageUrl</pre>
+                        <button class="btn btn-secondary" @onclick="CopyChatPageUrl" aria-label="Copy chat page link">
+                            🔗 Copy Chat Page Link
+                        </button>
+                        <a class="btn btn-link" href="@bot!.ChatPageUrl" target="_blank" rel="noopener noreferrer">
+                            Open Chat Page ↗
+                        </a>
+                    </div>
+
                     @if (string.IsNullOrEmpty(embedCode))
                     {
-                        <button class="btn btn-primary" @onclick="GenerateEmbedCode">
-                            Generate Embed Code
-                        </button>
+                        <div class="embed-preview">
+                            <h3>📋 HTML Embed Code</h3>
+                            <p>Embed a chat widget directly on your website.</p>
+                            <button class="btn btn-primary" @onclick="GenerateEmbedCode">
+                                Generate Embed Code
+                            </button>
+                        </div>
                     }
                     else
                     {
                         <div class="embed-preview">
-                            <h3>HTML Embed Code</h3>
+                            <h3>📋 HTML Embed Code</h3>
                             <pre class="code-block">@embedCode</pre>
                             <button class="btn btn-secondary" @onclick="CopyEmbedCode" aria-label="Copy embed code">
                                 📋 Copy Embed Code
-                            </button>
-                        </div>
-
-                        <div class="embed-preview">
-                            <h3>Link-only deployment (no code)</h3>
-                            <p>Use this link to share the chat directly without editing your website code:</p>
-                            <pre class="code-block">@chatPageUrl</pre>
-                            <button class="btn btn-secondary" @onclick="CopyChatPageUrl" aria-label="Copy chat page link">
-                                🔗 Copy Chat Page Link
                             </button>
                         </div>
 
