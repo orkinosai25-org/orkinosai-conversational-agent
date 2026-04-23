@@ -7,7 +7,7 @@
 @inject ILogger<ChatAgent> Logger
 @inject HttpClient Http
 
-<PageTitle>Orkinosai Chat Agent</PageTitle>
+<PageTitle>@(string.IsNullOrWhiteSpace(seatContextLabel) ? "Orkinosai Chat Agent" : $"Chat with {seatContextLabel} | Orkinosai")</PageTitle>
 
 <div class="chat-container">
     <div class="chat-header">
@@ -22,7 +22,7 @@
             You are chatting with the assistant for <strong>@seatContextLabel</strong>
         </div>
     }
-    @if (!string.IsNullOrWhiteSpace(trainingManageUrl))
+    @if (!string.IsNullOrWhiteSpace(trainingManageUrl) && !isPublicMode)
     {
         <div class="seat-context-banner seat-training-banner">
             <strong>Train your bot from your website or documents before going live.</strong>
@@ -98,6 +98,7 @@
     private string? seatId;
     private string? allowedDomain;
     private string seatContextLabel = string.Empty;
+    private bool isPublicMode = false;
     private string trainingManageUrl = string.Empty;
     private string trainingUrlsApiUrl = string.Empty;
     private string trainingDocumentsApiUrl = string.Empty;
@@ -260,6 +261,7 @@
 
             if (!string.IsNullOrWhiteSpace(SeatSlug))
             {
+                isPublicMode = true;
                 var bySlugResponse = await Http.GetAsync($"/api/seats/by-slug/{SeatSlug}");
                 if (bySlugResponse.IsSuccessStatusCode)
                 {
@@ -285,9 +287,14 @@
             seatId = seat.Id;
             allowedDomain = GetDomainHost(seat.SiteUrl);
             seatContextLabel = allowedDomain ?? seat.Name;
-            trainingManageUrl = $"/bot/{seat.Id}";
-            trainingUrlsApiUrl = $"/api/bot/{seat.Id}/urls";
-            trainingDocumentsApiUrl = $"/api/bot/{seat.Id}/documents";
+
+            if (!isPublicMode)
+            {
+                trainingManageUrl = $"/bot/{seat.Id}";
+                trainingUrlsApiUrl = $"/api/bot/{seat.Id}/urls";
+                trainingDocumentsApiUrl = $"/api/bot/{seat.Id}/documents";
+            }
+
             conversationId = BuildConversationId(seat.Id);
         }
         catch (Exception ex)
