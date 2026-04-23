@@ -218,7 +218,7 @@
     private async Task ClearConversation()
     {
         messages.Clear();
-        conversationId = $"{seatId ?? "public"}-{Guid.NewGuid()}";
+        conversationId = BuildConversationId(seatId);
         
         messages.Add(new ChatMessage 
         { 
@@ -278,7 +278,7 @@
 
             if (seat == null)
             {
-                conversationId = Guid.NewGuid().ToString();
+                conversationId = BuildConversationId(null);
                 return;
             }
 
@@ -288,12 +288,12 @@
             trainingManageUrl = $"/bot/{seat.Id}";
             trainingUrlsApiUrl = $"/api/bot/{seat.Id}/urls";
             trainingDocumentsApiUrl = $"/api/bot/{seat.Id}/documents";
-            conversationId = $"{seat.Id}-{Guid.NewGuid()}";
+            conversationId = BuildConversationId(seat.Id);
         }
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Failed to load seat context");
-            conversationId = Guid.NewGuid().ToString();
+            conversationId = BuildConversationId(null);
         }
     }
 
@@ -331,14 +331,19 @@
             {
                 if (!Uri.TryCreate(match.Value, UriKind.Absolute, out var uri))
                 {
-                    return "[invalid-link]";
+                    return "(malformed link removed)";
                 }
 
                 return uri.Host.Equals(allowedDomain, StringComparison.OrdinalIgnoreCase)
                     || uri.Host.EndsWith($".{allowedDomain}", StringComparison.OrdinalIgnoreCase)
                     ? match.Value
-                    : "[external-link-blocked]";
+                    : $"(external link not shown: only {allowedDomain} links are displayed)";
             });
+    }
+
+    private static string BuildConversationId(string? seat)
+    {
+        return $"{(string.IsNullOrWhiteSpace(seat) ? "public" : seat)}-{Guid.NewGuid()}";
     }
 }
 

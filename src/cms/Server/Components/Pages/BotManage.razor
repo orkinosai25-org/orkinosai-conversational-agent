@@ -184,7 +184,10 @@
                 <div class="embed-section">
                     <h2>🌐 Install on your site</h2>
                     <p>Copy and paste this code into your website to add the chatbot widget.</p>
-                    <p><strong>Train your bot from your website or documents before going live.</strong></p>
+                    <p>
+                        <strong>Train your bot from your website or documents before going live.</strong>
+                        <button type="button" class="btn btn-link" @onclick="@(() => activeTab = "train")">Open training</button>
+                    </p>
 
                     @if (string.IsNullOrEmpty(embedCode))
                     {
@@ -197,16 +200,16 @@
                         <div class="embed-preview">
                             <h3>HTML Embed Code</h3>
                             <pre class="code-block">@embedCode</pre>
-                            <button class="btn btn-secondary" @onclick="CopyEmbedCode">
+                            <button class="btn btn-secondary" @onclick="CopyEmbedCode" aria-label="Copy embed code">
                                 📋 Copy Embed Code
                             </button>
                         </div>
 
                         <div class="embed-preview">
                             <h3>Link-only deployment (no code)</h3>
-                            <p>Share this seat page directly:</p>
+                            <p>Use this link to share the chat directly without editing your website code:</p>
                             <pre class="code-block">@chatPageUrl</pre>
-                            <button class="btn btn-secondary" @onclick="CopyChatPageUrl">
+                            <button class="btn btn-secondary" @onclick="CopyChatPageUrl" aria-label="Copy chat page link">
                                 🔗 Copy Chat Page Link
                             </button>
                         </div>

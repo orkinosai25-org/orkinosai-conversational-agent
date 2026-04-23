@@ -98,6 +98,16 @@ public class BotController : ControllerBase
     [HttpPost("/api/seats")]
     public async Task<ActionResult<BotDto>> CreateSeat([FromBody] CreateBotDto dto)
     {
+        if (string.IsNullOrWhiteSpace(dto.Name))
+        {
+            return BadRequest(new { message = "Bot name is required" });
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.SiteUrl))
+        {
+            return BadRequest(new { message = "Site URL / domain is required" });
+        }
+
         return await CreateBot(dto);
     }
 
