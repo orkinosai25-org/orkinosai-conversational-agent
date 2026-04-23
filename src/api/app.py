@@ -21,10 +21,12 @@ See requirements.txt for security-related packages to add for production.
 import logging
 import os
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from typing import Dict, Any, Optional
+from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
 
 from src.config import get_settings
@@ -42,6 +44,7 @@ logger = logging.getLogger(__name__)
 users_db = {}
 documents_db = {}
 training_data_db = {}
+seats_db = {}
 
 
 def create_app(config_path: Optional[str] = None) -> Flask:
@@ -81,6 +84,25 @@ def create_app(config_path: Optional[str] = None) -> Flask:
     # Ensure upload directory exists
     upload_dir = Path("uploads")
     upload_dir.mkdir(exist_ok=True)
+
+    def _normalize_site_domain(value: str) -> str:
+        """Normalize user-provided site/domain value."""
+        parsed = urlparse(value if "://" in value else f"https://{value}")
+        return (parsed.netloc or parsed.path).lower().strip("/")
+
+    def _build_seat(seat_id: str, site_domain: str, bot_name: str, greeting: str) -> Dict[str, Any]:
+        """Build a standard seat response payload."""
+        return {
+            "id": seat_id,
+            "site_domain": site_domain,
+            "bot_name": bot_name,
+            "greeting": greeting,
+            "trained_sources": {
+                "urls": [],
+                "documents": []
+            },
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
     
     # Serve UI
     @app.route("/")
@@ -96,6 +118,52 @@ def create_app(config_path: Optional[str] = None) -> Flask:
             "agent": settings.agent.name,
             "version": settings.agent.version
         })
+
+    @app.route("/seats", methods=["POST"])
+    def create_seat():
+        """Create a chatbot seat for a specific website."""
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({"error": "Request body is required"}), 400
+
+            site_value = data.get("site_domain") or data.get("site_url")
+            if not site_value or not str(site_value).strip():
+                return jsonify({"error": "site_domain (or site_url) is required"}), 400
+
+            site_domain = _normalize_site_domain(str(site_value))
+            if not site_domain:
+                return jsonify({"error": "Invalid site_domain"}), 400
+
+            seat_id = str(uuid.uuid4())
+            seat = _build_seat(
+                seat_id=seat_id,
+                site_domain=site_domain,
+                bot_name=data.get("bot_name", "Website Assistant"),
+                greeting=data.get("greeting", "Hi! How can I help you today?")
+            )
+            seats_db[seat_id] = seat
+
+            return jsonify({
+                "message": "Chatbot Seat created successfully",
+                "seat": seat
+            }), 201
+        except Exception as e:
+            logger.error(f"Error creating seat: {str(e)}")
+            return jsonify({"error": "Internal server error"}), 500
+
+    @app.route("/seats", methods=["GET"])
+    def list_seats():
+        """List chatbot seats."""
+        return jsonify({"seats": list(seats_db.values())})
+
+    @app.route("/seats/<seat_id>", methods=["GET"])
+    def get_seat(seat_id: str):
+        """Get a chatbot seat."""
+        seat = seats_db.get(seat_id)
+        if not seat:
+            return jsonify({"error": "Seat not found"}), 404
+        return jsonify({"seat": seat})
     
     @app.route("/chat", methods=["POST"])
     def chat():
@@ -482,6 +550,10 @@ def create_app(config_path: Optional[str] = None) -> Flask:
                 return jsonify({"error": "URL required"}), 400
             
             url = data["url"]
+            seat_id = data.get("seat_id")
+
+            if seat_id and seat_id not in seats_db:
+                return jsonify({"error": "Seat not found"}), 404
             
             # Store URL for training (in production, fetch and process content)
             training_id = str(uuid.uuid4())
@@ -489,14 +561,22 @@ def create_app(config_path: Optional[str] = None) -> Flask:
                 "id": training_id,
                 "type": "url",
                 "source": url,
+                "seat_id": seat_id,
                 "status": "processed"
             }
+
+            if seat_id:
+                seats_db[seat_id]["trained_sources"]["urls"].append({
+                    "training_id": training_id,
+                    "source": url
+                })
             
             logger.info(f"Added URL for training: {url}")
             
             return jsonify({
                 "message": f"Successfully learned from URL: {url}",
-                "training_id": training_id
+                "training_id": training_id,
+                "seat_id": seat_id
             })
             
         except Exception as e:
@@ -511,6 +591,9 @@ def create_app(config_path: Optional[str] = None) -> Flask:
                 return jsonify({"error": "No documents provided"}), 400
             
             files = request.files.getlist('documents')
+            seat_id = request.form.get('seat_id')
+            if seat_id and seat_id not in seats_db:
+                return jsonify({"error": "Seat not found"}), 404
             uploaded = []
             
             for file in files:
@@ -528,19 +611,27 @@ def create_app(config_path: Optional[str] = None) -> Flask:
                     "id": file_id,
                     "name": filename,
                     "path": str(filepath),
-                    "size": os.path.getsize(filepath)
+                    "size": os.path.getsize(filepath),
+                    "seat_id": seat_id
                 }
                 
                 uploaded.append({
                     "id": file_id,
                     "name": filename
                 })
+
+                if seat_id:
+                    seats_db[seat_id]["trained_sources"]["documents"].append({
+                        "document_id": file_id,
+                        "name": filename
+                    })
                 
                 logger.info(f"Document uploaded: {filename}")
             
             return jsonify({
                 "message": f"Successfully uploaded {len(uploaded)} document(s)",
-                "documents": uploaded
+                "documents": uploaded,
+                "seat_id": seat_id
             })
             
         except Exception as e:
@@ -551,9 +642,14 @@ def create_app(config_path: Optional[str] = None) -> Flask:
     def get_documents():
         """Get list of uploaded documents."""
         try:
+            seat_id = request.args.get("seat_id")
+            if seat_id and seat_id not in seats_db:
+                return jsonify({"error": "Seat not found"}), 404
+
             docs = [
                 {"id": doc_id, "name": doc["name"], "size": doc["size"]}
                 for doc_id, doc in documents_db.items()
+                if not seat_id or doc.get("seat_id") == seat_id
             ]
             return jsonify({"documents": docs})
         except Exception as e:
@@ -573,6 +669,13 @@ def create_app(config_path: Optional[str] = None) -> Flask:
                 os.remove(doc["path"])
             
             # Remove from database
+            seat_id = doc.get("seat_id")
+            if seat_id and seat_id in seats_db:
+                seats_db[seat_id]["trained_sources"]["documents"] = [
+                    seat_doc
+                    for seat_doc in seats_db[seat_id]["trained_sources"]["documents"]
+                    if seat_doc["document_id"] != document_id
+                ]
             del documents_db[document_id]
             
             logger.info(f"Document deleted: {doc['name']}")
