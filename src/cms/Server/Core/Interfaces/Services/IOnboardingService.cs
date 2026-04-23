@@ -1,6 +1,6 @@
-using PapaganCMS.Shared.DTOs.Onboarding;
+using SiteChatCMS.Shared.DTOs.Onboarding;
 
-namespace PapaganCMS.Core.Interfaces.Services;
+namespace SiteChatCMS.Core.Interfaces.Services;
 
 public interface IOnboardingService
 {

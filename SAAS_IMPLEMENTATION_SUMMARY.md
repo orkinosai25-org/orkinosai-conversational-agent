@@ -2,7 +2,7 @@
 
 ## Overview
 
-This implementation adds comprehensive SaaS features to the Papagan conversational agent repository, adapting Blazor CMS patterns for a multi-tenant chatbot platform.
+This implementation adds comprehensive SaaS features to the SiteChat Agent conversational agent repository, adapting Blazor CMS patterns for a multi-tenant chatbot platform.
 
 ## Completed Features
 
@@ -305,7 +305,7 @@ The Blazor CMS can coexist with the existing Python backend:
 ```bash
 cd src/cms
 dotnet restore
-dotnet run --project Server/PapaganCMS.csproj
+dotnet run --project Server/SiteChatCMS.csproj
 ```
 
 ### Production

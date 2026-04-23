@@ -1,6 +1,6 @@
-# Papagan (The Chatter Parrot) - Branding Assets
+# SiteChat Agent - Branding Assets
 
-Welcome to the Papagan branding assets directory! This folder contains all the logos, icons, and brand guidelines for the Papagan project.
+Welcome to the SiteChat Agent branding assets directory! This folder contains all the logos, icons, and brand guidelines for the SiteChat Agent project.
 
 ## Quick Links
 
@@ -13,10 +13,10 @@ Welcome to the Papagan branding assets directory! This folder contains all the l
 ```
 branding/
 ├── logos/                  # Logo files
-│   ├── papagan-logo-main.svg           # Primary logo (SVG, scalable)
-│   ├── papagan-logo-main.png           # Primary logo (800×400px PNG)
-│   ├── papagan-logo-main@2x.png        # Primary logo (1600×800px PNG, high-DPI)
-│   └── papagan-icon.svg                # Icon only (SVG, scalable)
+│   ├── sitechat-logo-main.svg           # Primary logo (SVG, scalable)
+│   ├── sitechat-logo-main.png           # Primary logo (800×400px PNG)
+│   ├── sitechat-logo-main@2x.png        # Primary logo (1600×800px PNG, high-DPI)
+│   └── sitechat-icon.svg                # Icon only (SVG, scalable)
 │
 ├── icons/                  # Icon files for web and apps
 │   ├── favicon.ico                     # Multi-size ICO (16, 32, 48px)
@@ -46,8 +46,8 @@ branding/
 ```html
 <!-- In your HTML header -->
 <header>
-  <img src="/static/branding/logos/papagan-logo-main.svg" 
-       alt="Papagan - The Chatter Parrot" 
+  <img src="/static/branding/logos/sitechat-logo-main.svg" 
+       alt="SiteChat Agent" 
        height="60">
 </header>
 ```
@@ -65,15 +65,15 @@ branding/
 ```css
 /* CSS Variables */
 :root {
-  --papagan-green: #4CAF50;
-  --papagan-green-dark: #2E7D32;
-  --papagan-cyan: #00BCD4;
-  --papagan-teal: #0097A7;
+  --sitechat-green: #4CAF50;
+  --sitechat-green-dark: #2E7D32;
+  --sitechat-cyan: #00BCD4;
+  --sitechat-teal: #0097A7;
 }
 
 /* Example button */
 .btn-primary {
-  background: linear-gradient(135deg, var(--papagan-green), var(--papagan-green-dark));
+  background: linear-gradient(135deg, var(--sitechat-green), var(--sitechat-green-dark));
   color: white;
   padding: 12px 24px;
   border-radius: 8px;
@@ -83,14 +83,14 @@ branding/
 ### 4. Create a Chat Button
 
 ```html
-<button class="papagan-chat-btn">
-  <img src="/static/branding/logos/papagan-icon.svg" 
-       alt="Chat with Papagan" 
+<button class="sitechat-chat-btn">
+  <img src="/static/branding/logos/sitechat-icon.svg" 
+       alt="Chat with SiteChat Agent" 
        width="48" height="48">
 </button>
 
 <style>
-.papagan-chat-btn {
+.sitechat-chat-btn {
   background: linear-gradient(135deg, #4CAF50, #2E7D32);
   border: none;
   border-radius: 50%;
@@ -99,7 +99,7 @@ branding/
   cursor: pointer;
 }
 
-.papagan-chat-btn:hover {
+.sitechat-chat-btn:hover {
   transform: scale(1.1);
 }
 </style>
@@ -142,7 +142,7 @@ branding/
 ### Open Graph (Facebook, LinkedIn)
 
 ```html
-<meta property="og:title" content="Papagan - The Chatter Parrot">
+<meta property="og:title" content="SiteChat Agent">
 <meta property="og:description" content="Your friendly AI chat agent">
 <meta property="og:image" content="/static/branding/social/social-share.png">
 <meta property="og:image:width" content="1200">
@@ -153,7 +153,7 @@ branding/
 
 ```html
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Papagan - The Chatter Parrot">
+<meta name="twitter:title" content="SiteChat Agent">
 <meta name="twitter:description" content="Your friendly AI chat agent">
 <meta name="twitter:image" content="/static/branding/social/social-share.png">
 ```
@@ -195,8 +195,8 @@ font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont,
 ## Version
 
 **Version 1.0** - December 2025  
-Initial release of Papagan branding assets
+Initial release of SiteChat Agent branding assets
 
 ---
 
-**© 2025 Papagan - The Chatter Parrot. All rights reserved.**
+**© 2025 SiteChat Agent. All rights reserved.**

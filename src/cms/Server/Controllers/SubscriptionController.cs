@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OrkinosaiCMS.Core.Entities.Subscriptions;
 using OrkinosaiCMS.Core.Interfaces.Services;
-using PapaganCMS.Core.Interfaces.Services;
-using PapaganCMS.Shared.DTOs.Subscriptions;
+using SiteChatCMS.Core.Interfaces.Services;
+using SiteChatCMS.Shared.DTOs.Subscriptions;
 
-namespace PapaganCMS.Controllers;
+namespace SiteChatCMS.Controllers;
 
 /// <summary>
 /// API Controller for subscription management

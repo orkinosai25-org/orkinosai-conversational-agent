@@ -1,8 +1,8 @@
-# Papagan - The Chatter Parrot - UI Guide
+# SiteChat Agent - UI Guide
 
 ## Overview
 
-The Papagan - The Chatter Parrot features a modern, Azure-style dockable interface designed for intuitive interaction and easy customization. This guide will help you understand and use all the UI features.
+The SiteChat Agent features a modern, Azure-style dockable interface designed for intuitive interaction and easy customization. This guide will help you understand and use all the UI features.
 
 ## Main Interface Components
 
@@ -10,7 +10,7 @@ The Papagan - The Chatter Parrot features a modern, Azure-style dockable interfa
 
 The top bar provides quick access to all major features:
 
-- **Brand Logo & Name**: Always visible, shows "Papagan Agent"
+- **Brand Logo & Name**: Always visible, shows "SiteChat Agent Agent"
 - **Menu Button**: Opens/closes the left conversation panel
 - **Training Button**: Opens the training panel for URL learning
 - **Documents Button**: Opens the document upload panel

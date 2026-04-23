@@ -1,7 +1,7 @@
-using PapaganCMS.Core.Entities.Identity;
-using PapaganCMS.Shared.DTOs.Bots;
+using SiteChatCMS.Core.Entities.Identity;
+using SiteChatCMS.Shared.DTOs.Bots;
 
-namespace PapaganCMS.Core.Interfaces.Services;
+namespace SiteChatCMS.Core.Interfaces.Services;
 
 public interface IBotService
 {

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PapaganCMS.Core.Interfaces.Services;
-using PapaganCMS.Shared.DTOs.Auth;
+using SiteChatCMS.Core.Interfaces.Services;
+using SiteChatCMS.Shared.DTOs.Auth;
 
-namespace PapaganCMS.Controllers;
+namespace SiteChatCMS.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

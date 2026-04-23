@@ -1,8 +1,8 @@
-# Papagan Branding Migration - Complete Summary
+# SiteChat Agent Branding Migration - Complete Summary
 
 ## Overview
 
-This document summarizes the complete migration of the CMS branding from "Orkinosai Conversational Agent" to "Papagan - The Chatter Parrot". The migration was completed on December 12, 2025.
+This document summarizes the complete migration of the CMS branding from "Orkinosai Conversational Agent" to "SiteChat Agent". The migration was completed on December 12, 2025.
 
 ## What Was Changed
 
@@ -15,9 +15,9 @@ This document summarizes the complete migration of the CMS branding from "Orkino
 - Style: Professional, corporate, Azure-inspired
 
 **New Brand:**
-- Name: Papagan - The Chatter Parrot
-- Tagline: "The Chatter Parrot"
-- Colors: Papagan green palette
+- Name: SiteChat Agent
+- Tagline: "SiteChat Agent"
+- Colors: SiteChat Agent green palette
   - Primary: Parrot Green (#4CAF50), Deep Green (#2E7D32)
   - Secondary: Cyan Blue (#00BCD4), Teal (#0097A7)
   - Accents: Golden Yellow (#FFC107), Amber (#FFA000)
@@ -53,30 +53,30 @@ This document summarizes the complete migration of the CMS branding from "Orkino
 
 #### Flask UI (Python)
 - templates/index.html - Main UI template
-  - Title: "Papagan - The Chatter Parrot"
-  - Logo: Papagan SVG logo
-  - Favicon: Multiple Papagan favicons
+  - Title: "SiteChat Agent"
+  - Logo: SiteChat Agent SVG logo
+  - Favicon: Multiple SiteChat Agent favicons
   - Brand name in header
-- static/css/style.css - CSS with Papagan colors
+- static/css/style.css - CSS with SiteChat Agent colors
   - Color variables updated
-  - Primary color: #4CAF50 (Papagan Green)
-  - Secondary color: #00BCD4 (Papagan Cyan)
+  - Primary color: #4CAF50 (SiteChat Agent Green)
+  - Secondary color: #00BCD4 (SiteChat Agent Cyan)
 
 #### Blazor CMS (.NET)
 - **Solution & Projects:**
-  - OrkinosaiCMS.sln → PapaganCMS.sln
-  - OrkinosaiCMS.csproj → PapaganCMS.csproj
-  - OrkinosaiCMS.Client.csproj → PapaganCMS.Client.csproj
+  - OrkinosaiCMS.sln → SiteChatCMS.sln
+  - OrkinosaiCMS.csproj → SiteChatCMS.csproj
+  - OrkinosaiCMS.Client.csproj → SiteChatCMS.Client.csproj
 
 - **Razor Components:**
   - Components/App.razor - Title and favicons
   - Components/Layout/NavMenu.razor - Brand name with logo
-  - Components/Pages/Home.razor - Hero section with Papagan branding
+  - Components/Pages/Home.razor - Hero section with SiteChat Agent branding
   - Components/Pages/DockableChatPanel.razor - Chat UI
   - All _Imports.razor files - Namespace updates
 
 - **C# Source Code (40+ files):**
-  - All namespaces: OrkinosaiCMS → PapaganCMS
+  - All namespaces: OrkinosaiCMS → SiteChatCMS
   - All using statements updated
   - Controllers, Services, Entities, DTOs
 
@@ -89,10 +89,10 @@ This document summarizes the complete migration of the CMS branding from "Orkino
 All assets are located in `/static/branding/` and copied to `/src/cms/Server/wwwroot/branding/`:
 
 #### Logos (4 files)
-- papagan-logo-main.svg - Primary logo (scalable)
-- papagan-logo-main.png - Primary logo (800×400px)
-- papagan-logo-main@2x.png - High-DPI version (1600×800px)
-- papagan-icon.svg - Icon only (scalable)
+- sitechat-logo-main.svg - Primary logo (scalable)
+- sitechat-logo-main.png - Primary logo (800×400px)
+- sitechat-logo-main@2x.png - High-DPI version (1600×800px)
+- sitechat-icon.svg - Icon only (scalable)
 
 #### Icons (9 files)
 - favicon.ico - Multi-size ICO (16, 32, 48px)
@@ -122,14 +122,14 @@ All assets are located in `/static/branding/` and copied to `/src/cms/Server/www
 - **Project Files:** 3 solution/project files
 
 **Types of Changes:**
-1. Text replacements: "Orkinosai" → "Papagan"
-2. URL updates: orkinosai-conversational-agent → papagan-conversational-agent
-3. Repository references: orkinosaicms → papagancms
-4. Namespace updates: OrkinosaiCMS → PapaganCMS
-5. File renames: OrkinosaiCMS.* → PapaganCMS.*
-6. Logo additions: Robot icon → Papagan parrot logo
-7. Color scheme updates: Azure blue → Papagan green
-8. Favicon updates: Generic → Papagan parrot icons
+1. Text replacements: "Orkinosai" → "SiteChat Agent"
+2. URL updates: orkinosai-conversational-agent → sitechat-agent
+3. Repository references: orkinosaicms → sitechatcms
+4. Namespace updates: OrkinosaiCMS → SiteChatCMS
+5. File renames: OrkinosaiCMS.* → SiteChatCMS.*
+6. Logo additions: Robot icon → SiteChat Agent parrot logo
+7. Color scheme updates: Azure blue → SiteChat Agent green
+8. Favicon updates: Generic → SiteChat Agent parrot icons
 
 ## Implementation Details
 
@@ -144,8 +144,8 @@ All assets are located in `/static/branding/` and copied to `/src/cms/Server/www
 
 <!-- After -->
 <div class="brand">
-    <img src="/static/branding/logos/papagan-icon.svg" alt="Papagan" height="32">
-    <span>Papagan</span>
+    <img src="/static/branding/logos/sitechat-icon.svg" alt="SiteChat Agent" height="32">
+    <span>SiteChat Agent</span>
 </div>
 ```
 
@@ -161,9 +161,9 @@ All assets are located in `/static/branding/` and copied to `/src/cms/Server/www
 
 /* After */
 :root {
-    --primary-color: #4CAF50;  /* Papagan Green */
+    --primary-color: #4CAF50;  /* SiteChat Agent Green */
     --primary-hover: #2E7D32;
-    --secondary-color: #00BCD4; /* Papagan Cyan */
+    --secondary-color: #00BCD4; /* SiteChat Agent Cyan */
 }
 ```
 
@@ -175,8 +175,8 @@ All assets are located in `/static/branding/` and copied to `/src/cms/Server/www
 
 <!-- After -->
 <div class="navbar-brand" href="">
-    <img src="/branding/logos/papagan-icon.svg" alt="Papagan" height="32">
-    PapaganCMS
+    <img src="/branding/logos/sitechat-icon.svg" alt="SiteChat Agent" height="32">
+    SiteChatCMS
 </div>
 ```
 
@@ -194,8 +194,8 @@ All assets are located in `/static/branding/` and copied to `/src/cms/Server/www
 // After
 {
   "agent": {
-    "name": "Papagan - The Chatter Parrot",
-    "system_prompt": "You are Papagan, a helpful and friendly AI assistant. You're like a well-trained parrot - conversational, intelligent, and always ready to help!"
+    "name": "SiteChat Agent",
+    "system_prompt": "You are SiteChat Agent, a helpful and friendly AI assistant. You're like a well-trained parrot - conversational, intelligent, and always ready to help!"
   }
 }
 ```
@@ -206,18 +206,18 @@ All assets are located in `/static/branding/` and copied to `/src/cms/Server/www
 
 1. **Flask UI:**
    - Application starts without errors
-   - Papagan logo displays in header
+   - SiteChat Agent logo displays in header
    - Favicon shows in browser tab
-   - Colors reflect Papagan green theme
-   - Welcome message mentions Papagan
+   - Colors reflect SiteChat Agent green theme
+   - Welcome message mentions SiteChat Agent
 
 2. **Blazor CMS:**
    - Solution opens in Visual Studio without errors
    - Application compiles successfully
-   - Papagan logo displays in navigation
-   - Home page shows Papagan branding
+   - SiteChat Agent logo displays in navigation
+   - Home page shows SiteChat Agent branding
    - Favicons display correctly
-   - Chat button says "Chat with Papagan"
+   - Chat button says "Chat with SiteChat Agent"
 
 3. **Documentation:**
    - No references to "Orkinosai" or "Zoota" remain (except in historical notes)
@@ -239,8 +239,8 @@ All assets are located in `/static/branding/` and copied to `/src/cms/Server/www
 - [x] Rename solution and project files
 - [x] Update Flask UI templates
 - [x] Update CSS color scheme
-- [x] Add Papagan logos to Flask UI
-- [x] Add Papagan logos to Blazor CMS
+- [x] Add SiteChat Agent logos to Flask UI
+- [x] Add SiteChat Agent logos to Blazor CMS
 - [x] Add favicon references
 - [x] Copy branding assets to CMS wwwroot
 - [x] Update repository URLs
@@ -257,7 +257,7 @@ All assets are located in `/static/branding/` and copied to `/src/cms/Server/www
 
 ## Brand Assets Location
 
-All Papagan branding assets are available in:
+All SiteChat Agent branding assets are available in:
 - `/static/branding/` - Primary location for Flask UI
 - `/src/cms/Server/wwwroot/branding/` - Copy for Blazor CMS
 
@@ -274,4 +274,4 @@ For questions about the branding migration or asset usage, refer to:
 
 **Migration Completed:** December 12, 2025  
 **Version:** 1.0.0  
-**New Brand:** Papagan - The Chatter Parrot
+**New Brand:** SiteChat Agent

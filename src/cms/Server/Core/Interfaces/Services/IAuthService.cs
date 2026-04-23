@@ -1,7 +1,7 @@
-using PapaganCMS.Core.Entities.Identity;
-using PapaganCMS.Shared.DTOs.Auth;
+using SiteChatCMS.Core.Entities.Identity;
+using SiteChatCMS.Shared.DTOs.Auth;
 
-namespace PapaganCMS.Core.Interfaces.Services;
+namespace SiteChatCMS.Core.Interfaces.Services;
 
 public interface IAuthService
 {

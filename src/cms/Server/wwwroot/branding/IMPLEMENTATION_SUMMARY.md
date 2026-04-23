@@ -1,15 +1,15 @@
-# Papagan Branding Assets - Implementation Summary
+# SiteChat Agent Branding Assets - Implementation Summary
 
 ## Overview
-This document provides a summary of the complete Papagan (The Chatter Parrot) branding package that has been created for the Papagan Conversational Agent project.
+This document provides a summary of the complete SiteChat Agent branding package that has been created for the SiteChat Agent project.
 
 ## Assets Created
 
 ### 1. Logo Files (4 files)
-- `papagan-logo-main.svg` - Primary logo with character and text (scalable vector)
-- `papagan-logo-main.png` - Primary logo (800×400px)
-- `papagan-logo-main@2x.png` - Primary logo high-DPI (1600×800px)
-- `papagan-icon.svg` - Icon-only version (scalable vector)
+- `sitechat-logo-main.svg` - Primary logo with character and text (scalable vector)
+- `sitechat-logo-main.png` - Primary logo (800×400px)
+- `sitechat-logo-main@2x.png` - Primary logo high-DPI (1600×800px)
+- `sitechat-icon.svg` - Icon-only version (scalable vector)
 
 ### 2. Icon Files (9 files)
 - `favicon.ico` - Multi-size ICO format (16, 32, 48px)
@@ -40,8 +40,8 @@ This document provides a summary of the complete Papagan (The Chatter Parrot) br
 ## Brand Identity
 
 ### Character Design
-- **Name**: Papagan (English spelling)
-- **Tagline**: The Chatter Parrot
+- **Name**: SiteChat Agent (English spelling)
+- **Tagline**: SiteChat Agent
 - **Personality**: Friendly, intelligent, conversational, helpful, cheerful
 - **Visual Elements**: 
   - Green parrot body with gradient
@@ -102,8 +102,8 @@ This document provides a summary of the complete Papagan (The Chatter Parrot) br
 
 **HTML Header:**
 ```html
-<img src="/static/branding/logos/papagan-logo-main.svg" 
-     alt="Papagan - The Chatter Parrot" height="60">
+<img src="/static/branding/logos/sitechat-logo-main.svg" 
+     alt="SiteChat Agent" height="60">
 ```
 
 **Favicon:**
@@ -115,14 +115,14 @@ This document provides a summary of the complete Papagan (The Chatter Parrot) br
 **CSS Variables:**
 ```css
 :root {
-  --papagan-green: #4CAF50;
-  --papagan-cyan: #00BCD4;
+  --sitechat-green: #4CAF50;
+  --sitechat-cyan: #00BCD4;
 }
 ```
 
 ## Brand Promise
 
-Papagan makes customer interactions natural and engaging, providing instant, intelligent responses like a well-trained, friendly parrot.
+SiteChat Agent makes customer interactions natural and engaging, providing instant, intelligent responses like a well-trained, friendly parrot.
 
 ## Technical Details
 
@@ -147,7 +147,7 @@ Papagan makes customer interactions natural and engaging, providing instant, int
 
 **Version**: 1.0  
 **Release Date**: December 2025  
-**Created for**: Papagan Conversational Agent (Papagan)
+**Created for**: SiteChat Agent (SiteChat Agent)
 
 ## Support
 
@@ -159,4 +159,4 @@ For questions about brand usage, custom assets, or implementation help, refer to
 
 ---
 
-**© 2025 Papagan - The Chatter Parrot. All rights reserved.**
+**© 2025 SiteChat Agent. All rights reserved.**

@@ -1,4 +1,6 @@
-# Papagan - The Chatter Parrot
+# SiteChat Agent
+
+*An AI chat agent for your website. Test it instantly. Embed it or just share a link.*
 
 An Azure AI-powered conversational agent with a modern, colorful dockable UI and RESTful API interface. This project provides a complete scaffolding for building conversational AI applications using Azure OpenAI Service, designed to help startups and founders automate SaaS operations quickly.
 
@@ -28,7 +30,7 @@ Open `http://localhost:5000`, type "hello" and start chatting! The app runs in d
    ```
 
 2. **Open in Visual Studio**:
-   - Open `src/cms/PapaganCMS.sln` in Visual Studio 2022/2026
+   - Open `src/cms/SiteChatCMS.sln` in Visual Studio 2022/2026
    - Press **F5** to run
 
 The CMS will open in your browser with the chat agent integrated on the home page! See [src/cms/README.md](src/cms/README.md) for more details.
@@ -46,7 +48,7 @@ The CMS will open in your browser with the chat agent integrated on the home pag
 - 🎯 Type-safe with Pydantic models
 
 ### New UI Features
-- 🦜 **Papagan Branded UI** - Colorful, friendly interface with parrot mascot
+- 🦜 **SiteChat Agent Branded UI** - Colorful, friendly interface with parrot mascot
 - 📱 **Responsive Design** - Works on desktop, tablet, and mobile
 - 👤 **User Authentication** - Built-in login and registration
 - 🧠 **URL Learning** - Train the agent by providing web URLs
@@ -57,8 +59,8 @@ The CMS will open in your browser with the chat agent integrated on the home pag
 
 ### Blazor CMS Features ✨ NEW
 - 🌐 **Modern Blazor Web Application** - Built with .NET 10 and Blazor
-- 🦜 **Integrated Papagan Chat Agent** - AI assistant embedded directly in the CMS home page
-- 🎨 **Papagan-Style Dockable Panel** - Colorful, friendly UI with parrot branding
+- 🦜 **Integrated SiteChat Agent** - AI assistant embedded directly in the CMS home page
+- 🎨 **SiteChat Agent-Style Dockable Panel** - Colorful, friendly UI with parrot branding
 - 🔄 **Dynamic Dock Positioning** - Dock to top, right, bottom, or left with smooth animations
 - 📄 **Content Management** - Full-featured CMS for managing content
 - 👥 **User Management** - Role-based access control and permissions
@@ -72,10 +74,10 @@ See [Blazor CMS Documentation](src/cms/README.md) for detailed information on ru
 
 ### Embeddable SaaS Widget 🔌
 
-Papagan includes a **reusable, embeddable chat widget** that can be integrated into any website as a SaaS offering. The widget is built as a self-contained Blazor component with Papagan branding.
+SiteChat Agent includes a **reusable, embeddable chat widget** that can be integrated into any website as a SaaS offering. The widget is built as a self-contained Blazor component with SiteChat Agent branding.
 
 #### Key Features of the Widget:
-- **🦜 Papagan Branding** - Friendly, colorful look with the parrot mascot
+- **🦜 SiteChat Agent Branding** - Friendly, colorful look with the parrot mascot
 - **🔄 Dockable Interface** - Users can dock the chat to any screen edge (top, right, bottom, left)
 - **⚡ Out-of-the-Box Functionality** - Works immediately with demo mode, no Azure credentials required
 - **📱 Fully Responsive** - Optimized for desktop, tablet, and mobile devices
@@ -86,7 +88,7 @@ Papagan includes a **reusable, embeddable chat widget** that can be integrated i
 
 **1. As Integrated Component (Current Implementation)**
 
-The widget is fully integrated into the Papagan CMS home page:
+The widget is fully integrated into the SiteChat Agent CMS home page:
 
 ```razor
 <!-- In your Blazor page -->
@@ -122,7 +124,7 @@ To embed the chat widget on external websites:
 
    **Option A: Direct Blazor Component** (for .NET sites)
    ```razor
-   @using PapaganCMS.Components.Pages
+   @using SiteChatCMS.Components.Pages
    
    <DockableChatPanel IsOpen="true" IsOpenChanged="@((open) => {})" />
    ```
@@ -141,12 +143,12 @@ To embed the chat widget on external websites:
 
    **Option C: JavaScript Widget** (coming soon)
    ```html
-   <script src="https://your-domain.com/papagan-widget.js"></script>
+   <script src="https://your-domain.com/sitechat-widget.js"></script>
    <script>
-     PapaganWidget.init({
+     SiteChatWidget.init({
        apiUrl: 'https://your-backend.com',
        dockPosition: 'right',
-       theme: 'papagan'
+       theme: 'sitechat'
      });
    </script>
    ```
@@ -165,15 +167,15 @@ The widget supports various configuration parameters:
 
 **4. Styling and Branding**
 
-The widget uses Papagan design system colors and can be customized:
+The widget uses SiteChat Agent design system colors and can be customized:
 
 ```css
 /* Override widget styles */
 :root {
-    --papagan-green: #4CAF50;
-    --papagan-green-dark: #2E7D32;
-    --papagan-cyan: #00BCD4;
-    --papagan-teal: #0097A7;
+    --sitechat-green: #4CAF50;
+    --sitechat-green-dark: #2E7D32;
+    --sitechat-cyan: #00BCD4;
+    --sitechat-teal: #0097A7;
 }
 ```
 
@@ -203,7 +205,7 @@ The widget works out-of-the-box in demo mode without requiring Azure OpenAI cred
 
 ## SaaS Pricing & Product Roadmap
 
-This project is being developed as **Papagan (The Chatter Parrot)** - a commercial SaaS offering with multiple pricing tiers. Our product documentation includes:
+This project is being developed as **SiteChat Agent** - a commercial SaaS offering with multiple pricing tiers. Our product documentation includes:
 
 - 📋 **[PRICING.md](PRICING.md)** - Complete SaaS pricing tiers (Free, Starter, Pro, Business, Enterprise) with detailed feature breakdowns for:
   - Knowledge sources and limits
@@ -232,7 +234,7 @@ These documents provide a clear roadmap for implementation teams and define how 
 ## Architecture
 
 This project follows a **domain-partitioned architecture** separating:
-- **CMS Domain**: Generic, reusable features (user management, roles, billing, etc.) - to be synced with papagancms
+- **CMS Domain**: Generic, reusable features (user management, roles, billing, etc.) - to be synced with sitechatcms
 - **Agent Domain**: AI-specific features (chat, Azure OpenAI, conversations)
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation, including:
@@ -241,7 +243,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation, 
 - Development workflow and best practices
 - Integration patterns
 
-**Important**: All CMS domain features must be copied from [papagancms](https://github.com/orkinosai25-org/papagancms) before implementing agent-specific features.
+**Important**: All CMS domain features must be copied from [sitechatcms](https://github.com/orkinosai25-org/sitechatcms) before implementing agent-specific features.
 
 ## Prerequisites
 
@@ -252,8 +254,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation, 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/orkinosai25-org/papagan-conversational-agent.git
-cd papagan-conversational-agent
+git clone https://github.com/orkinosai25-org/sitechat-agent.git
+cd sitechat-agent
 ```
 
 2. Create a virtual environment:
@@ -371,7 +373,7 @@ Response:
 ```json
 {
   "status": "healthy",
-  "agent": "Papagan - The Chatter Parrot",
+  "agent": "SiteChat Agent",
   "version": "1.0.0"
 }
 ```
@@ -505,7 +507,7 @@ DELETE /training/documents/{document_id}
 ## Project Structure
 
 ```
-papagan-conversational-agent/
+sitechat-agent/
 ├── src/
 │   ├── __init__.py
 │   ├── agent/                   # AGENT DOMAIN (AI-specific features)
@@ -519,7 +521,7 @@ papagan-conversational-agent/
 │   │   ├── __init__.py
 │   │   └── settings.py         # Configuration management
 │   └── cms/                     # CMS DOMAIN (Blazor Web Application)
-│       ├── PapaganCMS.sln      # Visual Studio solution
+│       ├── SiteChatCMS.sln      # Visual Studio solution
 │       ├── Server/             # Blazor server project
 │       │   ├── Components/     # Razor components and pages
 │       │   └── wwwroot/        # Static web assets
@@ -528,7 +530,7 @@ papagan-conversational-agent/
 ├── docs/                        # Documentation
 │   ├── ARCHITECTURE.md          # Architecture and domain partitioning
 │   ├── CMS_FEATURES_INVENTORY.md # CMS features to be copied
-│   ├── CMS_SYNC_LOG.md          # Sync history with papagancms
+│   ├── CMS_SYNC_LOG.md          # Sync history with sitechatcms
 │   ├── DOMAIN_INTEGRATION.md    # Integration guidelines
 │   └── AZURE_DEPLOYMENT.md      # Azure deployment guide
 ├── logs/                        # Log files

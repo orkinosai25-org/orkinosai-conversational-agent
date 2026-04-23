@@ -1,28 +1,28 @@
-# Papagan (The Chatter Parrot) - Brand Identity Guidelines
+# SiteChat Agent - Brand Identity Guidelines
 
 ## Introduction
 
-Welcome to the Papagan brand identity guidelines. Papagan is a friendly, intelligent chat agent that responds to customers on websites like a trained parrot—conversational, helpful, and memorable. These guidelines ensure consistent and effective use of the Papagan brand across all platforms and touchpoints.
+Welcome to the SiteChat Agent brand identity guidelines. SiteChat Agent is a friendly, intelligent chat agent that responds to customers on websites like a trained parrot—conversational, helpful, and memorable. These guidelines ensure consistent and effective use of the SiteChat Agent brand across all platforms and touchpoints.
 
 ---
 
 ## Brand Essence
 
-**Name:** Papagan (English spelling)  
-**Tagline:** The Chatter Parrot  
+**Name:** SiteChat Agent (English spelling)  
+**Tagline:** SiteChat Agent  
 **Personality:** Friendly, intelligent, conversational, helpful, cheerful  
 **Target Audience:** Businesses looking for customer engagement solutions, website owners, SaaS customers
 
-**Brand Promise:** Papagan makes customer interactions natural and engaging, providing instant, intelligent responses like a well-trained, friendly parrot.
+**Brand Promise:** SiteChat Agent makes customer interactions natural and engaging, providing instant, intelligent responses like a well-trained, friendly parrot.
 
 ---
 
 ## Logo Variants
 
 ### Primary Logo
-The primary logo combines the parrot character with the "Papagan" wordmark and tagline "The Chatter Parrot."
+The primary logo combines the parrot character with the "SiteChat Agent" wordmark and tagline "An AI chat agent for your website."
 
-**File:** `papagan-logo-main.svg`  
+**File:** `sitechat-logo-main.svg`  
 **Usage:** Main website header, marketing materials, presentations, documentation  
 **Minimum width:** 200px for digital, 2 inches for print  
 **Clear space:** Maintain at least 20px of clear space around the logo
@@ -30,7 +30,7 @@ The primary logo combines the parrot character with the "Papagan" wordmark and t
 ### Icon Logo
 The icon-only version features just the parrot character with a small chat bubble.
 
-**File:** `papagan-icon.svg`  
+**File:** `sitechat-icon.svg`  
 **Usage:** App icons, favicons, social media profile pictures, small spaces  
 **Minimum size:** 32×32px  
 **Clear space:** Maintain at least 8px of clear space around the icon
@@ -160,7 +160,7 @@ caption: font-size: 12px, font-weight: 400, line-height: 1.4
 
 ### Tagline Typography
 
-The tagline "The Chatter Parrot" should always be displayed in:
+The tagline "An AI chat agent for your website. Test it instantly. Embed it or just share a link." should always be displayed in:
 - **Font size:** 35-40% of the main wordmark size
 - **Font style:** Italic
 - **Font weight:** Regular (400)
@@ -205,8 +205,8 @@ When color reproduction is not possible, use:
 ```html
 <!-- Primary logo in header -->
 <header>
-  <img src="/static/branding/logos/papagan-logo-main.svg" 
-       alt="Papagan - The Chatter Parrot" 
+  <img src="/static/branding/logos/sitechat-logo-main.svg" 
+       alt="SiteChat Agent" 
        height="60">
 </header>
 ```
@@ -253,15 +253,15 @@ When color reproduction is not possible, use:
 
 ```html
 <!-- Floating chat button with icon -->
-<button class="papagan-chat-button">
-  <img src="/static/branding/logos/papagan-icon.svg" 
-       alt="Chat with Papagan" 
+<button class="sitechat-chat-button">
+  <img src="/static/branding/logos/sitechat-icon.svg" 
+       alt="Chat with SiteChat Agent" 
        width="48" 
        height="48">
 </button>
 
 <style>
-.papagan-chat-button {
+.sitechat-chat-button {
   background: linear-gradient(135deg, #4CAF50, #2E7D32);
   border: none;
   border-radius: 50%;
@@ -271,7 +271,7 @@ When color reproduction is not possible, use:
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.papagan-chat-button:hover {
+.sitechat-chat-button:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
 }
@@ -338,9 +338,9 @@ When color reproduction is not possible, use:
 }
 ```
 
-**Papagan Response**
+**SiteChat Agent Response**
 ```css
-.message-papagan {
+.message-sitechat {
   background: white;
   color: #212121;
   border: 1px solid #E0E0E0;
@@ -386,14 +386,14 @@ When color reproduction is not possible, use:
 ### Sample Copy
 
 **Homepage Hero:**
-> "Meet Papagan, The Chatter Parrot  
+> "Meet SiteChat Agent  
 > Your friendly AI chat agent that talks to customers naturally, instantly, and intelligently."
 
 **Feature Description:**
-> "Papagan learns from your website content and documentation to answer customer questions accurately. Like a well-trained parrot, it remembers what you teach it and shares that knowledge with your visitors."
+> "SiteChat Agent learns from your website content and documentation to answer customer questions accurately. Like a well-trained parrot, it remembers what you teach it and shares that knowledge with your visitors."
 
 **Call to Action:**
-> "Start chatting with Papagan" (not "Get started" or "Sign up")
+> "Start chatting with SiteChat Agent" (not "Get started" or "Sign up")
 
 ---
 
@@ -403,10 +403,10 @@ When color reproduction is not possible, use:
 
 ```
 static/branding/logos/
-├── papagan-logo-main.svg          # Primary logo (SVG, scalable)
-├── papagan-logo-main.png          # Primary logo (800x400px PNG)
-├── papagan-logo-main@2x.png       # Primary logo (1600x800px PNG, high-DPI)
-├── papagan-icon.svg               # Icon only (SVG, scalable)
+├── sitechat-logo-main.svg          # Primary logo (SVG, scalable)
+├── sitechat-logo-main.png          # Primary logo (800x400px PNG)
+├── sitechat-logo-main@2x.png       # Primary logo (1600x800px PNG, high-DPI)
+├── sitechat-icon.svg               # Icon only (SVG, scalable)
 ```
 
 ### Icon Files
@@ -437,14 +437,14 @@ static/branding/social/
 ## Version History
 
 **Version 1.0** - December 2025  
-Initial brand identity guidelines for Papagan (The Chatter Parrot)
+Initial brand identity guidelines for SiteChat Agent
 
 ---
 
 ## Contact
 
-For questions about brand usage or to request additional assets, please contact the Papagan team.
+For questions about brand usage or to request additional assets, please contact the SiteChat Agent team.
 
 ---
 
-**© 2025 Papagan - The Chatter Parrot. All rights reserved.**
+**© 2025 SiteChat Agent. All rights reserved.**

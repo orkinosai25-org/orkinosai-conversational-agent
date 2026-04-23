@@ -2,9 +2,9 @@
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.0.0
 MinimumVisualStudioVersion = 16.0.0.0
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PapaganCMS", "Server\PapaganCMS.csproj", "{095BA607-2444-42AD-8DC8-4088ADAD7BBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SiteChatCMS", "Server\SiteChatCMS.csproj", "{095BA607-2444-42AD-8DC8-4088ADAD7BBC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PapaganCMS.Client", "Client\PapaganCMS.Client.csproj", "{3097A506-2B7D-4E02-8EE5-2AEACCA2DAF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SiteChatCMS.Client", "Client\SiteChatCMS.Client.csproj", "{3097A506-2B7D-4E02-8EE5-2AEACCA2DAF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

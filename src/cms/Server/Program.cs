@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OrkinosaiCMS.Core.Interfaces.Services;
-using PapaganCMS.Client.Pages;
-using PapaganCMS.Components;
-using PapaganCMS.Core.Entities.Identity;
-using PapaganCMS.Core.Interfaces.Services;
-using PapaganCMS.Infrastructure.Data;
-using PapaganCMS.Infrastructure.Services;
-using PapaganCMS.Infrastructure.Services.Auth;
-using PapaganCMS.Infrastructure.Services.Bots;
-using PapaganCMS.Infrastructure.Services.Onboarding;
-using PapaganCMS.Infrastructure.Services.Subscriptions;
+using SiteChatCMS.Client.Pages;
+using SiteChatCMS.Components;
+using SiteChatCMS.Core.Entities.Identity;
+using SiteChatCMS.Core.Interfaces.Services;
+using SiteChatCMS.Infrastructure.Data;
+using SiteChatCMS.Infrastructure.Services;
+using SiteChatCMS.Infrastructure.Services.Auth;
+using SiteChatCMS.Infrastructure.Services.Bots;
+using SiteChatCMS.Infrastructure.Services.Onboarding;
+using SiteChatCMS.Infrastructure.Services.Subscriptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +19,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     // Use InMemory database for development
     // TODO: Replace with SQL Server for production
-    options.UseInMemoryDatabase("PapaganCMS");
+    options.UseInMemoryDatabase("SiteChatCMS");
 });
 
 // Add ASP.NET Identity
@@ -109,7 +109,7 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(PapaganCMS.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(SiteChatCMS.Client._Imports).Assembly);
 
 // Map API controllers
 app.MapControllers();

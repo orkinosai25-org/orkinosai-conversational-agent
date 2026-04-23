@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
-using PapaganCMS.Core.Entities.Identity;
-using PapaganCMS.Core.Interfaces.Services;
-using PapaganCMS.Infrastructure.Data;
-using PapaganCMS.Shared.DTOs.Onboarding;
+using SiteChatCMS.Core.Entities.Identity;
+using SiteChatCMS.Core.Interfaces.Services;
+using SiteChatCMS.Infrastructure.Data;
+using SiteChatCMS.Shared.DTOs.Onboarding;
 
-namespace PapaganCMS.Infrastructure.Services.Onboarding;
+namespace SiteChatCMS.Infrastructure.Services.Onboarding;
 
 public class OnboardingService : IOnboardingService
 {

@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OrkinosaiCMS.Core.Entities.Subscriptions;
-using PapaganCMS.Core.Interfaces.Services;
+using SiteChatCMS.Core.Interfaces.Services;
 using Stripe;
 using Stripe.Checkout;
 
-namespace PapaganCMS.Infrastructure.Services.Subscriptions;
+namespace SiteChatCMS.Infrastructure.Services.Subscriptions;
 
 /// <summary>
 /// Service implementation for Stripe API interactions

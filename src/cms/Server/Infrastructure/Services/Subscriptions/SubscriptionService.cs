@@ -1,7 +1,7 @@
 using OrkinosaiCMS.Core.Entities.Subscriptions;
-using PapaganCMS.Core.Interfaces.Services;
+using SiteChatCMS.Core.Interfaces.Services;
 
-namespace PapaganCMS.Infrastructure.Services.Subscriptions;
+namespace SiteChatCMS.Infrastructure.Services.Subscriptions;
 
 /// <summary>
 /// Simple in-memory implementation of subscription service

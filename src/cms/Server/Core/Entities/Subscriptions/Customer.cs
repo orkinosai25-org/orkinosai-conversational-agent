@@ -1,4 +1,4 @@
-using PapaganCMS.Core.Common;
+using SiteChatCMS.Core.Common;
 
 namespace OrkinosaiCMS.Core.Entities.Subscriptions;
 

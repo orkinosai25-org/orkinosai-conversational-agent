@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
-using PapaganCMS.Core.Entities.Identity;
-using PapaganCMS.Core.Interfaces.Services;
-using PapaganCMS.Infrastructure.Data;
-using PapaganCMS.Shared.DTOs.Bots;
+using SiteChatCMS.Core.Entities.Identity;
+using SiteChatCMS.Core.Interfaces.Services;
+using SiteChatCMS.Infrastructure.Data;
+using SiteChatCMS.Shared.DTOs.Bots;
 
-namespace PapaganCMS.Infrastructure.Services.Bots;
+namespace SiteChatCMS.Infrastructure.Services.Bots;
 
 public class BotService : IBotService
 {
@@ -296,10 +296,10 @@ public class BotService : IBotService
             throw new InvalidOperationException("Bot not found");
         }
 
-        var embedCode = $@"<!-- Papagan Chatbot Widget -->
-<script src=""https://your-domain.com/widget/papagan-widget.js""></script>
+        var embedCode = $@"<!-- SiteChat Agent Chatbot Widget -->
+<script src=""https://your-domain.com/widget/sitechat-widget.js""></script>
 <script data-seat-id=""{botId}"">
-  PapaganWidget.init({{
+  SiteChatWidget.init({{
     seatId: '{botId}',
     botId: '{botId}',
     apiUrl: 'https://your-domain.com/api',

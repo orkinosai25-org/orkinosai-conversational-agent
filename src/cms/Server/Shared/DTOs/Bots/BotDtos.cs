@@ -1,4 +1,4 @@
-namespace PapaganCMS.Shared.DTOs.Bots;
+namespace SiteChatCMS.Shared.DTOs.Bots;
 
 public class BotDto
 {

@@ -1,6 +1,6 @@
 using OrkinosaiCMS.Core.Interfaces.Services;
 
-namespace PapaganCMS.Infrastructure.Services;
+namespace SiteChatCMS.Infrastructure.Services;
 
 /// <summary>
 /// Simple in-memory user service for demo purposes

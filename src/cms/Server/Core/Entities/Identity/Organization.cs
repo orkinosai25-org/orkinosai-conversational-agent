@@ -1,4 +1,4 @@
-namespace PapaganCMS.Core.Entities.Identity;
+namespace SiteChatCMS.Core.Entities.Identity;
 
 /// <summary>
 /// Organization entity for multi-tenant support

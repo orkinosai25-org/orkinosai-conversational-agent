@@ -1,4 +1,4 @@
-namespace PapaganCMS.Shared.DTOs.Onboarding;
+namespace SiteChatCMS.Shared.DTOs.Onboarding;
 
 public class OnboardingProgressDto
 {

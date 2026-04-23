@@ -1,4 +1,4 @@
-namespace PapaganCMS.Shared.DTOs.Auth;
+namespace SiteChatCMS.Shared.DTOs.Auth;
 
 public class RegisterDto
 {

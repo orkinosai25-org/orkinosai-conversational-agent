@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using PapaganCMS.Core.Interfaces.Services;
+using SiteChatCMS.Core.Interfaces.Services;
 
-namespace PapaganCMS.Controllers;
+namespace SiteChatCMS.Controllers;
 
 /// <summary>
 /// API Controller for handling Stripe webhooks

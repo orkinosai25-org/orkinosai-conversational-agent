@@ -1,33 +1,33 @@
-# Papagan Color Palette - Quick Reference
+# SiteChat Agent Color Palette - Quick Reference
 
 ## CSS Variables
 
 ```css
 :root {
   /* Primary Colors */
-  --papagan-green: #4CAF50;
-  --papagan-green-dark: #2E7D32;
+  --sitechat-green: #4CAF50;
+  --sitechat-green-dark: #2E7D32;
   
   /* Secondary Colors */
-  --papagan-cyan: #00BCD4;
-  --papagan-teal: #0097A7;
-  --papagan-teal-dark: #00838F;
+  --sitechat-cyan: #00BCD4;
+  --sitechat-teal: #0097A7;
+  --sitechat-teal-dark: #00838F;
   
   /* Accent Colors */
-  --papagan-yellow: #FFC107;
-  --papagan-amber: #FFA000;
+  --sitechat-yellow: #FFC107;
+  --sitechat-amber: #FFA000;
   
   /* Tail Feather Colors */
-  --papagan-red-orange: #FF5722;
-  --papagan-orange: #FF9800;
-  --papagan-yellow-bright: #FFEB3B;
+  --sitechat-red-orange: #FF5722;
+  --sitechat-orange: #FF9800;
+  --sitechat-yellow-bright: #FFEB3B;
   
   /* Neutral Colors */
-  --papagan-text-dark: #212121;
-  --papagan-white: #FFFFFF;
-  --papagan-gray-light: #F5F5F5;
-  --papagan-gray-medium: #E0E0E0;
-  --papagan-gray: #9E9E9E;
+  --sitechat-text-dark: #212121;
+  --sitechat-white: #FFFFFF;
+  --sitechat-gray-light: #F5F5F5;
+  --sitechat-gray-medium: #E0E0E0;
+  --sitechat-gray: #9E9E9E;
 }
 ```
 
@@ -35,35 +35,35 @@
 
 ```scss
 // Primary Colors
-$papagan-green: #4CAF50;
-$papagan-green-dark: #2E7D32;
+$sitechat-green: #4CAF50;
+$sitechat-green-dark: #2E7D32;
 
 // Secondary Colors
-$papagan-cyan: #00BCD4;
-$papagan-teal: #0097A7;
-$papagan-teal-dark: #00838F;
+$sitechat-cyan: #00BCD4;
+$sitechat-teal: #0097A7;
+$sitechat-teal-dark: #00838F;
 
 // Accent Colors
-$papagan-yellow: #FFC107;
-$papagan-amber: #FFA000;
+$sitechat-yellow: #FFC107;
+$sitechat-amber: #FFA000;
 
 // Tail Feather Colors
-$papagan-red-orange: #FF5722;
-$papagan-orange: #FF9800;
-$papagan-yellow-bright: #FFEB3B;
+$sitechat-red-orange: #FF5722;
+$sitechat-orange: #FF9800;
+$sitechat-yellow-bright: #FFEB3B;
 
 // Neutral Colors
-$papagan-text-dark: #212121;
-$papagan-white: #FFFFFF;
-$papagan-gray-light: #F5F5F5;
-$papagan-gray-medium: #E0E0E0;
-$papagan-gray: #9E9E9E;
+$sitechat-text-dark: #212121;
+$sitechat-white: #FFFFFF;
+$sitechat-gray-light: #F5F5F5;
+$sitechat-gray-medium: #E0E0E0;
+$sitechat-gray: #9E9E9E;
 ```
 
 ## JavaScript/TypeScript
 
 ```typescript
-export const PapaganColors = {
+export const SiteChatAgentColors = {
   // Primary
   green: '#4CAF50',
   greenDark: '#2E7D32',
@@ -98,7 +98,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        papagan: {
+        sitechat: {
           green: '#4CAF50',
           'green-dark': '#2E7D32',
           cyan: '#00BCD4',

@@ -1,16 +1,16 @@
 # Architecture Overview
 
-This document describes the architecture and design of Papagan - The Chatter Parrot.
+This document describes the architecture and design of SiteChat Agent.
 
 ## Domain Partitioning: CMS vs Agent
 
-This project is architecturally partitioned into two distinct domains to facilitate code reusability and maintainability between Papagan Conversational Agent and the main papagancms project.
+This project is architecturally partitioned into two distinct domains to facilitate code reusability and maintainability between SiteChat Agent and the main sitechatcms project.
 
 ### Domain Separation Strategy
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│              Papagan Conversational Agent Project                    │
+│              SiteChat Agent Project                    │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
 │  ┌────────────────────────────┐  ┌────────────────────────────────┐│
@@ -40,16 +40,16 @@ This project is architecturally partitioned into two distinct domains to facilit
              │                                     │
              ▼                                     ▼
     ┌─────────────────┐                  ┌──────────────────┐
-    │  papagancms     │                  │  Agent-Specific  │
+    │  sitechatcms     │                  │  Agent-Specific  │
     │  Main Project   │                  │   Features Only  │
     └─────────────────┘                  └──────────────────┘
 ```
 
 ### CMS Domain
 
-**Purpose**: Generic, reusable features that should be synchronized back to the main papagancms project.
+**Purpose**: Generic, reusable features that should be synchronized back to the main sitechatcms project.
 
-**Current State**: Not yet implemented in this project. These features must be copied from papagancms first.
+**Current State**: Not yet implemented in this project. These features must be copied from sitechatcms first.
 
 **Planned Components**:
 - **User Management**: User registration, authentication, profile management
@@ -75,9 +75,9 @@ This project is architecturally partitioned into two distinct domains to facilit
 - `src/cms/settings/` - Settings management
 
 **Development Rules**:
-1. **Copy First**: All CMS features must be copied from papagancms before starting agent-specific development
+1. **Copy First**: All CMS features must be copied from sitechatcms before starting agent-specific development
 2. **Keep Generic**: CMS code must remain generic and not contain agent-specific logic
-3. **Sync Back**: Any modifications to CMS features must be synchronized back to papagancms
+3. **Sync Back**: Any modifications to CMS features must be synchronized back to sitechatcms
 4. **Test Independently**: CMS features should have tests that don't depend on agent features
 5. **Document Changes**: All CMS changes must be documented for sync purposes
 
@@ -146,10 +146,10 @@ The current implementation includes only the **Agent Domain** core functionality
 
 1. **Initial Copy**: 
    ```bash
-   # Copy CMS features from papagancms
+   # Copy CMS features from sitechatcms
    # Ensure no agent-specific code is included
-   git clone https://github.com/orkinosai25-org/papagancms.git ../papagancms
-   cp -r ../papagancms/src/cms ./src/
+   git clone https://github.com/orkinosai25-org/sitechatcms.git ../sitechatcms
+   cp -r ../sitechatcms/src/cms ./src/
    ```
 
 2. **Adaptation**:
@@ -164,7 +164,7 @@ The current implementation includes only the **Agent Domain** core functionality
 
 4. **Synchronization Back**:
    - Document all changes made
-   - Create sync PR to papagancms
+   - Create sync PR to sitechatcms
    - Update both projects to maintain consistency
 
 #### For Agent Features
@@ -178,7 +178,7 @@ The current implementation includes only the **Agent Domain** core functionality
 
 **ADR-001: Domain Separation**
 - **Decision**: Partition project into CMS and Agent domains
-- **Rationale**: Enable code reuse with papagancms while maintaining agent-specific features
+- **Rationale**: Enable code reuse with sitechatcms while maintaining agent-specific features
 - **Consequences**: 
   - Easier maintenance and synchronization
   - Clear separation of concerns
@@ -445,11 +445,11 @@ See `docs/AZURE_DEPLOYMENT.md` for detailed deployment instructions.
 
 ### Overview
 
-This section provides detailed guidelines for maintaining synchronization between the Papagan Conversational Agent and the main papagancms project for CMS domain features.
+This section provides detailed guidelines for maintaining synchronization between the SiteChat Agent and the main sitechatcms project for CMS domain features.
 
 ### Synchronization Principles
 
-1. **CMS is the Source of Truth**: papagancms is the authoritative source for all CMS domain features
+1. **CMS is the Source of Truth**: sitechatcms is the authoritative source for all CMS domain features
 2. **Unidirectional Flow**: Features flow from CMS → Agent, improvements flow back CMS ← Agent
 3. **Regular Sync Cycles**: Establish regular sync windows (e.g., weekly, bi-weekly)
 4. **Change Documentation**: All CMS modifications must be documented for sync purposes
@@ -477,17 +477,17 @@ Features to Copy:
 
 **Step 2: Copy CMS Features**
 ```bash
-# Clone papagancms
-git clone https://github.com/orkinosai25-org/papagancms.git ../papagancms
+# Clone sitechatcms
+git clone https://github.com/orkinosai25-org/sitechatcms.git ../sitechatcms
 
 # Create CMS directory structure
 mkdir -p src/cms
 
 # Copy core CMS modules (example - actual structure may vary)
-cp -r ../papagancms/src/users src/cms/
-cp -r ../papagancms/src/roles src/cms/
-cp -r ../papagancms/src/organizations src/cms/
-cp -r ../papagancms/src/billing src/cms/
+cp -r ../sitechatcms/src/users src/cms/
+cp -r ../sitechatcms/src/roles src/cms/
+cp -r ../sitechatcms/src/organizations src/cms/
+cp -r ../sitechatcms/src/billing src/cms/
 # ... continue for all CMS features
 ```
 
@@ -505,14 +505,14 @@ touch docs/CMS_SYNC_LOG.md
 
 Document:
 - Date of copy
-- Commit hash from papagancms
+- Commit hash from sitechatcms
 - Features copied
 - Modifications made
 - Integration notes
 
 #### Phase 2: Ongoing Synchronization
 
-**When to Sync from papagancms → Agent**
+**When to Sync from sitechatcms → Agent**
 
 Sync when:
 - New CMS features are released
@@ -522,8 +522,8 @@ Sync when:
 
 **Process**:
 ```bash
-# 1. Check for updates in papagancms
-cd ../papagancms
+# 1. Check for updates in sitechatcms
+cd ../sitechatcms
 git pull origin main
 git log --oneline --since="last-sync-date"
 
@@ -531,7 +531,7 @@ git log --oneline --since="last-sync-date"
 git diff last-sync-commit..HEAD -- src/users src/roles src/organizations
 
 # 3. Cherry-pick or manually apply relevant changes
-cd ../papagan-conversational-agent
+cd ../sitechat-agent
 # Apply changes to src/cms/
 
 # 4. Test integration
@@ -541,7 +541,7 @@ pytest tests/cms/
 # Add entry to docs/CMS_SYNC_LOG.md
 ```
 
-**When to Sync from Agent → papagancms**
+**When to Sync from Agent → sitechatcms**
 
 Sync back when:
 - Bug fixes discovered in CMS code while using in agent
@@ -561,11 +561,11 @@ git diff base-commit..HEAD -- src/cms/ > cms-changes.patch
 # Remove any agent-specific modifications
 # Ensure changes are generic and reusable
 
-# 4. Create PR in papagancms
-cd ../papagancms
+# 4. Create PR in sitechatcms
+cd ../sitechatcms
 git checkout -b feature/agent-improvements
 # Apply cleaned changes
-git apply ../papagan-conversational-agent/cms-changes.patch
+git apply ../sitechat-agent/cms-changes.patch
 
 # 5. Submit PR with clear documentation
 # Include: what changed, why, and benefits
@@ -574,9 +574,9 @@ git apply ../papagan-conversational-agent/cms-changes.patch
 ### Directory Structure After CMS Integration
 
 ```
-papagan-conversational-agent/
+sitechat-agent/
 ├── src/
-│   ├── cms/                      # CMS DOMAIN (copied from papagancms)
+│   ├── cms/                      # CMS DOMAIN (copied from sitechatcms)
 │   │   ├── __init__.py
 │   │   ├── users/               # User management
 │   │   │   ├── models.py
@@ -717,7 +717,7 @@ cms:
 
 # Agent Configuration (agent-specific)
 agent:
-  name: "Papagan Conversational Agent"
+  name: "SiteChat Agent"
   azure:
     openai:
       endpoint: "${AZURE_OPENAI_ENDPOINT}"
@@ -730,7 +730,7 @@ agent:
 
 Before declaring CMS integration complete, verify:
 
-- [ ] All CMS features copied from papagancms
+- [ ] All CMS features copied from sitechatcms
 - [ ] CMS tests adapted and passing
 - [ ] CMS code remains generic (no agent-specific logic)
 - [ ] Agent code uses CMS features through defined interfaces
@@ -757,7 +757,7 @@ jobs:
       - name: Check for CMS updates
         run: |
           # Clone both repos
-          # Compare src/cms with papagancms source
+          # Compare src/cms with sitechatcms source
           # Report drift if found
           
       - name: Create sync reminder issue
@@ -774,7 +774,7 @@ jobs:
 
 ### References
 
-- Main CMS Repository: https://github.com/orkinosai25-org/papagancms
-- Agent Repository: https://github.com/orkinosai25-org/papagan-conversational-agent
+- Main CMS Repository: https://github.com/orkinosai25-org/sitechatcms
+- Agent Repository: https://github.com/orkinosai25-org/sitechat-agent
 - Sync Log: `docs/CMS_SYNC_LOG.md` (to be created)
 - Feature Inventory: `docs/CMS_FEATURES_INVENTORY.md` (to be created)
