@@ -1,28 +1,28 @@
-/* Papagan - The Chatter Parrot - Color Variables */
+/* EasyChat - Color Variables */
 :root {
-    /* Primary Papagan Colors */
-    --primary-color: #4CAF50;
-    --primary-hover: #2E7D32;
-    --secondary-color: #00BCD4;
-    --background: #f3f2f1;
+    /* Primary EasyChat Colors */
+    --primary-color: #2563EB;
+    --primary-hover: #1D4ED8;
+    --secondary-color: #14B8A6;
+    --background: #F8FAFC;
     --surface: #ffffff;
-    --surface-hover: #f3f2f1;
-    --text-primary: #323130;
-    --text-secondary: #605e5c;
-    --border: #edebe9;
-    --shadow: rgba(76, 175, 80, 0.2);
-    --success: #4CAF50;
+    --surface-hover: #F8FAFC;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --border: #E5E7EB;
+    --shadow: rgba(37, 99, 235, 0.15);
+    --success: #14B8A6;
     --error: #d13438;
     --panel-width: 280px;
     --top-bar-height: 60px;
     --bottom-bar-height: 40px;
     
-    /* Papagan Brand Colors */
-    --papagan-green: #4CAF50;
-    --papagan-green-dark: #2E7D32;
-    --papagan-cyan: #00BCD4;
-    --papagan-teal: #0097A7;
-    --papagan-yellow: #FFC107;
+    /* EasyChat Brand Colors */
+    --easychat-blue: #2563EB;
+    --easychat-blue-dark: #1D4ED8;
+    --easychat-teal: #14B8A6;
+    --easychat-teal-dark: #0D9488;
+    --easychat-slate: #F8FAFC;
 }
 
 /* Reset and Base Styles */
