@@ -2,6 +2,7 @@
 @using PapaganCMS.Shared.DTOs.Bots
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Manage Bot - Papagan</PageTitle>
 
@@ -181,8 +182,12 @@
         {
             <div class="tab-content">
                 <div class="embed-section">
-                    <h2>🌐 Embed on Your Website</h2>
-                    <p>Copy and paste this code into your website to add the chatbot widget</p>
+                    <h2>🌐 Install on your site</h2>
+                    <p>Copy and paste this code into your website to add the chatbot widget.</p>
+                    <p>
+                        <strong>Train your bot from your website or documents before going live.</strong>
+                        <button type="button" class="btn btn-link" @onclick="@(() => activeTab = "train")">Open training</button>
+                    </p>
 
                     @if (string.IsNullOrEmpty(embedCode))
                     {
@@ -195,8 +200,17 @@
                         <div class="embed-preview">
                             <h3>HTML Embed Code</h3>
                             <pre class="code-block">@embedCode</pre>
-                            <button class="btn btn-secondary" @onclick="CopyEmbedCode">
-                                📋 Copy to Clipboard
+                            <button class="btn btn-secondary" @onclick="CopyEmbedCode" aria-label="Copy embed code">
+                                📋 Copy Embed Code
+                            </button>
+                        </div>
+
+                        <div class="embed-preview">
+                            <h3>Link-only deployment (no code)</h3>
+                            <p>Use this link to share the chat directly without editing your website code:</p>
+                            <pre class="code-block">@chatPageUrl</pre>
+                            <button class="btn btn-secondary" @onclick="CopyChatPageUrl" aria-label="Copy chat page link">
+                                🔗 Copy Chat Page Link
                             </button>
                         </div>
 
@@ -551,6 +565,7 @@
     private string activeTab = "train";
     private string newUrl = string.Empty;
     private string? embedCode;
+    private string chatPageUrl = string.Empty;
     private string? settingsMessage;
     private bool isSavingSettings = false;
 
@@ -582,6 +597,7 @@
             bot = await response.Content.ReadFromJsonAsync<BotDto>();
             if (bot != null)
             {
+                chatPageUrl = ToAbsoluteChatPageUrl(bot.SeatSlug);
                 updateDto = new UpdateBotDto
                 {
                     Name = bot.Name,
@@ -705,12 +721,32 @@
 
     private async Task CopyEmbedCode()
     {
-        // TODO: Implement clipboard copy
-        // await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", embedCode);
+        if (!string.IsNullOrWhiteSpace(embedCode))
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", embedCode);
+        }
+    }
+
+    private async Task CopyChatPageUrl()
+    {
+        if (!string.IsNullOrWhiteSpace(chatPageUrl))
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", chatPageUrl);
+        }
     }
 
     private void GoBack()
     {
         Navigation.NavigateTo("/dashboard");
+    }
+
+    private string ToAbsoluteChatPageUrl(string seatSlug)
+    {
+        if (string.IsNullOrWhiteSpace(seatSlug))
+        {
+            return string.Empty;
+        }
+
+        return Navigation.ToAbsoluteUri($"/c/{seatSlug}").ToString();
     }
 }

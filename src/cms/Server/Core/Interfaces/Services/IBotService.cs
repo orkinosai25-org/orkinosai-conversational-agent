@@ -7,6 +7,7 @@ public interface IBotService
 {
     Task<List<BotDto>> GetUserBotsAsync(string userId);
     Task<BotDto?> GetBotAsync(string botId, string userId);
+    Task<BotDto?> GetBotBySeatSlugAsync(string seatSlug);
     Task<BotDto> CreateBotAsync(CreateBotDto dto, string userId);
     Task<BotDto?> UpdateBotAsync(string botId, UpdateBotDto dto, string userId);
     Task<bool> DeleteBotAsync(string botId, string userId);

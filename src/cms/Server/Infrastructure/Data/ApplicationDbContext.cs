@@ -55,7 +55,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.SiteUrl).HasMaxLength(1000);
+            entity.Property(e => e.SeatSlug).IsRequired().HasMaxLength(200);
             entity.Property(e => e.UserId).IsRequired();
+            entity.HasIndex(e => e.SeatSlug).IsUnique();
             entity.HasMany(e => e.TrainingDocuments)
                 .WithOne(e => e.Bot)
                 .HasForeignKey(e => e.BotId)
