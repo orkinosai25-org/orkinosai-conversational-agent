@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 using PapaganCMS.Core.Entities.Identity;
 using PapaganCMS.Core.Interfaces.Services;
 using PapaganCMS.Infrastructure.Data;
@@ -128,11 +129,17 @@ public class OnboardingService : IOnboardingService
             return false;
         }
 
+        var organizationWebsite = user.OrganizationId == null
+            ? null
+            : (await _context.Organizations.FindAsync(user.OrganizationId))?.Website;
+
         var bot = new Bot
         {
             Id = Guid.NewGuid().ToString(),
             Name = dto.Name,
             Description = dto.Description,
+            SiteUrl = dto.SiteUrl ?? organizationWebsite,
+            SeatSlug = await GenerateUniqueSeatSlugAsync(dto.Name),
             SystemPrompt = dto.Purpose,
             UserId = userId,
             OrganizationId = user.OrganizationId,
@@ -144,5 +151,25 @@ public class OnboardingService : IOnboardingService
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    private async Task<string> GenerateUniqueSeatSlugAsync(string botName)
+    {
+        var baseSlug = Regex.Replace(botName.ToLowerInvariant(), @"[^a-z0-9]+", "-").Trim('-');
+        if (string.IsNullOrWhiteSpace(baseSlug))
+        {
+            baseSlug = "seat";
+        }
+
+        var slug = baseSlug;
+        var counter = 2;
+
+        while (await _context.Bots.AnyAsync(b => b.SeatSlug == slug))
+        {
+            slug = $"{baseSlug}-{counter}";
+            counter++;
+        }
+
+        return slug;
     }
 }

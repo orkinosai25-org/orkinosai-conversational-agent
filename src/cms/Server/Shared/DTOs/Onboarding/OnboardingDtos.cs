@@ -23,6 +23,7 @@ public class OrganizationSetupDto
 public class BotSetupDto
 {
     public string Name { get; set; } = string.Empty;
+    public string? SiteUrl { get; set; }
     public string? Description { get; set; }
     public string? Purpose { get; set; }
 }

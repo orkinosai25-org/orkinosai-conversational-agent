@@ -1,6 +1,7 @@
 @page "/onboarding"
 @using PapaganCMS.Shared.DTOs.Onboarding
 @using PapaganCMS.Shared.DTOs.Auth
+@using PapaganCMS.Shared.DTOs.Bots
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
@@ -31,66 +32,29 @@
                 <button class="btn btn-link" @onclick="SkipOnboarding">Skip for now</button>
             </div>
         }
-        else if (currentStep == "organization")
-        {
-            <div class="step-content">
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 33%;"></div>
-                </div>
-                <h2>📊 Tell us about your organization</h2>
-                <p class="subtitle">This helps us customize your experience.</p>
-
-                <EditForm Model="@orgSetup" OnValidSubmit="@SaveOrganization">
-                    <div class="form-group">
-                        <label>Organization Name *</label>
-                        <InputText class="form-control" @bind-Value="orgSetup.Name" placeholder="Acme Corp" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Description</label>
-                        <InputTextArea class="form-control" @bind-Value="orgSetup.Description" placeholder="What does your organization do?" rows="3" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Website</label>
-                        <InputText class="form-control" @bind-Value="orgSetup.Website" placeholder="https://example.com" />
-                    </div>
-
-                    <div class="button-group">
-                        <button type="button" class="btn btn-secondary" @onclick="PreviousStep">Back</button>
-                        <button type="submit" class="btn btn-primary">Continue</button>
-                    </div>
-                </EditForm>
-            </div>
-        }
         else if (currentStep == "bot")
         {
             <div class="step-content">
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 66%;"></div>
+                    <div class="progress-fill" style="width: 100%;"></div>
                 </div>
-                <h2>🤖 Create your first chatbot</h2>
-                <p class="subtitle">Let's build your AI assistant!</p>
+                <h2>🚀 Create your first seat</h2>
+                <p class="subtitle">Enter your site URL and bot name to go live fast.</p>
 
                 <EditForm Model="@botSetup" OnValidSubmit="@SaveBot">
+                    <div class="form-group">
+                        <label>Site URL / Domain *</label>
+                        <InputText class="form-control" @bind-Value="botSetup.SiteUrl" placeholder="https://example.com" />
+                    </div>
+
                     <div class="form-group">
                         <label>Bot Name *</label>
                         <InputText class="form-control" @bind-Value="botSetup.Name" placeholder="Customer Support Bot" />
                     </div>
 
-                    <div class="form-group">
-                        <label>Description</label>
-                        <InputTextArea class="form-control" @bind-Value="botSetup.Description" placeholder="Describe what your bot will do" rows="3" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Purpose</label>
-                        <InputTextArea class="form-control" @bind-Value="botSetup.Purpose" placeholder="Help customers with product questions" rows="2" />
-                    </div>
-
                     <div class="button-group">
                         <button type="button" class="btn btn-secondary" @onclick="PreviousStep">Back</button>
-                        <button type="submit" class="btn btn-primary">Create Bot</button>
+                        <button type="submit" class="btn btn-primary">Create Seat</button>
                     </div>
                 </EditForm>
             </div>
@@ -349,7 +313,6 @@
 @code {
     private string currentStep = "welcome";
     private string? errorMessage;
-    private OrganizationSetupDto orgSetup = new();
     private BotSetupDto botSetup = new();
 
     protected override async Task OnInitializedAsync()
@@ -378,52 +341,44 @@
 
     private void NextStep()
     {
-        if (currentStep == "welcome") currentStep = "organization";
-        else if (currentStep == "organization") currentStep = "bot";
+        if (currentStep == "welcome") currentStep = "bot";
         else if (currentStep == "bot") currentStep = "complete";
     }
 
     private void PreviousStep()
     {
-        if (currentStep == "organization") currentStep = "welcome";
-        else if (currentStep == "bot") currentStep = "organization";
-    }
-
-    private async Task SaveOrganization()
-    {
-        try
-        {
-            var response = await Http.PostAsJsonAsync("/api/onboarding/setup-organization", orgSetup);
-            if (response.IsSuccessStatusCode)
-            {
-                await CompleteStep("organization");
-                NextStep();
-            }
-            else
-            {
-                errorMessage = "Failed to save organization";
-            }
-        }
-        catch
-        {
-            errorMessage = "An error occurred";
-        }
+        if (currentStep == "bot") currentStep = "welcome";
     }
 
     private async Task SaveBot()
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("/api/onboarding/setup-bot", botSetup);
+            var createSeatDto = new CreateBotDto
+            {
+                Name = botSetup.Name,
+                SiteUrl = botSetup.SiteUrl,
+                Description = botSetup.Description,
+                SystemPrompt = botSetup.Purpose
+            };
+            var response = await Http.PostAsJsonAsync("/api/seats", createSeatDto);
             if (response.IsSuccessStatusCode)
             {
-                await CompleteStep("bot");
-                NextStep();
+                var seat = await response.Content.ReadFromJsonAsync<BotDto>();
+                if (!string.IsNullOrWhiteSpace(seat?.SeatSlug))
+                {
+                    Navigation.NavigateTo($"/c/{seat.SeatSlug}");
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(seat?.Id))
+                {
+                    Navigation.NavigateTo($"/bot/{seat.Id}");
+                    return;
+                }
             }
-            else
-            {
-                errorMessage = "Failed to create bot";
-            }
+
+            errorMessage = "Failed to create seat";
         }
         catch
         {

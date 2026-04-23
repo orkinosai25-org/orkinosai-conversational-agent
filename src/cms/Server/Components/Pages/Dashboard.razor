@@ -8,9 +8,9 @@
 
 <div class="dashboard-container">
     <div class="dashboard-header">
-        <h1>🦜 My Chatbots</h1>
+        <h1>🦜 My Seats</h1>
         <button class="btn btn-primary" @onclick="ShowCreateBotModal">
-            <span>➕ Create New Bot</span>
+            <span>➕ Create New Seat</span>
         </button>
     </div>
 
@@ -27,10 +27,10 @@
     {
         <div class="empty-state">
             <div class="empty-icon">🤖</div>
-            <h2>No bots yet</h2>
-            <p>Create your first AI chatbot to get started!</p>
+            <h2>No seats yet</h2>
+            <p>Create your first chatbot seat to get started.</p>
             <button class="btn btn-primary btn-lg" @onclick="ShowCreateBotModal">
-                Create Your First Bot
+                Create Your First Seat
             </button>
         </div>
     }
@@ -106,12 +106,17 @@
         <div class="modal-overlay" @onclick="HideCreateBotModal">
             <div class="modal-content" @onclick:stopPropagation="true">
                 <div class="modal-header">
-                    <h2>Create New Bot</h2>
+                    <h2>Create New Seat</h2>
                     <button class="close-btn" @onclick="HideCreateBotModal">×</button>
                 </div>
 
                 <div class="modal-body">
                     <EditForm Model="@createBotDto" OnValidSubmit="@CreateBot">
+                        <div class="form-group">
+                            <label>Site URL / Domain *</label>
+                            <InputText class="form-control" @bind-Value="createBotDto.SiteUrl" placeholder="https://example.com" />
+                        </div>
+
                         <div class="form-group">
                             <label>Bot Name *</label>
                             <InputText class="form-control" @bind-Value="createBotDto.Name" placeholder="Customer Support Bot" />
@@ -157,7 +162,7 @@
                                 }
                                 else
                                 {
-                                    <span>Create Bot</span>
+                                    <span>Create Seat</span>
                                 }
                             </button>
                         </div>
@@ -520,7 +525,7 @@
             isCreating = true;
             errorMessage = null;
 
-            var response = await Http.PostAsJsonAsync("/api/bot", createBotDto);
+            var response = await Http.PostAsJsonAsync("/api/seats", createBotDto);
             if (response.IsSuccessStatusCode)
             {
                 var newBot = await response.Content.ReadFromJsonAsync<BotDto>();
@@ -528,13 +533,19 @@
                 {
                     bots ??= new List<BotDto>();
                     bots.Insert(0, newBot);
+                    if (!string.IsNullOrWhiteSpace(newBot.SeatSlug))
+                    {
+                        HideCreateBotModal();
+                        Navigation.NavigateTo($"/c/{newBot.SeatSlug}");
+                        return;
+                    }
                 }
 
                 HideCreateBotModal();
             }
             else
             {
-                errorMessage = "Failed to create bot. Please try again.";
+                errorMessage = "Failed to create seat. Please try again.";
             }
         }
         catch (Exception ex)

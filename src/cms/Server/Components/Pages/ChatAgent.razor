@@ -1,7 +1,11 @@
 @page "/chat"
+@page "/chat/{BotId}"
+@page "/c/{SeatSlug}"
+@using PapaganCMS.Shared.DTOs.Bots
 @inject IJSRuntime JSRuntime
 @inject IHttpClientFactory HttpClientFactory
 @inject ILogger<ChatAgent> Logger
+@inject HttpClient Http
 
 <PageTitle>Orkinosai Chat Agent</PageTitle>
 
@@ -12,6 +16,23 @@
             <i class="fas fa-trash"></i> Clear
         </button>
     </div>
+    @if (!string.IsNullOrWhiteSpace(seatContextLabel))
+    {
+        <div class="seat-context-banner">
+            You are chatting with the assistant for <strong>@seatContextLabel</strong>
+        </div>
+    }
+    @if (!string.IsNullOrWhiteSpace(trainingManageUrl))
+    {
+        <div class="seat-context-banner seat-training-banner">
+            <strong>Train your bot from your website or documents before going live.</strong>
+            <a href="@trainingManageUrl">Open training</a>
+            <span> | </span>
+            <a href="@trainingUrlsApiUrl">@trainingUrlsApiUrl</a>
+            <span> | </span>
+            <a href="@trainingDocumentsApiUrl">@trainingDocumentsApiUrl</a>
+        </div>
+    }
 
     <div class="chat-messages" id="chatMessages">
         @foreach (var message in messages)
@@ -64,6 +85,9 @@
 </div>
 
 @code {
+    [Parameter] public string? BotId { get; set; }
+    [Parameter] public string? SeatSlug { get; set; }
+
     private List<ChatMessage> messages = new();
     private string userMessage = "";
     private bool isLoading = false;
@@ -71,6 +95,12 @@
     private double temperature = 0.7;
     private int maxTokens = 1000;
     private HttpClient? httpClient;
+    private string? seatId;
+    private string? allowedDomain;
+    private string seatContextLabel = string.Empty;
+    private string trainingManageUrl = string.Empty;
+    private string trainingUrlsApiUrl = string.Empty;
+    private string trainingDocumentsApiUrl = string.Empty;
 
     private class ChatMessage
     {
@@ -83,6 +113,7 @@
     {
         // Get HttpClient from factory
         httpClient = HttpClientFactory.CreateClient("ChatBackend");
+        await LoadSeatContext();
         
         // Add welcome message
         messages.Add(new ChatMessage 
@@ -127,6 +158,7 @@
             {
                 conversation_id = conversationId,
                 message = message,
+                seat_id = seatId,
                 temperature = temperature,
                 max_tokens = maxTokens
             });
@@ -140,7 +172,7 @@
                     messages.Add(new ChatMessage 
                     { 
                         Role = "assistant", 
-                        Content = result.assistant_message,
+                        Content = SanitizeLinksForSeat(result.assistant_message),
                         Timestamp = DateTime.Now
                     });
                     Logger.LogInformation("Received successful response from backend");
@@ -186,7 +218,7 @@
     private async Task ClearConversation()
     {
         messages.Clear();
-        conversationId = Guid.NewGuid().ToString();
+        conversationId = $"{seatId ?? "public"}-{Guid.NewGuid()}";
         
         messages.Add(new ChatMessage 
         { 
@@ -219,6 +251,95 @@
         public object? usage { get; set; }
         public string? timestamp { get; set; }
     }
+
+    private async Task LoadSeatContext()
+    {
+        try
+        {
+            BotDto? seat = null;
+
+            if (!string.IsNullOrWhiteSpace(SeatSlug))
+            {
+                var bySlugResponse = await Http.GetAsync($"/api/seats/by-slug/{SeatSlug}");
+                if (bySlugResponse.IsSuccessStatusCode)
+                {
+                    seat = await bySlugResponse.Content.ReadFromJsonAsync<BotDto>();
+                }
+            }
+
+            if (seat == null && !string.IsNullOrWhiteSpace(BotId))
+            {
+                var byIdResponse = await Http.GetAsync($"/api/bot/{BotId}");
+                if (byIdResponse.IsSuccessStatusCode)
+                {
+                    seat = await byIdResponse.Content.ReadFromJsonAsync<BotDto>();
+                }
+            }
+
+            if (seat == null)
+            {
+                conversationId = Guid.NewGuid().ToString();
+                return;
+            }
+
+            seatId = seat.Id;
+            allowedDomain = GetDomainHost(seat.SiteUrl);
+            seatContextLabel = allowedDomain ?? seat.Name;
+            trainingManageUrl = $"/bot/{seat.Id}";
+            trainingUrlsApiUrl = $"/api/bot/{seat.Id}/urls";
+            trainingDocumentsApiUrl = $"/api/bot/{seat.Id}/documents";
+            conversationId = $"{seat.Id}-{Guid.NewGuid()}";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to load seat context");
+            conversationId = Guid.NewGuid().ToString();
+        }
+    }
+
+    private static string? GetDomainHost(string? siteUrl)
+    {
+        if (string.IsNullOrWhiteSpace(siteUrl))
+        {
+            return null;
+        }
+
+        if (Uri.TryCreate(siteUrl, UriKind.Absolute, out var absolute))
+        {
+            return absolute.Host;
+        }
+
+        if (Uri.TryCreate($"https://{siteUrl}", UriKind.Absolute, out var inferred))
+        {
+            return inferred.Host;
+        }
+
+        return null;
+    }
+
+    private string SanitizeLinksForSeat(string message)
+    {
+        if (string.IsNullOrWhiteSpace(allowedDomain))
+        {
+            return message;
+        }
+
+        return System.Text.RegularExpressions.Regex.Replace(
+            message,
+            @"https?://[^\s]+",
+            match =>
+            {
+                if (!Uri.TryCreate(match.Value, UriKind.Absolute, out var uri))
+                {
+                    return "[invalid-link]";
+                }
+
+                return uri.Host.Equals(allowedDomain, StringComparison.OrdinalIgnoreCase)
+                    || uri.Host.EndsWith($".{allowedDomain}", StringComparison.OrdinalIgnoreCase)
+                    ? match.Value
+                    : "[external-link-blocked]";
+            });
+    }
 }
 
 <style>
@@ -240,6 +361,19 @@
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border-radius: 8px 8px 0 0;
+    }
+
+    .seat-context-banner {
+        padding: 10px 20px;
+        background: #f5f7ff;
+        border-bottom: 1px solid #e0e4ff;
+        font-size: 13px;
+        color: #444;
+    }
+
+    .seat-training-banner {
+        background: #eef9f0;
+        border-bottom: 1px solid #d8f0dd;
     }
 
     .chat-header h3 {

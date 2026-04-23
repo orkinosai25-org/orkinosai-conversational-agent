@@ -11,6 +11,8 @@ public class Bot
     
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? SiteUrl { get; set; }
+    public string SeatSlug { get; set; } = string.Empty;
     public string UserId { get; set; } = string.Empty;
     public string? OrganizationId { get; set; }
     public string? AvatarUrl { get; set; }

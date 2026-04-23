@@ -59,6 +59,24 @@ public class BotController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
+    [HttpGet("/api/seats/by-slug/{slug}")]
+    public async Task<ActionResult<BotDto>> GetSeatBySlug(string slug)
+    {
+        try
+        {
+            var bot = await _botService.GetBotBySeatSlugAsync(slug);
+            if (bot == null) return NotFound();
+
+            return Ok(bot);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting seat by slug");
+            return StatusCode(500, new { message = "An error occurred" });
+        }
+    }
+
     [HttpPost]
     public async Task<ActionResult<BotDto>> CreateBot([FromBody] CreateBotDto dto)
     {
@@ -75,6 +93,12 @@ public class BotController : ControllerBase
             _logger.LogError(ex, "Error creating bot");
             return StatusCode(500, new { message = "An error occurred" });
         }
+    }
+
+    [HttpPost("/api/seats")]
+    public async Task<ActionResult<BotDto>> CreateSeat([FromBody] CreateBotDto dto)
+    {
+        return await CreateBot(dto);
     }
 
     [HttpPut("{id}")]

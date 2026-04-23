@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 using PapaganCMS.Core.Entities.Identity;
 using PapaganCMS.Core.Interfaces.Services;
 using PapaganCMS.Infrastructure.Data;
@@ -33,6 +34,15 @@ public class BotService : IBotService
         return bot == null ? null : MapToBotDto(bot);
     }
 
+    public async Task<BotDto?> GetBotBySeatSlugAsync(string seatSlug)
+    {
+        var normalizedSlug = seatSlug.Trim().ToLowerInvariant();
+        var bot = await _context.Bots
+            .FirstOrDefaultAsync(b => b.SeatSlug == normalizedSlug && b.IsActive);
+
+        return bot == null ? null : MapToBotDto(bot);
+    }
+
     public async Task<BotDto> CreateBotAsync(CreateBotDto dto, string userId)
     {
         var user = await _context.Users.FindAsync(userId);
@@ -46,6 +56,8 @@ public class BotService : IBotService
             Id = Guid.NewGuid().ToString(),
             Name = dto.Name,
             Description = dto.Description,
+            SiteUrl = dto.SiteUrl,
+            SeatSlug = await GenerateUniqueSeatSlugAsync(dto.Name),
             SystemPrompt = dto.SystemPrompt,
             Temperature = dto.Temperature,
             MaxTokens = dto.MaxTokens,
@@ -286,8 +298,9 @@ public class BotService : IBotService
 
         var embedCode = $@"<!-- Papagan Chatbot Widget -->
 <script src=""https://your-domain.com/widget/papagan-widget.js""></script>
-<script>
+<script data-seat-id=""{botId}"">
   PapaganWidget.init({{
+    seatId: '{botId}',
     botId: '{botId}',
     apiUrl: 'https://your-domain.com/api',
     position: '{bot.WidgetPosition ?? "bottom-right"}',
@@ -308,6 +321,8 @@ public class BotService : IBotService
             Id = bot.Id,
             Name = bot.Name,
             Description = bot.Description,
+            SiteUrl = bot.SiteUrl,
+            SeatSlug = bot.SeatSlug,
             AvatarUrl = bot.AvatarUrl,
             SystemPrompt = bot.SystemPrompt,
             Temperature = bot.Temperature,
@@ -322,5 +337,25 @@ public class BotService : IBotService
             EmbedCode = bot.EmbedCode,
             CreatedAt = bot.CreatedAt
         };
+    }
+
+    private async Task<string> GenerateUniqueSeatSlugAsync(string botName)
+    {
+        var baseSlug = Regex.Replace(botName.ToLowerInvariant(), @"[^a-z0-9]+", "-").Trim('-');
+        if (string.IsNullOrWhiteSpace(baseSlug))
+        {
+            baseSlug = "seat";
+        }
+
+        var slug = baseSlug;
+        var counter = 2;
+
+        while (await _context.Bots.AnyAsync(b => b.SeatSlug == slug))
+        {
+            slug = $"{baseSlug}-{counter}";
+            counter++;
+        }
+
+        return slug;
     }
 }

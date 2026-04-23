@@ -5,6 +5,9 @@ public class BotDto
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? SiteUrl { get; set; }
+    public string SeatSlug { get; set; } = string.Empty;
+    public string ChatPageUrl => $"/c/{SeatSlug}";
     public string? AvatarUrl { get; set; }
     public string? SystemPrompt { get; set; }
     public double Temperature { get; set; }
@@ -23,6 +26,7 @@ public class BotDto
 public class CreateBotDto
 {
     public string Name { get; set; } = string.Empty;
+    public string? SiteUrl { get; set; }
     public string? Description { get; set; }
     public string? SystemPrompt { get; set; }
     public double Temperature { get; set; } = 0.7;
