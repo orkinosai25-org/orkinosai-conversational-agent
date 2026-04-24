@@ -1,4 +1,4 @@
-namespace PapaganCMS.Shared.DTOs.Subscriptions;
+namespace SiteChatCMS.Shared.DTOs.Subscriptions;
 
 /// <summary>
 /// DTO for subscription information

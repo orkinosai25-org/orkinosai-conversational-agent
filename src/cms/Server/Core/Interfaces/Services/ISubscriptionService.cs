@@ -1,6 +1,6 @@
 using OrkinosaiCMS.Core.Entities.Subscriptions;
 
-namespace PapaganCMS.Core.Interfaces.Services;
+namespace SiteChatCMS.Core.Interfaces.Services;
 
 /// <summary>
 /// Service interface for subscription management

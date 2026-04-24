@@ -17,7 +17,7 @@ def test_index_page(client):
     """Test that index page loads."""
     response = client.get('/')
     assert response.status_code == 200
-    assert b'Orkinosai' in response.data
+    assert b'SiteChat Agent' in response.data
 
 
 def test_health_endpoint(client):

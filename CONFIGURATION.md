@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Papagan Conversational Agent uses `appsettings.json` as its primary configuration file. This file is automatically created with default values when you first run the application.
+The SiteChat Agent uses `appsettings.json` as its primary configuration file. This file is automatically created with default values when you first run the application.
 
 ## How It Works
 
@@ -43,7 +43,7 @@ The Papagan Conversational Agent uses `appsettings.json` as its primary configur
 ```json
 {
   "agent": {
-    "name": "Papagan Conversational Agent",
+    "name": "SiteChat Agent",
     "version": "1.0.0",
     "max_history": 10,
     "temperature": 0.7,

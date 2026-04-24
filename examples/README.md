@@ -1,6 +1,6 @@
 # Examples
 
-This directory contains example scripts and test pages demonstrating how to use and embed the Papagan - The Chatter Parrot chat widget.
+This directory contains example scripts and test pages demonstrating how to use and embed the SiteChat Agent chat widget.
 
 ## Prerequisites
 
@@ -141,13 +141,13 @@ print(result["assistant_message"])
 ### Option 2: Popup/Modal
 ```javascript
 function openChat() {
-    window.open('http://localhost:5000', 'papagan-chat', 'width=1200,height=800');
+    window.open('http://localhost:5000', 'sitechat-chat', 'width=1200,height=800');
 }
 ```
 
 ### Option 3: Full Page Link
 ```html
-<a href="http://localhost:5000">Chat with Papagan</a>
+<a href="http://localhost:5000">Chat with SiteChat Agent</a>
 ```
 
 ## Configuration
@@ -159,7 +159,7 @@ Customize the chat widget in `appsettings.json`:
   "agent": {
     "temperature": 0.7,
     "max_tokens": 1000,
-    "system_prompt": "You are Papagan, a helpful AI assistant..."
+    "system_prompt": "You are SiteChat Agent, a helpful AI assistant..."
   },
   "server": {
     "cors_origins": ["*"]  // Configure for production

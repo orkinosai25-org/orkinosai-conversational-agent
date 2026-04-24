@@ -1,3 +1,3 @@
-"""Papagan - The Chatter Parrot package."""
+"""SiteChat Agent package."""
 
 __version__ = "1.0.0"

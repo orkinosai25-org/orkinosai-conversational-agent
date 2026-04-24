@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using PapaganCMS.Core.Entities.Identity;
+using SiteChatCMS.Core.Entities.Identity;
 
-namespace PapaganCMS.Infrastructure.Data;
+namespace SiteChatCMS.Infrastructure.Data;
 
 /// <summary>
 /// Application database context with ASP.NET Identity

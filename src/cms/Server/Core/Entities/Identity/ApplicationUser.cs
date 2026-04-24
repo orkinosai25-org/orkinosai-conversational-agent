@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace PapaganCMS.Core.Entities.Identity;
+namespace SiteChatCMS.Core.Entities.Identity;
 
 /// <summary>
 /// Application user entity extending ASP.NET Identity

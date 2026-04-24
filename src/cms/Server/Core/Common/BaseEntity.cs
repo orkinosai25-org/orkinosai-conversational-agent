@@ -1,4 +1,4 @@
-namespace PapaganCMS.Core.Common;
+namespace SiteChatCMS.Core.Common;
 
 /// <summary>
 /// Base entity class with common properties

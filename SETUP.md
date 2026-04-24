@@ -1,8 +1,8 @@
-# Papagan Conversational Agent - Setup Guide
+# SiteChat Agent - Setup Guide
 
 ## Overview
 
-This guide provides comprehensive setup and configuration instructions for the Papagan Conversational Agent. The agent can run in two modes:
+This guide provides comprehensive setup and configuration instructions for the SiteChat Agent. The agent can run in two modes:
 - **Demo Mode**: Uses a mock AI client for testing without Azure credentials
 - **Production Mode**: Connects to Azure OpenAI for full AI capabilities
 
@@ -16,8 +16,8 @@ This guide provides comprehensive setup and configuration instructions for the P
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/orkinosai25-org/papagan-conversational-agent.git
-   cd papagan-conversational-agent
+   git clone https://github.com/orkinosai25-org/sitechat-agent.git
+   cd sitechat-agent
    ```
 
 2. **Install dependencies**
@@ -104,7 +104,7 @@ You can customize various settings in `appsettings.json`:
 ```json
 {
   "agent": {
-    "name": "Papagan Conversational Agent",
+    "name": "SiteChat Agent",
     "version": "1.0.0",
     "max_history": 10,        // Number of messages to keep in context
     "temperature": 0.7,       // AI response creativity (0.0-2.0)
@@ -131,7 +131,7 @@ The server will start on `http://localhost:5000`
 
 You should see output like:
 ```
-Starting Papagan Conversational Agent v1.0.0
+Starting SiteChat Agent v1.0.0
 Server running on http://0.0.0.0:5000
 Logs: logs/agent.log
 ```
@@ -156,7 +156,7 @@ Expected response:
 ```json
 {
   "status": "healthy",
-  "agent": "Papagan Conversational Agent",
+  "agent": "SiteChat Agent",
   "version": "1.0.0"
 }
 ```
@@ -175,7 +175,7 @@ Expected response:
 {
   "conversation_id": "default",
   "user_message": "Hello World",
-  "assistant_message": "Hello! I'm your Papagan Conversational Agent...",
+  "assistant_message": "Hello! I'm your SiteChat Agent...",
   "usage": {
     "prompt_tokens": 8,
     "completion_tokens": 22,
@@ -193,7 +193,7 @@ Expected response:
 4. You should receive a response from the agent
 
 **Demo Mode Response:**
-> "Hello! I'm your Papagan Conversational Agent. I'm currently running in demo mode without Azure OpenAI credentials. How can I help you today?"
+> "Hello! I'm your SiteChat Agent. I'm currently running in demo mode without Azure OpenAI credentials. How can I help you today?"
 
 **Production Mode Response:**
 > Will vary based on Azure OpenAI model response

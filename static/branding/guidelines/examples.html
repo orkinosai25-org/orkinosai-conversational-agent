@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Papagan Branding Examples - Website Integration</title>
+    <title>SiteChat Agent Branding Examples - Website Integration</title>
     <link rel="icon" type="image/x-icon" href="../icons/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png">
     <style>
         :root {
-            --papagan-green: #4CAF50;
-            --papagan-green-dark: #2E7D32;
-            --papagan-cyan: #00BCD4;
-            --papagan-teal: #0097A7;
-            --papagan-teal-dark: #00838F;
-            --papagan-yellow: #FFC107;
-            --papagan-text-dark: #212121;
-            --papagan-white: #FFFFFF;
-            --papagan-gray-light: #F5F5F5;
+            --sitechat-green: #4CAF50;
+            --sitechat-green-dark: #2E7D32;
+            --sitechat-cyan: #00BCD4;
+            --sitechat-teal: #0097A7;
+            --sitechat-teal-dark: #00838F;
+            --sitechat-yellow: #FFC107;
+            --sitechat-text-dark: #212121;
+            --sitechat-white: #FFFFFF;
+            --sitechat-gray-light: #F5F5F5;
         }
         
         * {
@@ -28,8 +28,8 @@
         body {
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
             line-height: 1.6;
-            color: var(--papagan-text-dark);
-            background: var(--papagan-gray-light);
+            color: var(--sitechat-text-dark);
+            background: var(--sitechat-gray-light);
         }
         
         .container {
@@ -48,13 +48,13 @@
         }
         
         .example-section h2 {
-            color: var(--papagan-green-dark);
+            color: var(--sitechat-green-dark);
             margin-bottom: 20px;
             font-size: 28px;
         }
         
         .example-section h3 {
-            color: var(--papagan-teal);
+            color: var(--sitechat-teal);
             margin: 20px 0 10px;
             font-size: 20px;
         }
@@ -66,7 +66,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid var(--papagan-gray-light);
+            border-bottom: 2px solid var(--sitechat-gray-light);
             margin-bottom: 20px;
         }
         
@@ -77,13 +77,13 @@
         .header-example nav a {
             margin-left: 25px;
             text-decoration: none;
-            color: var(--papagan-text-dark);
+            color: var(--sitechat-text-dark);
             font-weight: 500;
             transition: color 0.2s;
         }
         
         .header-example nav a:hover {
-            color: var(--papagan-green);
+            color: var(--sitechat-green);
         }
         
         /* Buttons */
@@ -95,7 +95,7 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--papagan-green), var(--papagan-green-dark));
+            background: linear-gradient(135deg, var(--sitechat-green), var(--sitechat-green-dark));
             color: white;
             border: none;
             border-radius: 8px;
@@ -113,8 +113,8 @@
         
         .btn-secondary {
             background: white;
-            color: var(--papagan-green-dark);
-            border: 2px solid var(--papagan-green);
+            color: var(--sitechat-green-dark);
+            border: 2px solid var(--sitechat-green);
             border-radius: 8px;
             padding: 10px 22px;
             font-weight: 600;
@@ -124,12 +124,12 @@
         }
         
         .btn-secondary:hover {
-            background: var(--papagan-green);
+            background: var(--sitechat-green);
             color: white;
         }
         
         .btn-icon {
-            background: linear-gradient(135deg, var(--papagan-green), var(--papagan-green-dark));
+            background: linear-gradient(135deg, var(--sitechat-green), var(--sitechat-green-dark));
             border: none;
             border-radius: 50%;
             width: 60px;
@@ -154,7 +154,7 @@
         
         /* Chat Interface */
         .chat-interface {
-            background: var(--papagan-gray-light);
+            background: var(--sitechat-gray-light);
             border-radius: 12px;
             padding: 20px;
             max-width: 600px;
@@ -167,7 +167,7 @@
             padding: 15px;
             background: white;
             border-radius: 8px 8px 0 0;
-            border-bottom: 2px solid var(--papagan-green);
+            border-bottom: 2px solid var(--sitechat-green);
         }
         
         .chat-header img {
@@ -176,13 +176,13 @@
         }
         
         .chat-header-info h4 {
-            color: var(--papagan-green-dark);
+            color: var(--sitechat-green-dark);
             font-size: 18px;
             margin-bottom: 2px;
         }
         
         .chat-header-info p {
-            color: var(--papagan-teal);
+            color: var(--sitechat-teal);
             font-size: 14px;
             font-style: italic;
         }
@@ -203,15 +203,15 @@
         
         .message-user {
             margin-left: auto;
-            background: linear-gradient(135deg, var(--papagan-cyan), var(--papagan-teal));
+            background: linear-gradient(135deg, var(--sitechat-cyan), var(--sitechat-teal));
             color: white;
             border-radius: 18px 18px 4px 18px;
             padding: 12px 16px;
         }
         
-        .message-papagan {
+        .message-sitechat {
             background: white;
-            color: var(--papagan-text-dark);
+            color: var(--sitechat-text-dark);
             border: 1px solid #E0E0E0;
             border-radius: 18px 18px 18px 4px;
             padding: 12px 16px;
@@ -229,7 +229,7 @@
         .chat-input input {
             flex: 1;
             padding: 12px;
-            border: 2px solid var(--papagan-gray-light);
+            border: 2px solid var(--sitechat-gray-light);
             border-radius: 8px;
             font-size: 16px;
             font-family: inherit;
@@ -237,11 +237,11 @@
         
         .chat-input input:focus {
             outline: none;
-            border-color: var(--papagan-green);
+            border-color: var(--sitechat-green);
         }
         
         .chat-input button {
-            background: linear-gradient(135deg, var(--papagan-green), var(--papagan-green-dark));
+            background: linear-gradient(135deg, var(--sitechat-green), var(--sitechat-green-dark));
             color: white;
             border: none;
             border-radius: 8px;
@@ -252,7 +252,7 @@
         
         /* Hero Section */
         .hero-section {
-            background: linear-gradient(135deg, var(--papagan-green), var(--papagan-teal));
+            background: linear-gradient(135deg, var(--sitechat-green), var(--sitechat-teal));
             color: white;
             padding: 60px 30px;
             border-radius: 12px;
@@ -310,7 +310,7 @@
         .color-info .color-name {
             font-weight: 600;
             margin-bottom: 5px;
-            color: var(--papagan-text-dark);
+            color: var(--sitechat-text-dark);
         }
         
         .color-info .color-hex {
@@ -324,7 +324,7 @@
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background: linear-gradient(135deg, var(--papagan-green), var(--papagan-green-dark));
+            background: linear-gradient(135deg, var(--sitechat-green), var(--sitechat-green-dark));
             border: none;
             border-radius: 50%;
             width: 70px;
@@ -352,15 +352,15 @@
 <body>
     <div class="container">
         <div class="example-section">
-            <h2>Papagan Branding Examples</h2>
-            <p>This page demonstrates various applications of the Papagan brand identity. Use these examples as a reference for implementing Papagan branding in your projects.</p>
+            <h2>SiteChat Agent Branding Examples</h2>
+            <p>This page demonstrates various applications of the SiteChat Agent brand identity. Use these examples as a reference for implementing SiteChat Agent branding in your projects.</p>
         </div>
 
         <!-- Header Example -->
         <div class="example-section">
             <h2>1. Website Header</h2>
             <div class="header-example">
-                <img src="../logos/papagan-logo-main.svg" alt="Papagan - The Chatter Parrot">
+                <img src="../logos/sitechat-logo-main.svg" alt="SiteChat Agent">
                 <nav>
                     <a href="#">Features</a>
                     <a href="#">Pricing</a>
@@ -375,10 +375,10 @@
         <div class="example-section">
             <h2>2. Hero Section</h2>
             <div class="hero-section">
-                <h1>Meet Papagan</h1>
-                <p class="tagline">The Chatter Parrot</p>
-                <p>Your friendly AI chat agent that talks to customers naturally, instantly, and intelligently. Like a well-trained parrot, Papagan learns from your content and engages your visitors 24/7.</p>
-                <button class="btn-primary" style="font-size: 18px; padding: 15px 32px;">Start Chatting with Papagan</button>
+                <h1>Meet SiteChat Agent</h1>
+                <p class="tagline">SiteChat Agent</p>
+                <p>Your friendly AI chat agent that talks to customers naturally, instantly, and intelligently. Like a well-trained parrot, SiteChat Agent learns from your content and engages your visitors 24/7.</p>
+                <button class="btn-primary" style="font-size: 18px; padding: 15px 32px;">Start Chatting with SiteChat Agent</button>
             </div>
         </div>
 
@@ -402,7 +402,7 @@
             <h3>Icon Button (Chat Widget)</h3>
             <div class="button-group">
                 <button class="btn-icon">
-                    <img src="../logos/papagan-icon.svg" alt="Chat">
+                    <img src="../logos/sitechat-icon.svg" alt="Chat">
                 </button>
             </div>
         </div>
@@ -412,20 +412,20 @@
             <h2>4. Chat Interface</h2>
             <div class="chat-interface">
                 <div class="chat-header">
-                    <img src="../logos/papagan-icon.svg" alt="Papagan">
+                    <img src="../logos/sitechat-icon.svg" alt="SiteChat Agent">
                     <div class="chat-header-info">
-                        <h4>Papagan</h4>
-                        <p>The Chatter Parrot</p>
+                        <h4>SiteChat Agent</h4>
+                        <p>SiteChat Agent</p>
                     </div>
                 </div>
                 <div class="chat-messages">
-                    <div class="message message-papagan">
-                        <div>Hello! I'm Papagan, your friendly chat assistant. How can I help you today?</div>
+                    <div class="message message-sitechat">
+                        <div>Hello! I'm SiteChat Agent, your friendly chat assistant. How can I help you today?</div>
                     </div>
                     <div class="message message-user">
                         <div>What features do you offer?</div>
                     </div>
-                    <div class="message message-papagan">
+                    <div class="message message-sitechat">
                         <div>Great question! I can help with customer support, answer questions about your products, and provide instant assistance 24/7. I learn from your website content to give accurate, helpful responses.</div>
                     </div>
                 </div>
@@ -505,7 +505,7 @@
         <!-- Icon Usage Example -->
         <div class="example-section">
             <h2>6. Icon Sizes</h2>
-            <p style="margin-bottom: 20px;">The Papagan icon works at various sizes. Here are examples:</p>
+            <p style="margin-bottom: 20px;">The SiteChat Agent icon works at various sizes. Here are examples:</p>
             <div style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
                 <div style="text-align: center;">
                     <img src="../icons/icon-64x64.png" alt="64x64" style="display: block; margin: 0 auto 10px;">
@@ -524,8 +524,8 @@
     </div>
 
     <!-- Floating Chat Button (always visible) -->
-    <button class="floating-chat-btn" title="Chat with Papagan">
-        <img src="../logos/papagan-icon.svg" alt="Chat">
+    <button class="floating-chat-btn" title="Chat with SiteChat Agent">
+        <img src="../logos/sitechat-icon.svg" alt="Chat">
     </button>
 </body>
 </html>

@@ -1,24 +1,24 @@
 @page "/onboarding"
-@using PapaganCMS.Shared.DTOs.Onboarding
-@using PapaganCMS.Shared.DTOs.Auth
-@using PapaganCMS.Shared.DTOs.Bots
+@using SiteChatCMS.Shared.DTOs.Onboarding
+@using SiteChatCMS.Shared.DTOs.Auth
+@using SiteChatCMS.Shared.DTOs.Bots
 @inject HttpClient Http
 @inject NavigationManager Navigation
 
-<PageTitle>Welcome to Papagan - Get Started</PageTitle>
+<PageTitle>Welcome to SiteChat Agent - Get Started</PageTitle>
 
 <div class="onboarding-container">
     <div class="onboarding-card">
         @if (currentStep == "welcome")
         {
             <div class="step-content">
-                <h1>🦜 Welcome to Papagan!</h1>
+                <h1>🦜 Welcome to SiteChat Agent!</h1>
                 <p class="subtitle">Let's get your AI chatbot platform set up in just a few steps.</p>
 
                 <div class="microsoft-announcement">
                     <img src="/images/microsoft-for-startups-badge.png" alt="Microsoft for Startups" style="max-width: 150px;" />
                     <h3>We're proud to announce</h3>
-                    <p>Papagan has joined Microsoft for Startups! This partnership enables us to deliver enterprise-grade AI chatbot solutions powered by Azure OpenAI and Microsoft's cloud infrastructure.</p>
+                    <p>SiteChat Agent has joined Microsoft for Startups! This partnership enables us to deliver enterprise-grade AI chatbot solutions powered by Azure OpenAI and Microsoft's cloud infrastructure.</p>
                     <p><strong>Benefits for you:</strong></p>
                     <ul>
                         <li>✅ Powered by Azure OpenAI Service</li>
@@ -64,7 +64,7 @@
             <div class="step-content">
                 <div class="success-icon">✅</div>
                 <h1>All set!</h1>
-                <p class="subtitle">Your Papagan account is ready to go.</p>
+                <p class="subtitle">Your SiteChat Agent account is ready to go.</p>
 
                 <div class="next-steps">
                     <h3>Next Steps:</h3>

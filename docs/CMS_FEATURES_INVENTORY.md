@@ -2,13 +2,13 @@
 
 ## Overview
 
-This document tracks all CMS domain features that should be copied from the main papagancms project. These features are generic, reusable components that support multi-tenant, subscription-based applications.
+This document tracks all CMS domain features that should be copied from the main sitechatcms project. These features are generic, reusable components that support multi-tenant, subscription-based applications.
 
 ## Status: NOT YET IMPLEMENTED
 
-⚠️ **Important**: All CMS features must be copied from papagancms before continuing with agent-specific development.
+⚠️ **Important**: All CMS features must be copied from sitechatcms before continuing with agent-specific development.
 
-## Features to be Copied from papagancms
+## Features to be Copied from sitechatcms
 
 ### 1. User Management
 **Priority**: High  
@@ -250,7 +250,7 @@ This document tracks all CMS domain features that should be copied from the main
 ## Copy Checklist
 
 Before copying each feature:
-- [ ] Review papagancms source code
+- [ ] Review sitechatcms source code
 - [ ] Identify all dependencies
 - [ ] Check for breaking changes
 - [ ] Plan integration strategy
@@ -301,6 +301,6 @@ Recommended order of implementation (respecting dependencies):
 
 ## References
 
-- Main CMS Repository: https://github.com/orkinosai25-org/papagancms
+- Main CMS Repository: https://github.com/orkinosai25-org/sitechatcms
 - Architecture Documentation: [ARCHITECTURE.md](../ARCHITECTURE.md)
 - Sync Log: [CMS_SYNC_LOG.md](./CMS_SYNC_LOG.md)

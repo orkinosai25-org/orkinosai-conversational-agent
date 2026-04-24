@@ -1,4 +1,4 @@
-# Papagan Chat Widget - Quick Start Guide
+# SiteChat Agent Widget - Quick Start Guide
 
 ## 🚀 Get Started in 2 Minutes
 
@@ -13,10 +13,10 @@ Open one of these test pages in your browser:
 - **Widget Test Page**: `examples/widget-test.html`
 - **Embedded Demo**: `examples/widget-embed-demo.html`
 
-### Step 3: Chat with Papagan
+### Step 3: Chat with SiteChat Agent
 1. Click "Open Chat" or "Start Chatting"
 2. Type: **"Hello"**
-3. Get response: *"Hello! I'm Papagan, The Chatter Parrot! I'm currently running in demo mode..."*
+3. Get response: *"Hello! I'm SiteChat Agent! I'm currently running in demo mode..."*
 
 ## ✨ What Works Out of the Box
 - ✅ Chat UI with beautiful interface
@@ -68,7 +68,7 @@ Open one of these test pages in your browser:
 <button onclick="openChat()">Chat with Us</button>
 <script>
 function openChat() {
-    window.open('http://localhost:5000', 'papagan-chat', 'width=1200,height=800');
+    window.open('http://localhost:5000', 'sitechat-chat', 'width=1200,height=800');
 }
 </script>
 ```
@@ -182,4 +182,4 @@ For issues and questions:
 
 ---
 
-Made with ❤️ by Papagan - The Chatter Parrot
+Made with ❤️ by SiteChat Agent

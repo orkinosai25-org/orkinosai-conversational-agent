@@ -1,4 +1,4 @@
-"""Setup script for Papagan - The Chatter Parrot."""
+"""Setup script for SiteChat Agent."""
 
 from setuptools import setup, find_packages
 
@@ -9,13 +9,13 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
 setup(
-    name="papagan-conversational-agent",
+    name="sitechat-agent",
     version="1.0.0",
-    author="Papagan",
-    description="Azure AI-powered conversational agent - The Chatter Parrot",
+    author="SiteChat Agent",
+    description="Azure AI-powered conversational agent - SiteChat Agent",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/orkinosai25-org/papagan-conversational-agent",
+    url="https://github.com/orkinosai25-org/sitechat-agent",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -30,7 +30,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "papagan-agent=main",
+            "sitechat-agent=main",
         ],
     },
     py_modules=["main"],

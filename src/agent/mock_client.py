@@ -87,7 +87,7 @@ class MockAIClient:
         
         # Contextual responses
         if "hello" in message_lower or "hi" in message_lower:
-            return "Hello! I'm Papagan, The Chatter Parrot! I'm currently running in demo mode without Azure OpenAI credentials. How can I help you today?"
+            return "Hello! I'm SiteChat Agent! I'm currently running in demo mode without Azure OpenAI credentials. How can I help you today?"
         
         elif "help" in message_lower or "what can you do" in message_lower:
             return """I'm an AI-powered conversational agent designed to help automate SaaS operations. I can:

@@ -1,4 +1,4 @@
-namespace PapaganCMS.Core.Entities.Identity;
+namespace SiteChatCMS.Core.Entities.Identity;
 
 /// <summary>
 /// Bot entity representing a trained chatbot instance

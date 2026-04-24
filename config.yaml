@@ -21,12 +21,12 @@ azure:
 
 # Conversational Agent Settings
 agent:
-  name: "Papagan - The Chatter Parrot"
+  name: "SiteChat Agent"
   version: "1.0.0"
   max_history: 10
   temperature: 0.7
   max_tokens: 1000
-  system_prompt: "You are Papagan, a helpful and friendly AI assistant. You're like a well-trained parrot - conversational, intelligent, and always ready to help!"
+  system_prompt: "You are SiteChat Agent, a helpful and friendly AI assistant. You're like a well-trained parrot - conversational, intelligent, and always ready to help!"
 
 # API Server Settings
 server:
