@@ -1,7 +1,9 @@
-# Workflow refactored to match the working MOSAIC deployment template (deploy.yml, commit cd4e492)
-# This follows the proven Azure Web App deployment pattern using publish profiles
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
+#
+# Required GitHub Secret:
+#   PUBLISH_PROFILE — Azure App Service publish profile (download from Azure Portal:
+#                     App Service > Overview > Get publish profile)
 
 name: Build and deploy ASP.Net Core app to Azure Web App - sitechat
 
@@ -28,10 +30,10 @@ jobs:
           dotnet-version: '8.x'
 
       - name: Build with dotnet
-        run: dotnet build src/cms/SiteChatCMS.sln --configuration Release
+        run: dotnet build src/cms/PapaganCMS.sln --configuration Release
 
       - name: Publish with dotnet
-        run: dotnet publish src/cms/Server/SiteChatCMS.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish src/cms/Server/PapaganCMS.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -40,7 +42,6 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/myapp
 
   # Deploy job - deploys the published application to Azure using publish profile
-  # This matches the MOSAIC workflow pattern: separate build/deploy jobs with publish profile authentication
   deploy:
     runs-on: windows-latest
     needs: build
@@ -56,9 +57,7 @@ jobs:
         with:
           name: .net-app
 
-      # Deploy to Azure Web App using publish profile
-      # Using v3 which properly supports publish-profile without requiring Azure login
-      # Uses the AZUREAPPSERVICE_PUBLISHPROFILE secret added by the user
+      # Deploy to Azure Web App using the PUBLISH_PROFILE secret
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -66,6 +65,6 @@ jobs:
           app-name: 'sitechat'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+          publish-profile: ${{ secrets.PUBLISH_PROFILE }}
 
           

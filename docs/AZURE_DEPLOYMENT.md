@@ -1,6 +1,105 @@
 # Azure Deployment Guide
 
-This guide covers deploying the SiteChat Agent to Azure.
+This guide covers deploying the Orkinosai Conversational Agent to Azure, including all
+required Azure AI services.
+
+## Required Azure Resources
+
+Before deploying, create the following resources in your Azure subscription.
+
+### 1. Azure OpenAI Service (AI)
+
+The conversational agent requires an **Azure OpenAI** resource to power its AI responses.
+
+```bash
+# Register the OpenAI provider (one-time per subscription)
+az provider register --namespace Microsoft.CognitiveServices
+
+# Create a resource group (if not already done)
+az group create --name sitechat-rg --location eastus
+
+# Create the Azure OpenAI resource
+az cognitiveservices account create \
+  --name orkinosai-openai \
+  --resource-group sitechat-rg \
+  --kind OpenAI \
+  --sku S0 \
+  --location eastus
+
+# Deploy a GPT-4o model (adjust model/version as available in your region)
+az cognitiveservices account deployment create \
+  --name orkinosai-openai \
+  --resource-group sitechat-rg \
+  --deployment-name gpt-4o \
+  --model-name gpt-4o \
+  --model-version "2024-08-06" \
+  --model-format OpenAI \
+  --capacity 10
+```
+
+Once created, retrieve the endpoint and key:
+```bash
+# Endpoint
+az cognitiveservices account show \
+  --name orkinosai-openai \
+  --resource-group sitechat-rg \
+  --query properties.endpoint -o tsv
+
+# API key
+az cognitiveservices account keys list \
+  --name orkinosai-openai \
+  --resource-group sitechat-rg \
+  --query key1 -o tsv
+```
+
+Set these as environment variables (see **Configure Environment Variables** below):
+- `AZURE_OPENAI_ENDPOINT` — the endpoint URL
+- `AZURE_OPENAI_API_KEY` — the API key
+- `AZURE_OPENAI_DEPLOYMENT_NAME` — the model deployment name (e.g. `gpt-4o`)
+
+### 2. Azure App Service
+
+The web app host for both the conversational agent (Python) and the CMS (.NET).
+
+```bash
+# Create App Service plan (Linux, B1 tier is sufficient for dev/test)
+az appservice plan create \
+  --name orkinosai-plan \
+  --resource-group sitechat-rg \
+  --sku B1 \
+  --is-linux
+
+# Create the web app for the conversational agent (Python)
+az webapp create \
+  --name orkinosai-agent \
+  --resource-group sitechat-rg \
+  --plan orkinosai-plan \
+  --runtime "PYTHON:3.11"
+
+# Create the web app for the CMS (.NET)
+az webapp create \
+  --name sitechat \
+  --resource-group sitechat-rg \
+  --plan orkinosai-plan \
+  --runtime "DOTNETCORE:8.0"
+```
+
+### 3. Download the Publish Profile
+
+The GitHub Actions workflow authenticates to Azure using a **publish profile**.
+
+1. Go to the [Azure Portal](https://portal.azure.com).
+2. Open the App Service (`sitechat` or `orkinosai-agent`).
+3. Click **Overview** → **Get publish profile** (downloads a `.PublishSettings` file).
+4. In your GitHub repository, go to **Settings → Secrets and variables → Actions**.
+5. Create a new secret named **`PUBLISH_PROFILE`** and paste the full contents of the
+   downloaded `.PublishSettings` file as the value.
+
+> **Tip:** Each App Service has its own publish profile. If you deploy both the CMS
+> and the Python agent from GitHub Actions, create separate secrets for each
+> (e.g. `PUBLISH_PROFILE` for the CMS, `PUBLISH_PROFILE_AGENT` for the Python app).
+
+---
 
 ## Deployment Options
 
@@ -250,34 +349,41 @@ az monitor autoscale rule create \
 
 ### GitHub Actions
 
-Create `.github/workflows/deploy.yml`:
+The repository's `.github/workflows/main_papagan.yml` deploys the CMS to the `sitechat`
+Azure Web App automatically on every push to `main`.
+
+**Required secret:** Add `PUBLISH_PROFILE` in your repository's
+**Settings → Secrets and variables → Actions** (see **Download the Publish Profile** above).
+
+For the Python conversational agent, create `.github/workflows/deploy-agent.yml`:
 
 ```yaml
-name: Deploy to Azure
+name: Deploy Python agent to Azure
 
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    
+    - uses: actions/checkout@v4
+
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    
+
     - name: Install dependencies
       run: pip install -r requirements.txt
-    
-    - name: Deploy to Azure
-      uses: azure/webapps-deploy@v2
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
       with:
         app-name: orkinosai-agent
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        publish-profile: ${{ secrets.PUBLISH_PROFILE }}
 ```
 
 ## Troubleshooting
