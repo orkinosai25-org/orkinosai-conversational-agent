@@ -93,12 +93,13 @@ The GitHub Actions workflow authenticates to Azure using a **publish profile**.
 2. Open the App Service (`sitechat` or `orkinosai-agent`).
 3. Click **Overview** → **Get publish profile** (downloads a `.PublishSettings` file).
 4. In your GitHub repository, go to **Settings → Secrets and variables → Actions**.
-5. Create a new secret named **`AGENT_PUBLISH_PROFILE`** and paste the full contents of the
-   downloaded `.PublishSettings` file as the value.
+5. Create a new secret named **`CMS_PUBLISH_PROFILE`** (for the `sitechat` CMS) or
+   **`AGENT_PUBLISH_PROFILE`** (for the `orkinosai-agent` Python app) and paste the full
+   contents of the downloaded `.PublishSettings` file as the value.
 
 > **Tip:** Each App Service has its own publish profile. If you deploy both the CMS
 > and the Python agent from GitHub Actions, create separate secrets for each
-> (e.g. `PUBLISH_PROFILE` for the CMS, `AGENT_PUBLISH_PROFILE` for the Python app).
+> (e.g. `CMS_PUBLISH_PROFILE` for the CMS, `AGENT_PUBLISH_PROFILE` for the Python app).
 
 ---
 
@@ -354,7 +355,7 @@ az monitor autoscale rule create \
 The repository's `.github/workflows/main_papagan.yml` deploys the CMS to the `sitechat`
 Azure Web App automatically on every push to `main`.
 
-**Required secret:** Add `PUBLISH_PROFILE` in your repository's
+**Required secret:** Add `CMS_PUBLISH_PROFILE` in your repository's
 **Settings → Secrets and variables → Actions** (see **Download the Publish Profile** above).
 
 The repository's `.github/workflows/main_orkinosai-agent.yml` deploys the Python agent to the
