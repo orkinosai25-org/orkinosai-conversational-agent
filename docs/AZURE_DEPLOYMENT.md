@@ -53,9 +53,10 @@ az cognitiveservices account keys list \
 ```
 
 Set these as environment variables (see **Configure Environment Variables** below):
-- `AZURE_OPENAI_ENDPOINT` — the endpoint URL
-- `AZURE_OPENAI_API_KEY` — the API key
-- `AZURE_OPENAI_DEPLOYMENT_NAME` — the model deployment name (e.g. `gpt-4o`)
+- `AZURE_AI_ENDPOINT` — the endpoint URL
+- `AZURE_AI_API_KEY` — the API key
+- `AZURE_OPENAI_DEPLOYMENT` — the model deployment name (e.g. `gpt-4o`)
+- `AZURE_OPENAI_API_VERSION` — the API version (e.g. `2024-08-01-preview`)
 
 ### 2. Azure App Service
 
@@ -92,12 +93,12 @@ The GitHub Actions workflow authenticates to Azure using a **publish profile**.
 2. Open the App Service (`sitechat` or `orkinosai-agent`).
 3. Click **Overview** → **Get publish profile** (downloads a `.PublishSettings` file).
 4. In your GitHub repository, go to **Settings → Secrets and variables → Actions**.
-5. Create a new secret named **`PUBLISH_PROFILE`** and paste the full contents of the
+5. Create a new secret named **`AGENT_PUBLISH_PROFILE`** and paste the full contents of the
    downloaded `.PublishSettings` file as the value.
 
 > **Tip:** Each App Service has its own publish profile. If you deploy both the CMS
 > and the Python agent from GitHub Actions, create separate secrets for each
-> (e.g. `PUBLISH_PROFILE` for the CMS, `PUBLISH_PROFILE_AGENT` for the Python app).
+> (e.g. `PUBLISH_PROFILE` for the CMS, `AGENT_PUBLISH_PROFILE` for the Python app).
 
 ---
 
@@ -143,9 +144,10 @@ Best for: Production web applications with auto-scaling
      --name orkinosai-agent \
      --resource-group sitechat-rg \
      --settings \
-       AZURE_OPENAI_ENDPOINT="https://your-resource.openai.azure.com/" \
-       AZURE_OPENAI_API_KEY="your-api-key" \
-       AZURE_OPENAI_DEPLOYMENT_NAME="your-deployment"
+       AZURE_AI_ENDPOINT="https://your-resource.openai.azure.com/" \
+       AZURE_AI_API_KEY="your-api-key" \
+       AZURE_OPENAI_DEPLOYMENT="your-deployment" \
+       AZURE_OPENAI_API_VERSION="2024-08-01-preview"
    ```
 
 3. **Deploy Application**
@@ -355,36 +357,12 @@ Azure Web App automatically on every push to `main`.
 **Required secret:** Add `PUBLISH_PROFILE` in your repository's
 **Settings → Secrets and variables → Actions** (see **Download the Publish Profile** above).
 
-For the Python conversational agent, create `.github/workflows/deploy-agent.yml`:
+The repository's `.github/workflows/main_orkinosai-agent.yml` deploys the Python agent to the
+`orkinosai-agent` Azure Web App automatically on every push to `main`.
 
-```yaml
-name: Deploy Python agent to Azure
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
-    - name: Install dependencies
-      run: pip install -r requirements.txt
-
-    - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v3
-      with:
-        app-name: orkinosai-agent
-        publish-profile: ${{ secrets.PUBLISH_PROFILE }}
-```
+**Required secret:** Add `AGENT_PUBLISH_PROFILE` in your repository's
+**Settings → Secrets and variables → Actions** (see **Download the Publish Profile** above for
+the `orkinosai-agent` App Service).
 
 ## Troubleshooting
 
