@@ -57,6 +57,17 @@ jobs:
         with:
           name: .net-app
 
+      # Validate that the required publish profile secret is set before attempting deployment
+      - name: Validate publish profile secret
+        shell: pwsh
+        env:
+          PUBLISH_PROFILE: ${{ secrets.CMS_PUBLISH_PROFILE }}
+        run: |
+          if ([string]::IsNullOrEmpty($env:PUBLISH_PROFILE)) {
+            Write-Error "Required secret 'CMS_PUBLISH_PROFILE' is not set. Download the publish profile from Azure Portal (App Service 'sitechat' > Overview > Get publish profile) and add it as a repository secret named CMS_PUBLISH_PROFILE (Settings > Secrets and variables > Actions). See docs/AZURE_DEPLOYMENT.md for full instructions."
+            exit 1
+          }
+
       # Deploy to Azure Web App using the CMS_PUBLISH_PROFILE secret
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
