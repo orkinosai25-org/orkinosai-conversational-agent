@@ -162,23 +162,41 @@ class Settings(BaseModel):
     
     @staticmethod
     def _apply_env_overrides(config_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Apply environment variable overrides to configuration."""
-        # Azure OpenAI overrides
+        """Apply environment variable overrides to configuration.
+        
+        Supports both the legacy AZURE_OPENAI_* names and the Azure App Service
+        names (AZURE_AI_ENDPOINT, AZURE_AI_API_KEY, AZURE_OPENAI_DEPLOYMENT).
+        App Service names take precedence when both are set.
+        """
+        # Azure OpenAI overrides — legacy names
         endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
         if endpoint:
             config_data.setdefault("azure", {}).setdefault("openai", {})["endpoint"] = endpoint
-        
+
         api_key = os.getenv("AZURE_OPENAI_API_KEY")
         if api_key:
             config_data.setdefault("azure", {}).setdefault("openai", {})["api_key"] = api_key
-        
+
         deployment_name = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
         if deployment_name:
             config_data.setdefault("azure", {}).setdefault("openai", {})["deployment_name"] = deployment_name
-        
+
         api_version = os.getenv("AZURE_OPENAI_API_VERSION")
         if api_version:
             config_data.setdefault("azure", {}).setdefault("openai", {})["api_version"] = api_version
+
+        # Azure App Service env var names (take precedence over legacy names)
+        ai_endpoint = os.getenv("AZURE_AI_ENDPOINT")
+        if ai_endpoint:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["endpoint"] = ai_endpoint
+
+        ai_api_key = os.getenv("AZURE_AI_API_KEY")
+        if ai_api_key:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["api_key"] = ai_api_key
+
+        openai_deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+        if openai_deployment:
+            config_data.setdefault("azure", {}).setdefault("openai", {})["deployment_name"] = openai_deployment
         
         # Azure Search overrides
         search_endpoint = os.getenv("AZURE_SEARCH_ENDPOINT")
