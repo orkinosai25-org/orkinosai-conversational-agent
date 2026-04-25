@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OrkinosaiCMS.Core.Interfaces.Services;
-using SiteChatCMS.Client.Pages;
-using SiteChatCMS.Components;
+using PapaganCMS.Client.Pages;
+using PapaganCMS.Components;
 using SiteChatCMS.Core.Entities.Identity;
 using SiteChatCMS.Core.Interfaces.Services;
 using SiteChatCMS.Infrastructure.Data;
@@ -109,7 +109,7 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(SiteChatCMS.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(PapaganCMS.Client._Imports).Assembly);
 
 // Map API controllers
 app.MapControllers();
