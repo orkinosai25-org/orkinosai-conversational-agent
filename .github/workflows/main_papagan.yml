@@ -2,8 +2,8 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 #
 # Required GitHub Secret:
-#   CMS_PUBLISH_PROFILE — Azure App Service publish profile for the sitechat CMS
-#                         (download from Azure Portal: App Service > Overview > Get publish profile)
+#   PUBLISH_PROFILE — Azure App Service publish profile for the sitechat CMS
+#                     (download from Azure Portal: App Service > Overview > Get publish profile)
 
 name: Build and deploy ASP.Net Core app to Azure Web App - sitechat
 
@@ -64,11 +64,11 @@ jobs:
           PUBLISH_PROFILE: ${{ secrets.PUBLISH_PROFILE }}
         run: |
           if ([string]::IsNullOrEmpty($env:PUBLISH_PROFILE)) {
-            Write-Error "Required secret 'CMS_PUBLISH_PROFILE' is not set. Download the publish profile from Azure Portal (App Service 'sitechat' > Overview > Get publish profile) and add it as a repository secret named CMS_PUBLISH_PROFILE (Settings > Secrets and variables > Actions). See docs/AZURE_DEPLOYMENT.md for full instructions."
+            Write-Error "Required secret 'PUBLISH_PROFILE' is not set. Download the publish profile from Azure Portal (App Service 'sitechat' > Overview > Get publish profile) and add it as a repository secret named PUBLISH_PROFILE (Settings > Secrets and variables > Actions). See docs/AZURE_DEPLOYMENT.md for full instructions."
             exit 1
           }
 
-      # Deploy to Azure Web App using the CMS_PUBLISH_PROFILE secret
+      # Deploy to Azure Web App using the PUBLISH_PROFILE secret
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -76,4 +76,4 @@ jobs:
           app-name: 'sitechat'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.CMS_PUBLISH_PROFILE }}
+          publish-profile: ${{ secrets.PUBLISH_PROFILE }}
