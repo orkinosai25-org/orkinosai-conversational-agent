@@ -75,7 +75,7 @@ jobs:
       # Validate that the required publish profile secret is set before attempting deployment
       - name: Validate publish profile secret
         env:
-          PUBLISH_PROFILE: ${{ secrets.PUBLISH_PROFILE }}
+          PUBLISH_PROFILE: ${{ secrets.AGENT_PUBLISH_PROFILE }}
         run: |
           if [ -z "$PUBLISH_PROFILE" ]; then
             echo "::error::Required secret 'PUBLISH_PROFILE' is not set. Download the publish profile from Azure Portal (App Service 'site-chat-agent' > Overview > Get publish profile) and add it as a repository secret named PUBLISH_PROFILE (Settings > Secrets and variables > Actions). See docs/AZURE_DEPLOYMENT.md for full instructions."
