@@ -90,11 +90,11 @@ az webapp create \
 The GitHub Actions workflow authenticates to Azure using a **publish profile**.
 
 1. Go to the [Azure Portal](https://portal.azure.com).
-2. Open the App Service (`sitechat` or `orkinosai-agent`).
+2. Open the App Service (`sitechat` or `orkinosai-agent-b3f5c3cac0fzgteh`).
 3. Click **Overview** → **Get publish profile** (downloads a `.PublishSettings` file).
 4. In your GitHub repository, go to **Settings → Secrets and variables → Actions**.
 5. Create a new secret named **`CMS_PUBLISH_PROFILE`** (for the `sitechat` CMS) or
-   **`AGENT_PUBLISH_PROFILE`** (for the `orkinosai-agent` Python app) and paste the full
+   **`AGENT_PUBLISH_PROFILE`** (for the `orkinosai-agent-b3f5c3cac0fzgteh` Python app) and paste the full
    contents of the downloaded `.PublishSettings` file as the value.
 
 > **Tip:** Each App Service has its own publish profile. If you deploy both the CMS
@@ -359,11 +359,11 @@ Azure Web App automatically on every push to `main`.
 **Settings → Secrets and variables → Actions** (see **Download the Publish Profile** above).
 
 The repository's `.github/workflows/main_orkinosai-agent.yml` deploys the Python agent to the
-`site-chat-agent` Azure Web App automatically on every push to `main`.
+`orkinosai-agent-b3f5c3cac0fzgteh` Azure Web App automatically on every push to `main`.
 
-**Required secret:** Add `PUBLISH_PROFILE` in your repository's
+**Required secret:** Add `AGENT_PUBLISH_PROFILE` in your repository's
 **Settings → Secrets and variables → Actions** (see **Download the Publish Profile** above for
-the `site-chat-agent` App Service).
+the `orkinosai-agent-b3f5c3cac0fzgteh` App Service).
 
 ## Troubleshooting
 
