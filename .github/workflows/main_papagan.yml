@@ -35,6 +35,14 @@ jobs:
       - name: Publish with dotnet
         run: dotnet publish src/cms/Server/PapaganCMS.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
+      - name: Remove Blazor client runtimeconfig to avoid ambiguous startup detection
+        run: |
+          $clientConfig = "${{env.DOTNET_ROOT}}/myapp/PapaganCMS.Client.runtimeconfig.json"
+          if (Test-Path $clientConfig) {
+            Remove-Item $clientConfig -Force
+            Write-Host "Removed $clientConfig"
+          }
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -77,4 +85,3 @@ jobs:
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.PUBLISH_PROFILE }}
-          startup-command: 'dotnet PapaganCMS.dll'
