@@ -10,6 +10,26 @@
   <ItemGroup>
     <ProjectReference Include="..\Client\PapaganCMS.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
+  </ItemGroup>
+
+  <!--
+    Exclude the Blazor WebAssembly client's runtimeconfig from the Server publish output.
+    When dotnet publish runs on this Server project it also publishes the referenced Client
+    project, which places PapaganCMS.Client.runtimeconfig.json alongside
+    PapaganCMS.runtimeconfig.json in the output folder.  Azure App Service (Oryx) requires
+    exactly ONE .runtimeconfig.json to auto-detect the startup DLL; finding two causes it
+    to fall back to the hostingstart.dll placeholder instead of running the real app.
+    Removing the client runtimeconfig here (at build time) is the correct Option-2 fix:
+    deploy only the Server entry point.
+  -->
+  <Target Name="ExcludeClientRuntimeConfigFromPublish" AfterTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+                             Condition="'%(Filename)%(Extension)' == 'PapaganCMS.Client.runtimeconfig.json'" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.0" />
     <PackageReference Include="Stripe.net" Version="47.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

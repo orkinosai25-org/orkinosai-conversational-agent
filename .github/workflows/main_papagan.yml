@@ -35,17 +35,26 @@ jobs:
       - name: Publish with dotnet
         run: dotnet publish src/cms/Server/PapaganCMS.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
-      - name: Remove Blazor client runtimeconfig to avoid ambiguous startup detection
+      - name: Verify single runtimeconfig for unambiguous Azure startup detection
         shell: pwsh
         run: |
-          $clientConfig = "${{env.DOTNET_ROOT}}/myapp/PapaganCMS.Client.runtimeconfig.json"
-          if (Test-Path $clientConfig) {
-            Remove-Item $clientConfig -Force
-            Write-Host "Removed $clientConfig"
-          } else {
-            Write-Error "Expected to find '$clientConfig' but it was not present. Check the publish output path."
+          # Azure App Service (Oryx) requires exactly ONE .runtimeconfig.json in the
+          # publish output to auto-detect the startup DLL.  The Server csproj excludes
+          # PapaganCMS.Client.runtimeconfig.json at publish time via an MSBuild target;
+          # this step confirms the invariant holds before the artifact is uploaded.
+          $publishDir = "${{env.DOTNET_ROOT}}/myapp"
+          $configs = Get-ChildItem $publishDir -Filter "*.runtimeconfig.json"
+          Write-Host "runtimeconfig.json files in publish output ($($configs.Count)):"
+          $configs | ForEach-Object { Write-Host "  - $($_.Name)" }
+          if ($configs.Count -ne 1) {
+            Write-Error "Expected exactly one .runtimeconfig.json in publish output but found $($configs.Count). Oryx cannot auto-detect the startup DLL when multiple exist — it falls back to hostingstart.dll."
             exit 1
           }
+          if ($configs[0].Name -ne 'PapaganCMS.runtimeconfig.json') {
+            Write-Error "Expected 'PapaganCMS.runtimeconfig.json' but found '$($configs[0].Name)'. Ensure only the Server project is published."
+            exit 1
+          }
+          Write-Host "OK: publish output contains exactly 'PapaganCMS.runtimeconfig.json'"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -82,8 +91,8 @@ jobs:
 
       # Deploy to Azure Web App using the PUBLISH_PROFILE secret.
       # Note: startup-command is not supported with publish-profile auth scheme.
-      # The build step removes PapaganCMS.Client.runtimeconfig.json so Oryx
-      # auto-detects PapaganCMS.dll as the sole startup file.
+      # The Server csproj excludes PapaganCMS.Client.runtimeconfig.json at publish time
+      # so Oryx auto-detects PapaganCMS.dll as the sole startup file.
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
