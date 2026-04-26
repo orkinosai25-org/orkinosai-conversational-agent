@@ -87,6 +87,5 @@ jobs:
         id: deploy-to-webapp
         with:
           app-name: 'orkinosai-agent-b3f5c3cac0fzgteh'
-          slot-name: 'Production'
           publish-profile: ${{ secrets.AGENT_PUBLISH_PROFILE }}
           startup-command: 'gunicorn --bind=0.0.0.0 --timeout 600 wsgi:app'
