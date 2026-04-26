@@ -61,7 +61,7 @@ jobs:
       - name: Validate publish profile secret
         shell: pwsh
         env:
-          PUBLISH_PROFILE: ${{ secrets.CMS_PUBLISH_PROFILE }}
+          PUBLISH_PROFILE: ${{ secrets.PUBLISH_PROFILE }}
         run: |
           if ([string]::IsNullOrEmpty($env:PUBLISH_PROFILE)) {
             Write-Error "Required secret 'CMS_PUBLISH_PROFILE' is not set. Download the publish profile from Azure Portal (App Service 'sitechat' > Overview > Get publish profile) and add it as a repository secret named CMS_PUBLISH_PROFILE (Settings > Secrets and variables > Actions). See docs/AZURE_DEPLOYMENT.md for full instructions."
