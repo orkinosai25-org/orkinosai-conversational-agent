@@ -3,7 +3,7 @@
 # More info on Python, GitHub Actions, and Azure App Service: https://aka.ms/python-webapps-actions
 #
 # Required GitHub Secret:
-#   AGENT_PUBLISH_PROFILE — Azure App Service publish profile for site-chat-agent
+#   AGENT_PUBLISH_PROFILE — Azure App Service publish profile for orkinosai-agent-b3f5c3cac0fzgteh
 #                           (download from Azure Portal: App Service > Overview > Get publish profile)
 #
 # Required Azure App Service environment variables (set in Azure Portal > App Service > Configuration):
@@ -12,7 +12,7 @@
 #   AZURE_OPENAI_API_VERSION  — Azure OpenAI API version (e.g. 2024-08-01-preview)
 #   AZURE_OPENAI_DEPLOYMENT   — Azure OpenAI model deployment name
 
-name: Build and deploy Python app to Azure Web App - site-chat-agent
+name: Build and deploy Python app to Azure Web App - orkinosai-agent
 
 on:
   push:
@@ -78,7 +78,7 @@ jobs:
           PUBLISH_PROFILE: ${{ secrets.AGENT_PUBLISH_PROFILE }}
         run: |
           if [ -z "$PUBLISH_PROFILE" ]; then
-            echo "::error::Required secret 'AGENT_PUBLISH_PROFILE' is not set. Download the publish profile from Azure Portal (App Service 'site-chat-agent' > Overview > Get publish profile) and add it as a repository secret named AGENT_PUBLISH_PROFILE (Settings > Secrets and variables > Actions). See docs/AZURE_DEPLOYMENT.md for full instructions."
+            echo "::error::Required secret 'AGENT_PUBLISH_PROFILE' is not set. Download the publish profile from Azure Portal (App Service 'orkinosai-agent-b3f5c3cac0fzgteh' > Overview > Get publish profile) and add it as a repository secret named AGENT_PUBLISH_PROFILE (Settings > Secrets and variables > Actions). See docs/AZURE_DEPLOYMENT.md for full instructions."
             exit 1
           fi
 
@@ -86,7 +86,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'site-chat-agent'
+          app-name: 'orkinosai-agent-b3f5c3cac0fzgteh'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AGENT_PUBLISH_PROFILE }}
           startup-command: 'gunicorn --bind=0.0.0.0 --timeout 600 wsgi:app'
