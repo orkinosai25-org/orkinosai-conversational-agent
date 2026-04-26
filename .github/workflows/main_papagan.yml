@@ -80,9 +80,11 @@ jobs:
             exit 1
           }
 
-      # Deploy to Azure Web App using the PUBLISH_PROFILE secret
-      # Note: startup-command is not supported with publish-profile auth; the build step
-      # already removes PapaganCMS.Client.runtimeconfig.json so Oryx detects a single DLL.
+      # Deploy to Azure Web App using the PUBLISH_PROFILE secret.
+      # startup-command explicitly sets which DLL to run, bypassing Oryx's auto-detection
+      # (which can fail when multiple .runtimeconfig.json files are present in wwwroot).
+      # clean: true removes stale files from previous deployments (e.g. a lingering
+      # PapaganCMS.Client.runtimeconfig.json) before extracting the new package.
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -91,3 +93,5 @@ jobs:
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.PUBLISH_PROFILE }}
+          startup-command: 'dotnet PapaganCMS.dll'
+          clean: true
