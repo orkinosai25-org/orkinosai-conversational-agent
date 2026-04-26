@@ -359,11 +359,11 @@ Azure Web App automatically on every push to `main`.
 **Settings → Secrets and variables → Actions** (see **Download the Publish Profile** above).
 
 The repository's `.github/workflows/main_orkinosai-agent.yml` deploys the Python agent to the
-`orkinosai-agent` Azure Web App automatically on every push to `main`.
+`site-chat-agent` Azure Web App automatically on every push to `main`.
 
-**Required secret:** Add `AGENT_PUBLISH_PROFILE` in your repository's
+**Required secret:** Add `PUBLISH_PROFILE` in your repository's
 **Settings → Secrets and variables → Actions** (see **Download the Publish Profile** above for
-the `orkinosai-agent` App Service).
+the `site-chat-agent` App Service).
 
 ## Troubleshooting
 

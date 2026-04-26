@@ -13,6 +13,9 @@ python-dotenv==1.0.1
 flask==3.0.3
 flask-cors==5.0.0
 
+# Production WSGI server (required for Azure App Service)
+gunicorn==23.0.0
+
 # Utilities
 requests==2.32.3
 pydantic==2.13.3
