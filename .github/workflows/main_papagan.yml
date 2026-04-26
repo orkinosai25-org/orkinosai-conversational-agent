@@ -81,6 +81,9 @@ jobs:
           }
 
       # Deploy to Azure Web App using the PUBLISH_PROFILE secret
+      # startup-command overrides Oryx auto-detection so it always launches the correct DLL
+      # even if a stale PapaganCMS.Client.runtimeconfig.json was left on the server by a
+      # previous deployment (zip deploy merges files rather than replacing them wholesale).
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -89,3 +92,4 @@ jobs:
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.PUBLISH_PROFILE }}
+          startup-command: 'dotnet PapaganCMS.dll'
