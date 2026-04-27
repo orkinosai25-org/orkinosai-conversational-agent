@@ -64,6 +64,24 @@ builder.Services.AddControllers()
 // Add HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
+// Register a named HttpClient used by Blazor Server components (Pricing, Subscription, etc.).
+// A scoped registration wraps IHttpClientFactory so that the BaseAddress is resolved
+// dynamically from the incoming HTTP request, ensuring the correct host/scheme is used
+// on every environment (local dev, Azure, etc.) without any hardcoded URLs.
+builder.Services.AddHttpClient("BlazorServer");
+builder.Services.AddScoped(sp =>
+{
+    var factory = sp.GetRequiredService<IHttpClientFactory>();
+    var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+    var client = factory.CreateClient("BlazorServer");
+    var request = httpContextAccessor.HttpContext?.Request;
+    if (request != null)
+    {
+        client.BaseAddress = new Uri($"{request.Scheme}://{request.Host}/");
+    }
+    return client;
+});
+
 // Configure HttpClient for chat agent backend
 var backendUrl = builder.Configuration["ChatAgent:BackendUrl"] ?? "http://localhost:5000";
 builder.Services.AddHttpClient("ChatBackend", client =>
