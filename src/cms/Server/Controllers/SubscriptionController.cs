@@ -110,6 +110,12 @@ public class SubscriptionController : ControllerBase
     {
         try
         {
+            string SafeGetPriceId(SubscriptionTier tier, BillingInterval interval)
+            {
+                try { return _stripeService.GetPriceId(tier, interval); }
+                catch { return string.Empty; }
+            }
+
             var plans = new List<PlanDto>
             {
                 new PlanDto
@@ -130,8 +136,8 @@ public class SubscriptionController : ControllerBase
                     Description = "Great for personal projects and small businesses",
                     MonthlyPrice = 12,
                     YearlyPrice = 120,
-                    MonthlyPriceId = _stripeService.GetPriceId(SubscriptionTier.Starter, BillingInterval.Monthly),
-                    YearlyPriceId = _stripeService.GetPriceId(SubscriptionTier.Starter, BillingInterval.Yearly),
+                    MonthlyPriceId = SafeGetPriceId(SubscriptionTier.Starter, BillingInterval.Monthly),
+                    YearlyPriceId = SafeGetPriceId(SubscriptionTier.Starter, BillingInterval.Yearly),
                     Limits = MapTierLimits(_subscriptionService.GetTierLimits(SubscriptionTier.Starter))
                 },
                 new PlanDto
@@ -141,8 +147,8 @@ public class SubscriptionController : ControllerBase
                     Description = "For growing businesses and agencies",
                     MonthlyPrice = 35,
                     YearlyPrice = 350,
-                    MonthlyPriceId = _stripeService.GetPriceId(SubscriptionTier.Pro, BillingInterval.Monthly),
-                    YearlyPriceId = _stripeService.GetPriceId(SubscriptionTier.Pro, BillingInterval.Yearly),
+                    MonthlyPriceId = SafeGetPriceId(SubscriptionTier.Pro, BillingInterval.Monthly),
+                    YearlyPriceId = SafeGetPriceId(SubscriptionTier.Pro, BillingInterval.Yearly),
                     Limits = MapTierLimits(_subscriptionService.GetTierLimits(SubscriptionTier.Pro))
                 },
                 new PlanDto
@@ -152,8 +158,8 @@ public class SubscriptionController : ControllerBase
                     Description = "Enterprise-grade features and support",
                     MonthlyPrice = 250,
                     YearlyPrice = 2500,
-                    MonthlyPriceId = _stripeService.GetPriceId(SubscriptionTier.Business, BillingInterval.Monthly),
-                    YearlyPriceId = _stripeService.GetPriceId(SubscriptionTier.Business, BillingInterval.Yearly),
+                    MonthlyPriceId = SafeGetPriceId(SubscriptionTier.Business, BillingInterval.Monthly),
+                    YearlyPriceId = SafeGetPriceId(SubscriptionTier.Business, BillingInterval.Yearly),
                     Limits = MapTierLimits(_subscriptionService.GetTierLimits(SubscriptionTier.Business))
                 }
             };

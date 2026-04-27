@@ -30,15 +30,31 @@ public class StripeService : IStripeService
         _customerService = customerService;
         _subscriptionService = subscriptionService;
 
-        _secretKey = _configuration["Payment:Stripe:SecretKey"] 
-            ?? throw new InvalidOperationException("Stripe SecretKey not configured");
+        _secretKey = _configuration["Payment:Stripe:SecretKey"] ?? string.Empty;
         _webhookSecret = _configuration["Payment:Stripe:WebhookSecret"] ?? string.Empty;
 
-        StripeConfiguration.ApiKey = _secretKey;
+        if (!string.IsNullOrEmpty(_secretKey))
+        {
+            StripeConfiguration.ApiKey = _secretKey;
+        }
+        else
+        {
+            _logger.LogWarning("Stripe SecretKey is not configured. Stripe payment features will be unavailable.");
+        }
+    }
+
+    private void EnsureStripeConfigured()
+    {
+        if (string.IsNullOrEmpty(_secretKey))
+        {
+            throw new InvalidOperationException(
+                "Stripe SecretKey is not configured. Set Payment:Stripe:SecretKey in appsettings or environment variables.");
+        }
     }
 
     public async Task<string> CreateCustomerAsync(string email, string name, int userId)
     {
+        EnsureStripeConfigured();
         try
         {
             var options = new CustomerCreateOptions
@@ -83,6 +99,7 @@ public class StripeService : IStripeService
         SubscriptionTier tier, 
         BillingInterval interval)
     {
+        EnsureStripeConfigured();
         try
         {
             var options = new SubscriptionCreateOptions
@@ -136,6 +153,7 @@ public class StripeService : IStripeService
         string newPriceId, 
         SubscriptionTier newTier)
     {
+        EnsureStripeConfigured();
         try
         {
             var stripeSubscriptionService = new Stripe.SubscriptionService();
@@ -181,6 +199,7 @@ public class StripeService : IStripeService
 
     public async Task<bool> CancelSubscriptionAsync(string subscriptionId, bool cancelAtPeriodEnd = true)
     {
+        EnsureStripeConfigured();
         try
         {
             var stripeSubscriptionService = new Stripe.SubscriptionService();
@@ -211,6 +230,7 @@ public class StripeService : IStripeService
 
     public async Task<OrkinosaiCMS.Core.Entities.Subscriptions.Subscription?> GetSubscriptionAsync(string subscriptionId)
     {
+        EnsureStripeConfigured();
         try
         {
             var stripeSubscriptionService = new Stripe.SubscriptionService();
@@ -235,6 +255,7 @@ public class StripeService : IStripeService
         string successUrl, 
         string cancelUrl)
     {
+        EnsureStripeConfigured();
         try
         {
             var options = new SessionCreateOptions
@@ -270,6 +291,7 @@ public class StripeService : IStripeService
 
     public async Task<string> CreateBillingPortalSessionAsync(string customerId, string returnUrl)
     {
+        EnsureStripeConfigured();
         try
         {
             var options = new Stripe.BillingPortal.SessionCreateOptions
@@ -298,9 +320,9 @@ public class StripeService : IStripeService
         
         if (string.IsNullOrEmpty(priceId))
         {
-            var message = $"Price ID not configured for {tier}_{interval}. Please configure {key} in appsettings.json or environment variables.";
-            _logger.LogError(message);
-            throw new InvalidOperationException(message);
+            _logger.LogWarning("Price ID not configured for {Tier}_{Interval}. Configure {Key} in appsettings or environment variables.", 
+                tier, interval, key);
+            return string.Empty;
         }
 
         return priceId;
