@@ -8,7 +8,7 @@
         <div class="chat-panel @(isAnimating ? "animating" : "")">
             <div class="chat-panel-header">
                 <div class="header-left">
-                    <img src="/branding/logos/sitechat-icon.svg" alt="SiteChat Agent" height="28" style="margin-right: 4px;">
+                    <img src="/branding/logos/sitechat-icon.svg" alt="SiteChat Agent" height="28" class="sitechat-logo">
                     <h4>SiteChat Agent</h4>
                 </div>
                 <div class="header-right">
@@ -390,9 +390,8 @@
         gap: 12px;
     }
 
-    .sc-icon {
-        font-size: 24px;
-        color: var(--sc-cyan);
+    .sitechat-logo {
+        margin-right: 4px;
     }
 
     .chat-panel-header h4 {
