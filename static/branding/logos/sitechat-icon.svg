@@ -1,28 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
   <defs>
-    <linearGradient id="bubbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="sc-icon-bubbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#2E7D32;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="dotGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <linearGradient id="sc-icon-dotGrad" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" style="stop-color:#00BCD4;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#0097A7;stop-opacity:1" />
     </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+    <filter id="sc-icon-shadow" x="-10%" y="-10%" width="120%" height="120%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.18)"/>
     </filter>
   </defs>
 
   <!-- Main chat bubble -->
   <rect x="28" y="38" width="230" height="175" rx="36" ry="36"
-        fill="url(#bubbleGrad)" filter="url(#shadow)"/>
+        fill="url(#sc-icon-bubbleGrad)" filter="url(#sc-icon-shadow)"/>
 
   <!-- Bubble tail (bottom-left) -->
-  <path d="M 60 213 L 36 268 L 118 213 Z" fill="url(#bubbleGrad)"/>
+  <path d="M 60 213 L 36 268 L 118 213 Z" fill="url(#sc-icon-bubbleGrad)"/>
 
   <!-- Typing dots -->
   <circle cx="108" cy="128" r="18" fill="#ffffff"/>
-  <circle cx="150" cy="128" r="18" fill="url(#dotGrad)"/>
+  <circle cx="150" cy="128" r="18" fill="url(#sc-icon-dotGrad)"/>
   <circle cx="192" cy="128" r="18" fill="#FFC107"/>
 
   <!-- "SC" monogram at top-right of bubble -->
