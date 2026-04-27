@@ -1,28 +1,30 @@
-/* EasyChat - Color Variables */
+/* SiteChat Agent - Color Variables */
 :root {
-    /* Primary EasyChat Colors */
-    --primary-color: #2563EB;
-    --primary-hover: #1D4ED8;
-    --secondary-color: #14B8A6;
-    --background: #F8FAFC;
+    /* SiteChat Agent Brand Colors */
+    --primary-color: #4CAF50;
+    --primary-hover: #2E7D32;
+    --secondary-color: #00BCD4;
+    --secondary-hover: #0097A7;
+    --accent-color: #FFC107;
+    --background: #F5F8F5;
     --surface: #ffffff;
-    --surface-hover: #F8FAFC;
+    --surface-hover: #F1F8F1;
     --text-primary: #1F2937;
     --text-secondary: #6B7280;
-    --border: #E5E7EB;
-    --shadow: rgba(37, 99, 235, 0.15);
-    --success: #14B8A6;
+    --border: #C8E6C9;
+    --shadow: rgba(76, 175, 80, 0.15);
+    --success: #4CAF50;
     --error: #d13438;
     --panel-width: 280px;
     --top-bar-height: 60px;
     --bottom-bar-height: 40px;
-    
-    /* EasyChat Brand Colors */
-    --easychat-blue: #2563EB;
-    --easychat-blue-dark: #1D4ED8;
-    --easychat-teal: #14B8A6;
-    --easychat-teal-dark: #0D9488;
-    --easychat-slate: #F8FAFC;
+
+    /* SiteChat Agent Palette */
+    --sitechat-green: #4CAF50;
+    --sitechat-green-dark: #2E7D32;
+    --sitechat-cyan: #00BCD4;
+    --sitechat-cyan-dark: #0097A7;
+    --sitechat-yellow: #FFC107;
 }
 
 /* Reset and Base Styles */
