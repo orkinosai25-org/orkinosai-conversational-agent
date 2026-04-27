@@ -320,8 +320,8 @@ public class StripeService : IStripeService
         
         if (string.IsNullOrEmpty(priceId))
         {
-            _logger.LogWarning("Price ID not configured for {Tier}_{Interval}. Configure {Key} in appsettings or environment variables.", 
-                tier, interval, key);
+            _logger.LogWarning("Price ID not configured for {TierInterval}. Configure {Key} in appsettings or environment variables.", 
+                $"{tier}_{interval}", key);
             return string.Empty;
         }
 

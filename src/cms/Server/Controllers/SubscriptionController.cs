@@ -113,7 +113,11 @@ public class SubscriptionController : ControllerBase
             string SafeGetPriceId(SubscriptionTier tier, BillingInterval interval)
             {
                 try { return _stripeService.GetPriceId(tier, interval); }
-                catch { return string.Empty; }
+                catch (InvalidOperationException ex)
+                {
+                    _logger.LogWarning(ex, "Could not resolve price ID for {Tier}/{Interval}", tier, interval);
+                    return string.Empty;
+                }
             }
 
             var plans = new List<PlanDto>
