@@ -77,6 +77,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+          path: ./publish
 
       # Validate that the required publish profile secret is set before attempting deployment
       - name: Validate publish profile secret
@@ -99,6 +100,6 @@ jobs:
         with:
           app-name: 'site-chat-agent'
           slot-name: 'Production'
-          package: .
+          package: ./publish
           publish-profile: ${{ secrets.PUBLISH_PROFILE }}
     clean: true
