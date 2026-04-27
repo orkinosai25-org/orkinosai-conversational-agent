@@ -102,4 +102,3 @@ jobs:
           slot-name: 'Production'
           package: ./publish
           publish-profile: ${{ secrets.PUBLISH_PROFILE }}
-    clean: true
