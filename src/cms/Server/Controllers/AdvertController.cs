@@ -78,7 +78,7 @@ public class AdvertController : ControllerBase
             if (dto.EndDate <= dto.StartDate)
                 return BadRequest("End date must be after start date.");
 
-            var maxDuration = (dto.EndDate - dto.StartDate).Days;
+            var maxDuration = (int)(dto.EndDate - dto.StartDate).TotalDays;
             if (maxDuration > tier.MaxDurationDays)
                 return BadRequest($"Campaign duration exceeds the maximum of {tier.MaxDurationDays} days for this tier.");
 
@@ -133,8 +133,11 @@ public class AdvertController : ControllerBase
     /// <summary>Record an impression for an advert</summary>
     [HttpPost("{id:int}/impression")]
     [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> RecordImpression(int id)
     {
+        var advert = await _advertService.GetAdvertByIdAsync(id);
+        if (advert == null) return NotFound();
         await _advertService.RecordImpressionAsync(id);
         return NoContent();
     }
@@ -142,8 +145,11 @@ public class AdvertController : ControllerBase
     /// <summary>Record a click for an advert</summary>
     [HttpPost("{id:int}/click")]
     [ProducesResponseType(204)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> RecordClick(int id)
     {
+        var advert = await _advertService.GetAdvertByIdAsync(id);
+        if (advert == null) return NotFound();
         await _advertService.RecordClickAsync(id);
         return NoContent();
     }
@@ -206,7 +212,7 @@ public class AdvertController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating advert {Id}", id);
+            _logger.LogError(ex, "Error updating advert {AdvertId}", id);
             return StatusCode(500, "An error occurred while updating the advert.");
         }
     }

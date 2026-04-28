@@ -214,7 +214,7 @@
                         </div>
                         <div class="review-item">
                             <span class="review-label">Dates</span>
-                            <span class="review-value">@startDate.ToString("MMM dd, yyyy") → @endDate.ToString("MMM dd, yyyy") (@((endDate - startDate).Days) days)</span>
+                            <span class="review-value">@startDate.ToString("MMM dd, yyyy") → @endDate.ToString("MMM dd, yyyy") (@((int)(endDate - startDate).TotalDays) days)</span>
                         </div>
                         <div class="review-item">
                             <span class="review-label">Target URL</span>
@@ -657,7 +657,7 @@
         if (endDate <= startDate)
         { stepError = "End date must be after start date."; return; }
 
-        if (selectedTier != null && (endDate - startDate).Days > selectedTier.MaxDurationDays)
+        if (selectedTier != null && (int)(endDate - startDate).TotalDays > selectedTier.MaxDurationDays)
         { stepError = $"Campaign duration cannot exceed {selectedTier.MaxDurationDays} days for the {selectedTier.Name} tier."; return; }
 
         createDto.StartDate = startDate;

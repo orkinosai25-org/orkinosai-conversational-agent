@@ -65,6 +65,7 @@ public class AdvertService : IAdvertService
     // ── In-memory store ──────────────────────────────────────────────────────
 
     private readonly List<Advert> _adverts = new();
+    private readonly object _syncLock = new();
     private int _nextId = 1;
 
     public AdvertService()
@@ -182,13 +183,13 @@ public class AdvertService : IAdvertService
 
     public Task<Advert> UpdateAdvertAsync(Advert advert)
     {
-        advert.UpdatedAt = DateTime.UtcNow;
         var index = _adverts.FindIndex(a => a.Id == advert.Id);
-        if (index >= 0)
-        {
-            advert.Tier = _tiers.FirstOrDefault(t => t.Id == advert.TierId);
-            _adverts[index] = advert;
-        }
+        if (index < 0)
+            return Task.FromException<Advert>(new KeyNotFoundException($"Advert {advert.Id} not found."));
+
+        advert.UpdatedAt = DateTime.UtcNow;
+        advert.Tier = _tiers.FirstOrDefault(t => t.Id == advert.TierId);
+        _adverts[index] = advert;
         return Task.FromResult(advert);
     }
 
@@ -230,13 +231,15 @@ public class AdvertService : IAdvertService
     public async Task RecordImpressionAsync(int id)
     {
         var advert = await GetAdvertByIdAsync(id);
-        if (advert != null) advert.ImpressionCount++;
+        if (advert != null)
+            lock (_syncLock) { advert.ImpressionCount++; }
     }
 
     public async Task RecordClickAsync(int id)
     {
         var advert = await GetAdvertByIdAsync(id);
-        if (advert != null) advert.ClickCount++;
+        if (advert != null)
+            lock (_syncLock) { advert.ClickCount++; }
     }
 
     public IEnumerable<AdvertTier> GetAllTiers() => _tiers.AsReadOnly();
