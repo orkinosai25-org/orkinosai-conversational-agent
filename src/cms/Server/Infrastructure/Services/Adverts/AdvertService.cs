@@ -173,11 +173,14 @@ public class AdvertService : IAdvertService
 
     public Task<Advert> CreateAdvertAsync(Advert advert)
     {
-        advert.Id = _nextId++;
-        advert.CreatedAt = DateTime.UtcNow;
-        advert.Status = AdvertStatus.Pending;
-        advert.Tier = _tiers.FirstOrDefault(t => t.Id == advert.TierId);
-        _adverts.Add(advert);
+        lock (_syncLock)
+        {
+            advert.Id = _nextId++;
+            advert.CreatedAt = DateTime.UtcNow;
+            advert.Status = AdvertStatus.Pending;
+            advert.Tier = _tiers.FirstOrDefault(t => t.Id == advert.TierId);
+            _adverts.Add(advert);
+        }
         return Task.FromResult(advert);
     }
 
@@ -232,14 +235,27 @@ public class AdvertService : IAdvertService
     {
         var advert = await GetAdvertByIdAsync(id);
         if (advert != null)
-            lock (_syncLock) { advert.ImpressionCount++; }
+        {
+            lock (_syncLock)
+            {
+                // Re-check inside the lock in case the advert was removed concurrently
+                if (_adverts.Contains(advert))
+                    advert.ImpressionCount++;
+            }
+        }
     }
 
     public async Task RecordClickAsync(int id)
     {
         var advert = await GetAdvertByIdAsync(id);
         if (advert != null)
-            lock (_syncLock) { advert.ClickCount++; }
+        {
+            lock (_syncLock)
+            {
+                if (_adverts.Contains(advert))
+                    advert.ClickCount++;
+            }
+        }
     }
 
     public IEnumerable<AdvertTier> GetAllTiers() => _tiers.AsReadOnly();

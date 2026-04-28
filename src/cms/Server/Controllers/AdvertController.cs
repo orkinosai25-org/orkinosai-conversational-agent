@@ -75,10 +75,14 @@ public class AdvertController : ControllerBase
             if (!tier.AllowedPlacements.Contains(placement))
                 return BadRequest($"Placement '{dto.Placement}' is not available for the '{tier.Name}' tier.");
 
-            if (dto.EndDate <= dto.StartDate)
+            // Normalise to UTC before date comparisons
+            var startUtc = dto.StartDate.ToUniversalTime();
+            var endUtc = dto.EndDate.ToUniversalTime();
+
+            if (endUtc <= startUtc)
                 return BadRequest("End date must be after start date.");
 
-            var maxDuration = (int)(dto.EndDate - dto.StartDate).TotalDays;
+            var maxDuration = (int)(endUtc - startUtc).TotalDays;
             if (maxDuration > tier.MaxDurationDays)
                 return BadRequest($"Campaign duration exceeds the maximum of {tier.MaxDurationDays} days for this tier.");
 
@@ -92,8 +96,8 @@ public class AdvertController : ControllerBase
                 Placement = placement,
                 AdvertiserName = dto.AdvertiserName,
                 AdvertiserEmail = dto.AdvertiserEmail,
-                StartDate = dto.StartDate.ToUniversalTime(),
-                EndDate = dto.EndDate.ToUniversalTime(),
+                StartDate = startUtc,
+                EndDate = endUtc,
                 AmountPaid = tier.MonthlyPrice
             };
 
