@@ -1,0 +1,203 @@
+# Azure Infrastructure Provisioning Workflow
+#
+# Provisions Azure SQL Database + Blob Storage using Bicep, wires the
+# resulting connection strings into the CMS App Service configuration, and
+# runs EF Core migrations so the schema is created automatically.
+#
+# ── Required GitHub Secrets ───────────────────────────────────────────────────
+#   AZURE_CREDENTIALS      Service principal JSON used by azure/login:
+#                            {
+#                              "clientId":       "<GUID>",
+#                              "clientSecret":   "<secret>",
+#                              "subscriptionId": "<GUID>",
+#                              "tenantId":       "<GUID>"
+#                            }
+#                          Create with:
+#                            az ad sp create-for-rbac \
+#                              --name "orkinosai-ghactions" \
+#                              --role Contributor \
+#                              --scopes /subscriptions/<sub-id>/resourceGroups/sitechat-rg \
+#                              --sdk-auth
+#
+#   SQL_ADMIN_PASSWORD     Strong password for the Azure SQL administrator
+#                          account (same value used when the Bicep template was
+#                          first deployed — or the new value after rotation).
+#
+# ── Workflow inputs ───────────────────────────────────────────────────────────
+# All inputs have sensible defaults that match the existing deployment.
+# Override them in the GitHub Actions "Run workflow" UI when needed.
+#
+# ── What this workflow does ───────────────────────────────────────────────────
+# Job 1 — provision  : deploy infra/main.bicep (idempotent, safe to re-run)
+# Job 2 — configure  : set ConnectionStrings + Blob Storage on the App Service
+# Job 3 — migrate    : run 'dotnet ef database update' against Azure SQL
+
+name: Provision Azure Infrastructure (SQL + Blob Storage)
+
+on:
+  workflow_dispatch:
+    inputs:
+      resource_group:
+        description: 'Azure Resource Group'
+        required: true
+        default: 'sitechat-rg'
+      location:
+        description: 'Azure Region'
+        required: true
+        default: 'uksouth'
+      base_name:
+        description: 'Base resource name (derives SQL server / storage account names)'
+        required: true
+        default: 'orkinosai'
+      sql_admin_login:
+        description: 'SQL Server administrator login name'
+        required: true
+        default: 'sqladmin'
+      database_name:
+        description: 'SQL Database name'
+        required: true
+        default: 'sitechat'
+      cms_app_name:
+        description: 'Azure App Service name for the CMS'
+        required: true
+        default: 'site-chat-agent'
+
+# ---------------------------------------------------------------------------
+# Job 1: Provision Azure resources via Bicep
+# ---------------------------------------------------------------------------
+jobs:
+  provision:
+    name: Provision Azure Resources
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    outputs:
+      sql_server_fqdn: ${{ steps.bicep.outputs.sql_server_fqdn }}
+      storage_account_name: ${{ steps.bicep.outputs.storage_account_name }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Ensure resource group exists
+        run: |
+          az group create \
+            --name "${{ github.event.inputs.resource_group }}" \
+            --location "${{ github.event.inputs.location }}" \
+            --output none
+
+      - name: Deploy Bicep template (idempotent)
+        id: bicep
+        run: |
+          OUTPUTS=$(az deployment group create \
+            --resource-group "${{ github.event.inputs.resource_group }}" \
+            --template-file infra/main.bicep \
+            --parameters baseName="${{ github.event.inputs.base_name }}" \
+                         sqlAdminLogin="${{ github.event.inputs.sql_admin_login }}" \
+                         sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}" \
+                         databaseName="${{ github.event.inputs.database_name }}" \
+            --query "properties.outputs" \
+            --output json)
+
+          SQL_FQDN=$(echo "$OUTPUTS" | jq -r '.sqlServerFqdn.value')
+          STORAGE_NAME=$(echo "$OUTPUTS" | jq -r '.storageAccountName.value')
+
+          echo "sql_server_fqdn=$SQL_FQDN"       >> "$GITHUB_OUTPUT"
+          echo "storage_account_name=$STORAGE_NAME" >> "$GITHUB_OUTPUT"
+
+          echo "### Bicep outputs"                                 >> "$GITHUB_STEP_SUMMARY"
+          echo "- SQL Server FQDN: \`$SQL_FQDN\`"                 >> "$GITHUB_STEP_SUMMARY"
+          echo "- Storage Account: \`$STORAGE_NAME\`"             >> "$GITHUB_STEP_SUMMARY"
+
+# ---------------------------------------------------------------------------
+# Job 2: Configure App Service with connection strings
+# ---------------------------------------------------------------------------
+  configure:
+    name: Configure App Service
+    needs: provision
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Retrieve Blob Storage connection string
+        id: storage
+        run: |
+          BLOB_CONN=$(az storage account show-connection-string \
+            --name "${{ needs.provision.outputs.storage_account_name }}" \
+            --resource-group "${{ github.event.inputs.resource_group }}" \
+            --query connectionString \
+            --output tsv)
+          echo "::add-mask::$BLOB_CONN"
+          echo "blob_connection_string=$BLOB_CONN" >> "$GITHUB_OUTPUT"
+
+      - name: Build SQL connection string
+        id: sql
+        run: |
+          SQL_CONN="Server=tcp:${{ needs.provision.outputs.sql_server_fqdn }},1433;Initial Catalog=${{ github.event.inputs.database_name }};Persist Security Info=False;User ID=${{ github.event.inputs.sql_admin_login }};Password=${{ secrets.SQL_ADMIN_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+          echo "::add-mask::$SQL_CONN"
+          echo "sql_connection_string=$SQL_CONN" >> "$GITHUB_OUTPUT"
+
+      - name: Set App Service connection string (SQL)
+        run: |
+          az webapp config connection-string set \
+            --name "${{ github.event.inputs.cms_app_name }}" \
+            --resource-group "${{ github.event.inputs.resource_group }}" \
+            --settings "Default=${{ steps.sql.outputs.sql_connection_string }}" \
+            --connection-string-type SQLAzure \
+            --output none
+          echo "Set ConnectionStrings:Default on ${{ github.event.inputs.cms_app_name }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set App Service application setting (Blob Storage)
+        run: |
+          az webapp config appsettings set \
+            --name "${{ github.event.inputs.cms_app_name }}" \
+            --resource-group "${{ github.event.inputs.resource_group }}" \
+            --settings "Azure__BlobStorage__ConnectionString=${{ steps.storage.outputs.blob_connection_string }}" \
+            --output none
+          echo "Set Azure__BlobStorage__ConnectionString on ${{ github.event.inputs.cms_app_name }}" >> "$GITHUB_STEP_SUMMARY"
+
+# ---------------------------------------------------------------------------
+# Job 3: Run EF Core migrations against Azure SQL
+# ---------------------------------------------------------------------------
+  migrate:
+    name: Run EF Core Migrations
+    needs: [provision, configure]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Restore packages
+        run: dotnet restore src/cms/Server/PapaganCMS.csproj
+
+      - name: Run database migrations
+        run: dotnet ef database update --project src/cms/Server/PapaganCMS.csproj --no-build
+        env:
+          # ApplicationDbContextDesignTimeFactory reads CONNECTIONSTRINGS__DEFAULT
+          CONNECTIONSTRINGS__DEFAULT: "Server=tcp:${{ needs.provision.outputs.sql_server_fqdn }},1433;Initial Catalog=${{ github.event.inputs.database_name }};Persist Security Info=False;User ID=${{ github.event.inputs.sql_admin_login }};Password=${{ secrets.SQL_ADMIN_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+
+      - name: Report migration success
+        run: echo "EF Core migrations applied to ${{ needs.provision.outputs.sql_server_fqdn }}" >> "$GITHUB_STEP_SUMMARY"
