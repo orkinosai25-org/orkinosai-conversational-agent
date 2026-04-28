@@ -1,0 +1,739 @@
+@page "/adverts/buy"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using SiteChatCMS.Shared.DTOs.Adverts
+
+<PageTitle>Advertise With Us — Orkinosai CMS</PageTitle>
+
+<div class="advert-buy">
+
+    <!-- ── Hero ── -->
+    <div class="hero">
+        <h1>📢 Advertise With Us</h1>
+        <p>Reach thousands of users directly inside AI-powered chat widgets. Choose a tier, set your campaign details and submit for review.</p>
+    </div>
+
+    @if (loading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading advertising options…</p>
+        </div>
+    }
+    else if (submitted)
+    {
+        <div class="success-card">
+            <div class="success-icon">🎉</div>
+            <h2>Campaign Submitted!</h2>
+            <p>Your advert is now <strong>pending review</strong>. Our team will approve it within 1 business day. You'll receive a confirmation at <strong>@submittedEmail</strong>.</p>
+            <div class="success-actions">
+                <button class="btn btn-primary" @onclick="StartOver">Submit Another Advert</button>
+                <a href="/" class="btn btn-secondary">Go to Home</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- ── Step 1 — Pick a tier ── -->
+        @if (currentStep == 1)
+        {
+            <div class="step-header">
+                <span class="step-indicator">Step 1 of 3</span>
+                <h2>Choose Your Advertising Tier</h2>
+                <p>All tiers include placement in the chat widget. Upgrade for more visibility and longer campaigns.</p>
+            </div>
+
+            @if (tiers != null && tiers.Any())
+            {
+                <div class="tier-cards">
+                    @foreach (var tier in tiers)
+                    {
+                        <div class="tier-card @(selectedTierId == tier.Id ? "selected" : "") @(tier.Id == 1 ? "cheapest" : "") @(tier.Id == 3 ? "featured" : "")">
+                            @if (tier.Id == 3)
+                            {
+                                <div class="featured-badge">Most Popular</div>
+                            }
+                            @if (tier.Id == 1)
+                            {
+                                <div class="cheapest-badge">⭐ Best Value</div>
+                            }
+
+                            <h3>@tier.Name</h3>
+                            <div class="tier-price">
+                                <span class="currency">$</span>
+                                <span class="amount">@tier.MonthlyPrice.ToString("0.00")</span>
+                                <span class="period">/month</span>
+                            </div>
+                            <p class="tier-desc">@tier.Description</p>
+
+                            <ul class="feature-list">
+                                <li>⏱️ Up to <strong>@tier.MaxDurationDays days</strong></li>
+                                <li>👁️ @(tier.MaxImpressions == 0 ? "Unlimited impressions" : $"Up to {FormatNumber(tier.MaxImpressions)} impressions")</li>
+                                @foreach (var placement in tier.AllowedPlacements)
+                                {
+                                    <li>📍 @FormatPlacement(placement)</li>
+                                }
+                                @if (tier.IsPriorityPlacement)
+                                {
+                                    <li>⭐ Priority ordering</li>
+                                }
+                            </ul>
+
+                            <button class="select-btn @(selectedTierId == tier.Id ? "selected" : "")"
+                                    @onclick="() => SelectTier(tier)">
+                                @(selectedTierId == tier.Id ? "✓ Selected" : "Select This Tier")
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                @if (selectedTierId > 0)
+                {
+                    <div class="step-nav">
+                        <button class="btn btn-primary btn-lg" @onclick="GoToStep2">Continue →</button>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="error-state">
+                    <p>⚠️ Unable to load advertising tiers. Please refresh the page.</p>
+                </div>
+            }
+        }
+
+        <!-- ── Step 2 — Campaign details ── -->
+        @if (currentStep == 2)
+        {
+            <div class="step-header">
+                <span class="step-indicator">Step 2 of 3</span>
+                <h2>Campaign Details</h2>
+                <p>Tell us about your advert. All campaigns are reviewed before going live.</p>
+            </div>
+
+            <div class="form-card">
+                @if (selectedTier != null)
+                {
+                    <div class="selected-tier-summary">
+                        <strong>Selected tier:</strong> @selectedTier.Name — $@selectedTier.MonthlyPrice.ToString("0.00")/month
+                        <button class="btn-link" @onclick="GoToStep1">Change</button>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label>Advert Title *</label>
+                    <input class="form-control" @bind="createDto.Title" placeholder="e.g. Boost Your Business with AI Chat" maxlength="80" />
+                    <small>80 characters max</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" rows="3" @bind="createDto.Description" placeholder="Short description shown alongside your advert…" maxlength="200"></textarea>
+                    <small>200 characters max</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Target URL *</label>
+                    <input class="form-control" @bind="createDto.TargetUrl" placeholder="https://yourwebsite.com/landing-page" type="url" />
+                    <small>Where users are taken when they click the advert</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Advert Image URL</label>
+                    <input class="form-control" @bind="createDto.ImageUrl" placeholder="https://yourcdn.com/banner.png (optional)" type="url" />
+                    <small>Recommended size: 728×90 pixels (leaderboard)</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Placement *</label>
+                    <select class="form-control" @bind="createDto.Placement">
+                        <option value="">— Select a placement —</option>
+                        @if (selectedTier != null)
+                        {
+                            @foreach (var placement in selectedTier.AllowedPlacements)
+                            {
+                                <option value="@placement">@FormatPlacement(placement)</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Campaign Start Date *</label>
+                        <input type="date" class="form-control" @bind="startDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-group">
+                        <label>Campaign End Date *</label>
+                        <input type="date" class="form-control" @bind="endDate" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                        @if (selectedTier != null)
+                        {
+                            <small>Max @selectedTier.MaxDurationDays days</small>
+                        }
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(stepError))
+                {
+                    <div class="alert alert-danger">@stepError</div>
+                }
+
+                <div class="step-nav step-nav-spaced">
+                    <button class="btn btn-secondary" @onclick="GoToStep1">← Back</button>
+                    <button class="btn btn-primary btn-lg" @onclick="GoToStep3">Continue →</button>
+                </div>
+            </div>
+        }
+
+        <!-- ── Step 3 — Advertiser details & review ── -->
+        @if (currentStep == 3)
+        {
+            <div class="step-header">
+                <span class="step-indicator">Step 3 of 3</span>
+                <h2>Advertiser Information &amp; Review</h2>
+                <p>Almost done! Review your campaign and provide your contact details.</p>
+            </div>
+
+            <div class="form-card">
+
+                <!-- Campaign summary -->
+                <div class="review-section">
+                    <h3>📋 Campaign Summary</h3>
+                    <div class="review-grid">
+                        <div class="review-item">
+                            <span class="review-label">Tier</span>
+                            <span class="review-value">@selectedTier?.Name ($@selectedTier?.MonthlyPrice.ToString("0.00")/month)</span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Title</span>
+                            <span class="review-value">@createDto.Title</span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Placement</span>
+                            <span class="review-value">@FormatPlacement(createDto.Placement)</span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Dates</span>
+                            <span class="review-value">@startDate.ToString("MMM dd, yyyy") → @endDate.ToString("MMM dd, yyyy") (@((endDate - startDate).Days) days)</span>
+                        </div>
+                        <div class="review-item">
+                            <span class="review-label">Target URL</span>
+                            <span class="review-value"><a href="@createDto.TargetUrl" target="_blank">@createDto.TargetUrl</a></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advertiser info -->
+                <h3>👤 Your Details</h3>
+                <div class="form-group">
+                    <label>Business / Advertiser Name *</label>
+                    <input class="form-control" @bind="createDto.AdvertiserName" placeholder="Acme Corp." />
+                </div>
+                <div class="form-group">
+                    <label>Contact Email *</label>
+                    <input class="form-control" type="email" @bind="createDto.AdvertiserEmail" placeholder="marketing@yourcompany.com" />
+                    <small>We'll send campaign updates to this address</small>
+                </div>
+
+                <div class="payment-note">
+                    <span class="info-icon">ℹ️</span>
+                    <div>
+                        <strong>Payment</strong><br />
+                        An invoice will be emailed to you upon approval. Payment is due within 48 hours of approval to activate your campaign.
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(stepError))
+                {
+                    <div class="alert alert-danger">@stepError</div>
+                }
+
+                <div class="step-nav step-nav-spaced">
+                    <button class="btn btn-secondary" @onclick="GoToStep2">← Back</button>
+                    <button class="btn btn-primary btn-lg" @onclick="SubmitAdvert" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-sm"></span>
+                            <span> Submitting…</span>
+                        }
+                        else
+                        {
+                            <span>🚀 Submit Campaign</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .advert-buy {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* Hero */
+    .hero {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    .hero h1 {
+        font-size: 2.6em;
+        margin-bottom: 16px;
+        color: #222;
+    }
+
+    .hero p {
+        font-size: 1.15em;
+        color: #555;
+        max-width: 680px;
+        margin: 0 auto;
+    }
+
+    /* Loading */
+    .loading-state {
+        text-align: center;
+        padding: 80px 20px;
+        color: #888;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e0e0e0;
+        border-top-color: #4CAF50;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    .spinner-sm {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.5);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        vertical-align: middle;
+        margin-right: 6px;
+    }
+
+    @@keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Steps */
+    .step-header {
+        text-align: center;
+        margin-bottom: 36px;
+    }
+
+    .step-indicator {
+        display: inline-block;
+        background: #e8f5e9;
+        color: #2E7D32;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    .step-header h2 { font-size: 2em; color: #222; margin: 8px 0; }
+    .step-header p { color: #666; font-size: 1.05em; }
+
+    /* Tier cards */
+    .tier-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .tier-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 14px;
+        padding: 28px 24px;
+        position: relative;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        cursor: pointer;
+    }
+
+    .tier-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .tier-card.selected {
+        border-color: #4CAF50;
+        box-shadow: 0 0 0 3px rgba(76,175,80,0.2);
+    }
+
+    .tier-card.cheapest { background: #fafff9; }
+
+    .tier-card.featured {
+        border-color: #2196F3;
+    }
+
+    .featured-badge {
+        position: absolute;
+        top: -13px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 4px 16px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .cheapest-badge {
+        position: absolute;
+        top: -13px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #4CAF50;
+        color: white;
+        padding: 4px 16px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .tier-card h3 {
+        font-size: 1.6em;
+        margin: 0 0 6px;
+        color: #222;
+    }
+
+    .tier-price {
+        margin-bottom: 12px;
+    }
+
+    .tier-price .currency {
+        font-size: 1.4em;
+        vertical-align: super;
+        color: #555;
+    }
+
+    .tier-price .amount {
+        font-size: 2.8em;
+        font-weight: 700;
+        color: #2E7D32;
+    }
+
+    .tier-price .period {
+        color: #888;
+        font-size: 1em;
+    }
+
+    .tier-desc {
+        color: #666;
+        font-size: 0.95em;
+        margin-bottom: 16px;
+        min-height: 44px;
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 20px;
+        font-size: 0.9em;
+        color: #555;
+    }
+
+    .feature-list li { padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+    .feature-list li:last-child { border-bottom: none; }
+
+    .select-btn {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #4CAF50;
+        border-radius: 8px;
+        background: white;
+        color: #4CAF50;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .select-btn.selected, .select-btn:hover {
+        background: #4CAF50;
+        color: white;
+    }
+
+    /* Form card */
+    .form-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 14px;
+        padding: 32px;
+        max-width: 720px;
+        margin: 0 auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .selected-tier-summary {
+        background: #e8f5e9;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 24px;
+        font-size: 0.95em;
+        color: #2E7D32;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Review */
+    .review-section {
+        background: #f9f9f9;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .review-section h3 { margin: 0 0 16px; font-size: 1.1em; color: #333; }
+
+    .review-grid { display: flex; flex-direction: column; gap: 10px; }
+
+    .review-item {
+        display: flex;
+        gap: 12px;
+        font-size: 0.95em;
+    }
+
+    .review-label {
+        min-width: 100px;
+        color: #888;
+        font-weight: 500;
+    }
+
+    .review-value { color: #333; }
+
+    /* Payment note */
+    .payment-note {
+        display: flex;
+        gap: 14px;
+        background: #fff8e1;
+        border: 1px solid #ffe082;
+        border-radius: 10px;
+        padding: 16px;
+        margin: 20px 0;
+        font-size: 0.92em;
+        color: #5d4037;
+    }
+
+    .info-icon { font-size: 1.4em; flex-shrink: 0; }
+
+    /* Success */
+    .success-card {
+        text-align: center;
+        background: white;
+        border: 2px solid #4CAF50;
+        border-radius: 14px;
+        padding: 60px 40px;
+        max-width: 560px;
+        margin: 0 auto;
+        box-shadow: 0 4px 16px rgba(76,175,80,0.15);
+    }
+
+    .success-icon { font-size: 4em; margin-bottom: 16px; }
+
+    .success-card h2 { font-size: 2em; color: #2E7D32; margin-bottom: 12px; }
+    .success-card p { color: #555; font-size: 1.05em; margin-bottom: 28px; }
+
+    .success-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    /* Nav */
+    .step-nav { text-align: center; margin-top: 28px; }
+    .step-nav-spaced { display: flex; justify-content: space-between; align-items: center; }
+
+    /* Errors */
+    .error-state { text-align: center; color: #f44336; padding: 40px; font-size: 1.1em; }
+    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 0.95em; }
+    .alert-danger { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+
+    /* Forms */
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-weight: 500; margin-bottom: 6px; color: #333; }
+    .form-group small { display: block; margin-top: 4px; color: #888; font-size: 0.85em; }
+    .form-control { width: 100%; padding: 11px 13px; border: 1px solid #ddd; border-radius: 7px; font-size: 0.95em; box-sizing: border-box; }
+    .form-control:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 3px rgba(76,175,80,0.12); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    @@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* Buttons */
+    .btn {
+        padding: 10px 22px;
+        border-radius: 7px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: opacity 0.2s;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 0.95em;
+    }
+
+    .btn-lg { padding: 13px 32px; font-size: 1.05em; }
+    .btn:hover:not(:disabled) { opacity: 0.85; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-primary { background: #4CAF50; color: white; }
+    .btn-secondary { background: #e0e0e0; color: #333; }
+    .btn-link { background: none; border: none; color: #2196F3; cursor: pointer; text-decoration: underline; font-size: 0.9em; padding: 0; }
+</style>
+
+@code {
+    private List<AdvertTierDto>? tiers;
+    private bool loading = true;
+    private bool submitted;
+    private bool isSubmitting;
+    private int currentStep = 1;
+
+    private int selectedTierId;
+    private AdvertTierDto? selectedTier;
+
+    private CreateAdvertDto createDto = new()
+    {
+        StartDate = DateTime.Today.AddDays(1),
+        EndDate = DateTime.Today.AddDays(31)
+    };
+
+    private DateTime startDate = DateTime.Today.AddDays(1);
+    private DateTime endDate = DateTime.Today.AddDays(31);
+    private string? stepError;
+    private string submittedEmail = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            tiers = await Http.GetFromJsonAsync<List<AdvertTierDto>>("/api/advert/tiers");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading tiers: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void SelectTier(AdvertTierDto tier)
+    {
+        selectedTierId = tier.Id;
+        selectedTier = tier;
+        createDto.TierId = tier.Id;
+    }
+
+    private void GoToStep1() { currentStep = 1; stepError = null; }
+
+    private void GoToStep2() { currentStep = 2; stepError = null; }
+
+    private void GoToStep3()
+    {
+        stepError = null;
+
+        if (string.IsNullOrWhiteSpace(createDto.Title))
+        { stepError = "Please enter an advert title."; return; }
+
+        if (string.IsNullOrWhiteSpace(createDto.TargetUrl))
+        { stepError = "Please enter a target URL."; return; }
+
+        if (string.IsNullOrWhiteSpace(createDto.Placement))
+        { stepError = "Please select a placement."; return; }
+
+        if (endDate <= startDate)
+        { stepError = "End date must be after start date."; return; }
+
+        if (selectedTier != null && (endDate - startDate).Days > selectedTier.MaxDurationDays)
+        { stepError = $"Campaign duration cannot exceed {selectedTier.MaxDurationDays} days for the {selectedTier.Name} tier."; return; }
+
+        createDto.StartDate = startDate;
+        createDto.EndDate = endDate;
+
+        currentStep = 3;
+    }
+
+    private async Task SubmitAdvert()
+    {
+        stepError = null;
+
+        if (string.IsNullOrWhiteSpace(createDto.AdvertiserName))
+        { stepError = "Please enter your business / advertiser name."; return; }
+
+        if (string.IsNullOrWhiteSpace(createDto.AdvertiserEmail))
+        { stepError = "Please enter a contact email address."; return; }
+
+        try
+        {
+            isSubmitting = true;
+            createDto.StartDate = startDate;
+            createDto.EndDate = endDate;
+
+            var response = await Http.PostAsJsonAsync("/api/advert", createDto);
+            if (response.IsSuccessStatusCode)
+            {
+                submittedEmail = createDto.AdvertiserEmail;
+                submitted = true;
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                stepError = string.IsNullOrEmpty(error)
+                    ? "Failed to submit your advert. Please try again."
+                    : error;
+            }
+        }
+        catch (Exception ex)
+        {
+            stepError = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void StartOver()
+    {
+        submitted = false;
+        currentStep = 1;
+        selectedTierId = 0;
+        selectedTier = null;
+        createDto = new CreateAdvertDto
+        {
+            StartDate = DateTime.Today.AddDays(1),
+            EndDate = DateTime.Today.AddDays(31)
+        };
+        startDate = DateTime.Today.AddDays(1);
+        endDate = DateTime.Today.AddDays(31);
+        stepError = null;
+        submittedEmail = "";
+    }
+
+    private static string FormatPlacement(string placement) => placement switch
+    {
+        "ChatFooter" => "Chat Widget Footer",
+        "ChatSidebar" => "Chat Widget Sidebar",
+        "ChatBanner" => "Chat Banner",
+        "HomePage" => "Homepage",
+        _ => placement
+    };
+
+    private static string FormatNumber(long n) =>
+        n >= 1_000_000 ? $"{n / 1_000_000.0:0.#}M"
+        : n >= 1_000 ? $"{n / 1_000.0:0.#}K"
+        : n.ToString();
+}
