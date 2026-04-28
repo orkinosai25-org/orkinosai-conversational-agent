@@ -7,6 +7,133 @@ required Azure AI services.
 
 Before deploying, create the following resources in your Azure subscription.
 
+### 0. Azure SQL Database + Blob Storage (via Bicep — MVP)
+
+The CMS requires an Azure SQL Database (for identity, bots, training docs) and an
+Azure Blob Storage account (for file uploads and raw ingested artefacts).
+Both resources are provisioned with the Bicep templates in the `infra/` directory.
+
+#### Deploy with Bicep
+
+```bash
+# 1. Login & select subscription
+az login
+az account set --subscription "<your-subscription-id>"
+
+# 2. Create (or reuse) a resource group
+az group create --name sitechat-rg --location uksouth
+
+# 3. Deploy — supply the SQL admin password interactively or via --parameters
+az deployment group create \
+  --resource-group sitechat-rg \
+  --template-file infra/main.bicep \
+  --parameters baseName=orkinosai sqlAdminLogin=sqladmin \
+  --query "properties.outputs"
+```
+
+The deployment outputs `sqlServerFqdn`, `sqlConnectionStringTemplate`,
+`blobEndpoint`, and `storageAccountName`.
+
+#### Retrieve the Blob Storage connection string
+
+```bash
+STORAGE_NAME=$(az deployment group show \
+  --resource-group sitechat-rg \
+  --name main \
+  --query "properties.outputs.storageAccountName.value" -o tsv)
+
+az storage account show-connection-string \
+  --name "$STORAGE_NAME" \
+  --resource-group sitechat-rg \
+  --query connectionString -o tsv
+```
+
+#### Configure Azure App Service
+
+Set the following values in **Azure App Service → Configuration**:
+
+| Type | Name | Value |
+|------|------|-------|
+| Connection string | `Default` | Full ADO.NET connection string for the SQL database |
+| Application setting | `Azure__BlobStorage__ConnectionString` | Blob Storage connection string from step above |
+
+> **Note:** App Service connection strings named `Default` are exposed to .NET as
+> `ConnectionStrings:Default`. Application settings with `__` become `:` in .NET
+> configuration (e.g. `Azure__BlobStorage__ConnectionString` →
+> `Azure:BlobStorage:ConnectionString`).
+
+#### Run database migrations
+
+After deploying and configuring connection strings, run the EF Core migration to
+create the schema:
+
+```bash
+# From the repository root — requires the real SQL connection string in the environment
+cd src/cms/Server
+ASPNETCORE_ENVIRONMENT=Production \
+  CONNECTIONSTRINGS__DEFAULT="<your-connection-string>" \
+  dotnet ef database update
+```
+
+Or via the Azure CLI using App Service SSH / Kudu console:
+
+```bash
+dotnet ef database update
+```
+
+> **Tip:** The `InitialCreate` migration is already in
+> `src/cms/Server/Infrastructure/Data/Migrations/`. No additional scaffold step
+> is needed unless the schema changes.
+
+---
+
+### ⚠️ Security Action Item — Hardcoded SQL Password
+
+`src/cms/Server/appsettings.Development.json` contains a hardcoded SQL password
+that was committed for early development. **This credential must be rotated and
+removed before the application goes live.**
+
+**Before going live you must:**
+
+1. **Rotate the password** on the Azure SQL Server:
+   ```bash
+   az sql server update \
+     --name orkinosai-sql \
+     --resource-group sitechat-rg \
+     --admin-password "<new-strong-password>"
+   ```
+2. **Remove the hardcoded value** from `appsettings.Development.json` and replace
+   it with `""` or use [.NET User Secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets)
+   for local development.
+3. **Move the secret** to Azure Key Vault:
+   ```bash
+   az keyvault secret set \
+     --vault-name orkinosai-kv \
+     --name SqlAdminPassword \
+     --value "<new-strong-password>"
+   ```
+4. Reference it from App Service via a Key Vault reference instead of a plain value:
+   ```
+   @Microsoft.KeyVault(SecretUri=https://orkinosai-kv.vault.azure.net/secrets/SqlAdminPassword/)
+   ```
+
+---
+
+### Future: Azure AI Search (not yet implemented)
+
+When you are ready to add retrieval-augmented generation (RAG), uncomment the
+`aiSearch` resource in `infra/main.bicep` and deploy.  The `raw-ingested` Blob
+container created above is already ready to serve as the indexer data source.
+
+Minimal application settings to add at that point:
+
+| Setting | Value |
+|---------|-------|
+| `AzureSearch__Endpoint` | `https://<name>.search.windows.net` |
+| `AzureSearch__ApiKey` | Admin key (or use Managed Identity) |
+
+---
+
 ### 1. Azure OpenAI Service (AI)
 
 The conversational agent requires an **Azure OpenAI** resource to power its AI responses.

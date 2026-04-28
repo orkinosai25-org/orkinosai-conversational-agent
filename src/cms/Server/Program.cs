@@ -1,3 +1,4 @@
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OrkinosaiCMS.Core.Interfaces.Services;
@@ -16,12 +17,34 @@ using SiteChatCMS.Infrastructure.Services.Subscriptions;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add database context
+// Development: use InMemory for fast iteration without a SQL instance.
+// Production:  use Azure SQL Server — connection string supplied via
+//              App Service configuration (ConnectionStrings:Default) or
+//              the CONNECTIONSTRINGS__DEFAULT environment variable.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    // Use InMemory database for development
-    // TODO: Replace with SQL Server for production
-    options.UseInMemoryDatabase("SiteChatCMS");
+    if (builder.Environment.IsDevelopment())
+    {
+        options.UseInMemoryDatabase("SiteChatCMS");
+    }
+    else
+    {
+        var connectionString = builder.Configuration.GetConnectionString("Default")
+            ?? throw new InvalidOperationException(
+                "ConnectionStrings:Default is not set. " +
+                "Configure it in Azure App Service → Configuration → Connection strings.");
+        options.UseSqlServer(connectionString);
+    }
 });
+
+// Register Azure Blob Storage client (used for training-document uploads).
+// Connection string is read from Azure:BlobStorage:ConnectionString — set this
+// in App Service → Configuration → Application settings.
+var blobConnectionString = builder.Configuration["Azure:BlobStorage:ConnectionString"];
+if (!string.IsNullOrWhiteSpace(blobConnectionString))
+{
+    builder.Services.AddSingleton(new BlobServiceClient(blobConnectionString));
+}
 
 // Add ASP.NET Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
