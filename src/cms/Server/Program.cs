@@ -7,6 +7,7 @@ using SiteChatCMS.Core.Entities.Identity;
 using SiteChatCMS.Core.Interfaces.Services;
 using SiteChatCMS.Infrastructure.Data;
 using SiteChatCMS.Infrastructure.Services;
+using SiteChatCMS.Infrastructure.Services.Adverts;
 using SiteChatCMS.Infrastructure.Services.Auth;
 using SiteChatCMS.Infrastructure.Services.Bots;
 using SiteChatCMS.Infrastructure.Services.Onboarding;
@@ -100,6 +101,9 @@ builder.Services.AddSingleton<OrkinosaiCMS.Core.Interfaces.Services.IUserService
 builder.Services.AddSingleton<ICustomerService, CustomerService>();
 builder.Services.AddSingleton<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
+
+// Register advert service
+builder.Services.AddSingleton<IAdvertService, AdvertService>();
 
 var app = builder.Build();
 
