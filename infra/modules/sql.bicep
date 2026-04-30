@@ -55,7 +55,7 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-05-01-preview' = {
   properties: {
     collation: 'SQL_Latin1_General_CP1_CI_AS'
     autoPauseDelay: 60   // Auto-pause after 60 minutes idle (saves cost)
-    minCapacity: '0.5'   // Minimum 0.5 vCores when active
+    minCapacity: 1        // Minimum 1 vCore when active (integer required; 0.5 vCores not valid as a Bicep int)
     zoneRedundant: false // Single-zone — enable for production HA if needed
     requestedBackupStorageRedundancy: 'Local' // Cheapest backup option
   }

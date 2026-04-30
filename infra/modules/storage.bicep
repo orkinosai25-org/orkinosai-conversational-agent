@@ -10,7 +10,7 @@ param location string = resourceGroup().location
 
 // Storage account names must be 3-24 lowercase alphanumeric characters; strip
 // hyphens and truncate to 22 chars to leave room for the "st" suffix.
-var storageAccountName = take(toLower(replace(baseName, '-', '')), 22) + 'st'
+var storageAccountName = '${take(toLower(replace(baseName, '-', '')), 22)}st'
 
 // ── Storage Account ───────────────────────────────────────────────────────────
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
