@@ -131,8 +131,28 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Check App Service exists
+        id: check_app
+        run: |
+          if az webapp show \
+               --name "${{ github.event.inputs.cms_app_name }}" \
+               --resource-group "${{ github.event.inputs.resource_group }}" \
+               --output none 2>/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "### ⚠️ App Service not found — skipping configuration" >> "$GITHUB_STEP_SUMMARY"
+            echo "App Service \`${{ github.event.inputs.cms_app_name }}\` was not found in resource group \`${{ github.event.inputs.resource_group }}\`." >> "$GITHUB_STEP_SUMMARY"
+            echo "Set the following values manually in **App Service → Configuration**:" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Setting | Type | Value |" >> "$GITHUB_STEP_SUMMARY"
+            echo "|---------|------|-------|" >> "$GITHUB_STEP_SUMMARY"
+            echo "| \`Default\` | Connection string (SQLAzure) | See Bicep output \`sqlConnectionStringTemplate\` (replace password) |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| \`Azure__BlobStorage__ConnectionString\` | Application setting | Run: \`az storage account show-connection-string --name ${{ needs.provision.outputs.storage_account_name }} --resource-group ${{ github.event.inputs.resource_group }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Retrieve Blob Storage connection string
         id: storage
+        if: steps.check_app.outputs.exists == 'true'
         run: |
           BLOB_CONN=$(az storage account show-connection-string \
             --name "${{ needs.provision.outputs.storage_account_name }}" \
@@ -144,12 +164,14 @@ jobs:
 
       - name: Build SQL connection string
         id: sql
+        if: steps.check_app.outputs.exists == 'true'
         run: |
           SQL_CONN="Server=tcp:${{ needs.provision.outputs.sql_server_fqdn }},1433;Initial Catalog=${{ github.event.inputs.database_name }};Persist Security Info=False;User ID=${{ github.event.inputs.sql_admin_login }};Password=${{ secrets.SQL_ADMIN_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
           echo "::add-mask::$SQL_CONN"
           echo "sql_connection_string=$SQL_CONN" >> "$GITHUB_OUTPUT"
 
       - name: Set App Service connection string (SQL)
+        if: steps.check_app.outputs.exists == 'true'
         run: |
           az webapp config connection-string set \
             --name "${{ github.event.inputs.cms_app_name }}" \
@@ -160,6 +182,7 @@ jobs:
           echo "Set ConnectionStrings:Default on ${{ github.event.inputs.cms_app_name }}" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Set App Service application setting (Blob Storage)
+        if: steps.check_app.outputs.exists == 'true'
         run: |
           az webapp config appsettings set \
             --name "${{ github.event.inputs.cms_app_name }}" \
@@ -173,7 +196,7 @@ jobs:
 # ---------------------------------------------------------------------------
   migrate:
     name: Run EF Core Migrations
-    needs: [provision, configure]
+    needs: [provision]
     runs-on: ubuntu-latest
     permissions:
       contents: read
