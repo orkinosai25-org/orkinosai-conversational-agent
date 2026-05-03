@@ -216,6 +216,9 @@ jobs:
       - name: Restore packages
         run: dotnet restore src/cms/Server/PapaganCMS.csproj
 
+      - name: Build project
+        run: dotnet build src/cms/Server/PapaganCMS.csproj --no-restore
+
       - name: Run database migrations
         run: dotnet ef database update --project src/cms/Server/PapaganCMS.csproj --no-build
         env:
