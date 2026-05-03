@@ -9,9 +9,9 @@ param baseName string
 @description('Azure region for all resources')
 param location string = resourceGroup().location
 
-@description('App Service Plan SKU. B1 is sufficient for dev/test; use P1v3 for production.')
-@allowed(['B1', 'B2', 'B3', 'P1v3', 'P2v3', 'P3v3'])
-param planSku string = 'B1'
+@description('App Service Plan SKU. S1 is recommended for dev/test (Standard quota, avoids Basic quota limits); use P1v3 for production.')
+@allowed(['B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1v3', 'P2v3', 'P3v3'])
+param planSku string = 'S1'
 
 @description('Name of the CMS Azure App Service (.NET)')
 param cmsAppName string = 'site-chat-agent'
@@ -41,7 +41,7 @@ resource cmsApp 'Microsoft.Web/sites@2023-01-01' = {
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|10.0'
-      alwaysOn: false // Disabled on B1 (no always-on support); enable on P1v3+
+      alwaysOn: false // Set to true on S1+ or P1v3+ if you need always-on (B1 does not support it)
       // SCM_DO_BUILD_DURING_DEPLOYMENT is NOT set here — publish-profile deploys
       // a pre-built artifact so Oryx build is not needed.
     }

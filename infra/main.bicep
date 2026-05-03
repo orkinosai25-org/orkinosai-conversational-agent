@@ -50,9 +50,9 @@ param cmsAppName string = 'site-chat-agent'
 @description('Name of the Agent Azure App Service (Python). Must be globally unique.')
 param agentAppName string = 'orkinosai-agent'
 
-@description('App Service Plan SKU. B1 is sufficient for dev/test; use P1v3 for production.')
-@allowed(['B1', 'B2', 'B3', 'P1v3', 'P2v3', 'P3v3'])
-param appServicePlanSku string = 'B1'
+@description('App Service Plan SKU. S1 is recommended for dev/test (Standard quota, avoids Basic quota limits); use P1v3 for production.')
+@allowed(['B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1v3', 'P2v3', 'P3v3'])
+param appServicePlanSku string = 'S1'
 
 // ── Modules ───────────────────────────────────────────────────────────────────
 module appservice 'modules/appservice.bicep' = {
