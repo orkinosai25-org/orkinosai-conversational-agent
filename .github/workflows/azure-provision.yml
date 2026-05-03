@@ -1,8 +1,16 @@
-# Azure Infrastructure Provisioning Workflow
+# Azure Full Infrastructure Provisioning Workflow
 #
-# Provisions Azure SQL Database + Blob Storage using Bicep, wires the
-# resulting connection strings into the CMS App Service configuration, and
-# runs EF Core migrations so the schema is created automatically.
+# Provisions ALL required Azure resources using Bicep (idempotent — safe to re-run):
+#   - Resource Group
+#   - App Service Plan
+#   - CMS App Service  (.NET 8)
+#   - Agent App Service (Python 3.11)
+#   - Azure SQL Server + Database
+#   - Azure Blob Storage
+#
+# After provisioning, the workflow configures both App Services with the correct
+# connection strings and application settings so deployments from
+# main_papagan.yml and main_orkinosai-agent.yml work without manual steps.
 #
 # ── Required GitHub Secrets ───────────────────────────────────────────────────
 #   AZURE_CREDENTIALS      Service principal JSON used by azure/login:
@@ -16,23 +24,22 @@
 #                            az ad sp create-for-rbac \
 #                              --name "orkinosai-ghactions" \
 #                              --role Contributor \
-#                              --scopes /subscriptions/<sub-id>/resourceGroups/sitechat-rg \
+#                              --scopes /subscriptions/<sub-id> \
 #                              --sdk-auth
 #
-#   SQL_ADMIN_PASSWORD     Strong password for the Azure SQL administrator
-#                          account (same value used when the Bicep template was
-#                          first deployed — or the new value after rotation).
+#   SQL_ADMIN_PASSWORD     Strong password for the Azure SQL administrator account.
 #
-# ── Workflow inputs ───────────────────────────────────────────────────────────
-# All inputs have sensible defaults that match the existing deployment.
-# Override them in the GitHub Actions "Run workflow" UI when needed.
+#   AZURE_AI_API_KEY       Azure OpenAI API key (set on the Agent App Service).
+#   AZURE_AI_ENDPOINT      Azure OpenAI endpoint URL (set on the Agent App Service).
+#   AZURE_OPENAI_DEPLOYMENT  Azure OpenAI model deployment name.
+#   AZURE_OPENAI_API_VERSION Azure OpenAI API version (e.g. 2024-08-01-preview).
 #
 # ── What this workflow does ───────────────────────────────────────────────────
-# Job 1 — provision  : deploy infra/main.bicep (idempotent, safe to re-run)
-# Job 2 — configure  : set ConnectionStrings + Blob Storage on the App Service
+# Job 1 — provision  : deploy infra/main.bicep (creates RG + all resources)
+# Job 2 — configure  : push connection strings & app settings to both App Services
 # Job 3 — migrate    : run 'dotnet ef database update' against Azure SQL
 
-name: Provision Azure Infrastructure (SQL + Blob Storage)
+name: Provision Azure Infrastructure (Full)
 
 on:
   workflow_dispatch:
@@ -46,7 +53,7 @@ on:
         required: true
         default: 'uksouth'
       base_name:
-        description: 'Base resource name (derives SQL server / storage account names)'
+        description: 'Base resource name (derives SQL server / storage account / plan names)'
         required: true
         default: 'orkinosai'
       sql_admin_login:
@@ -58,12 +65,28 @@ on:
         required: true
         default: 'sitechat'
       cms_app_name:
-        description: 'Azure App Service name for the CMS'
+        description: 'Azure App Service name for the CMS (.NET)'
         required: true
         default: 'site-chat-agent'
+      agent_app_name:
+        description: 'Azure App Service name for the Python agent'
+        required: true
+        default: 'orkinosai-agent'
+      app_service_plan_sku:
+        description: 'App Service Plan SKU (B1 for dev/test, P1v3 for production)'
+        required: true
+        default: 'B1'
+        type: choice
+        options:
+          - B1
+          - B2
+          - B3
+          - P1v3
+          - P2v3
+          - P3v3
 
 # ---------------------------------------------------------------------------
-# Job 1: Provision Azure resources via Bicep
+# Job 1: Provision ALL Azure resources via Bicep (idempotent)
 # ---------------------------------------------------------------------------
 jobs:
   provision:
@@ -73,8 +96,12 @@ jobs:
       contents: read
 
     outputs:
-      sql_server_fqdn: ${{ steps.bicep.outputs.sql_server_fqdn }}
+      sql_server_fqdn:      ${{ steps.bicep.outputs.sql_server_fqdn }}
       storage_account_name: ${{ steps.bicep.outputs.storage_account_name }}
+      cms_app_name:         ${{ steps.bicep.outputs.cms_app_name }}
+      agent_app_name:       ${{ steps.bicep.outputs.agent_app_name }}
+      cms_hostname:         ${{ steps.bicep.outputs.cms_hostname }}
+      agent_hostname:       ${{ steps.bicep.outputs.agent_hostname }}
 
     steps:
       - name: Checkout repository
@@ -91,35 +118,56 @@ jobs:
             --name "${{ github.event.inputs.resource_group }}" \
             --location "${{ github.event.inputs.location }}" \
             --output none
+          echo "Resource group '${{ github.event.inputs.resource_group }}' ready."
 
-      - name: Deploy Bicep template (idempotent)
+      - name: Deploy Bicep template (idempotent — provisions all resources)
         id: bicep
         run: |
           OUTPUTS=$(az deployment group create \
             --resource-group "${{ github.event.inputs.resource_group }}" \
             --template-file infra/main.bicep \
-            --parameters baseName="${{ github.event.inputs.base_name }}" \
-                         sqlAdminLogin="${{ github.event.inputs.sql_admin_login }}" \
-                         sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}" \
-                         databaseName="${{ github.event.inputs.database_name }}" \
+            --parameters \
+                baseName="${{ github.event.inputs.base_name }}" \
+                sqlAdminLogin="${{ github.event.inputs.sql_admin_login }}" \
+                sqlAdminPassword="${{ secrets.SQL_ADMIN_PASSWORD }}" \
+                databaseName="${{ github.event.inputs.database_name }}" \
+                cmsAppName="${{ github.event.inputs.cms_app_name }}" \
+                agentAppName="${{ github.event.inputs.agent_app_name }}" \
+                appServicePlanSku="${{ github.event.inputs.app_service_plan_sku }}" \
             --query "properties.outputs" \
             --output json)
 
-          SQL_FQDN=$(echo "$OUTPUTS" | jq -r '.sqlServerFqdn.value')
-          STORAGE_NAME=$(echo "$OUTPUTS" | jq -r '.storageAccountName.value')
+          SQL_FQDN=$(echo    "$OUTPUTS" | jq -r '.sqlServerFqdn.value')
+          STORAGE=$(echo     "$OUTPUTS" | jq -r '.storageAccountName.value')
+          CMS_APP=$(echo     "$OUTPUTS" | jq -r '.cmsAppName.value')
+          AGENT_APP=$(echo   "$OUTPUTS" | jq -r '.agentAppName.value')
+          CMS_HOST=$(echo    "$OUTPUTS" | jq -r '.cmsDefaultHostname.value')
+          AGENT_HOST=$(echo  "$OUTPUTS" | jq -r '.agentDefaultHostname.value')
+          PLAN=$(echo        "$OUTPUTS" | jq -r '.appServicePlanName.value')
 
-          echo "sql_server_fqdn=$SQL_FQDN"       >> "$GITHUB_OUTPUT"
-          echo "storage_account_name=$STORAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "sql_server_fqdn=$SQL_FQDN"         >> "$GITHUB_OUTPUT"
+          echo "storage_account_name=$STORAGE"      >> "$GITHUB_OUTPUT"
+          echo "cms_app_name=$CMS_APP"              >> "$GITHUB_OUTPUT"
+          echo "agent_app_name=$AGENT_APP"          >> "$GITHUB_OUTPUT"
+          echo "cms_hostname=$CMS_HOST"             >> "$GITHUB_OUTPUT"
+          echo "agent_hostname=$AGENT_HOST"         >> "$GITHUB_OUTPUT"
 
-          echo "### Bicep outputs"                                 >> "$GITHUB_STEP_SUMMARY"
-          echo "- SQL Server FQDN: \`$SQL_FQDN\`"                 >> "$GITHUB_STEP_SUMMARY"
-          echo "- Storage Account: \`$STORAGE_NAME\`"             >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### ✅ Bicep provisioning complete"
+            echo "| Resource | Value |"
+            echo "|----------|-------|"
+            echo "| App Service Plan | \`$PLAN\` |"
+            echo "| CMS App Service  | \`$CMS_APP\` → https://$CMS_HOST |"
+            echo "| Agent App Service| \`$AGENT_APP\` → https://$AGENT_HOST |"
+            echo "| SQL Server FQDN  | \`$SQL_FQDN\` |"
+            echo "| Storage Account  | \`$STORAGE\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
 # ---------------------------------------------------------------------------
-# Job 2: Configure App Service with connection strings
+# Job 2: Configure both App Services with connection strings & settings
 # ---------------------------------------------------------------------------
   configure:
-    name: Configure App Service
+    name: Configure App Services
     needs: provision
     runs-on: ubuntu-latest
     permissions:
@@ -131,28 +179,8 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Check App Service exists
-        id: check_app
-        run: |
-          if az webapp show \
-               --name "${{ github.event.inputs.cms_app_name }}" \
-               --resource-group "${{ github.event.inputs.resource_group }}" \
-               --output none 2>/dev/null; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "### ⚠️ App Service not found — skipping configuration" >> "$GITHUB_STEP_SUMMARY"
-            echo "App Service \`${{ github.event.inputs.cms_app_name }}\` was not found in resource group \`${{ github.event.inputs.resource_group }}\`." >> "$GITHUB_STEP_SUMMARY"
-            echo "Set the following values manually in **App Service → Configuration**:" >> "$GITHUB_STEP_SUMMARY"
-            echo "| Setting | Type | Value |" >> "$GITHUB_STEP_SUMMARY"
-            echo "|---------|------|-------|" >> "$GITHUB_STEP_SUMMARY"
-            echo "| \`Default\` | Connection string (SQLAzure) | See Bicep output \`sqlConnectionStringTemplate\` (replace password) |" >> "$GITHUB_STEP_SUMMARY"
-            echo "| \`Azure__BlobStorage__ConnectionString\` | Application setting | Run: \`az storage account show-connection-string --name ${{ needs.provision.outputs.storage_account_name }} --resource-group ${{ github.event.inputs.resource_group }}\` |" >> "$GITHUB_STEP_SUMMARY"
-          fi
-
       - name: Retrieve Blob Storage connection string
         id: storage
-        if: steps.check_app.outputs.exists == 'true'
         run: |
           BLOB_CONN=$(az storage account show-connection-string \
             --name "${{ needs.provision.outputs.storage_account_name }}" \
@@ -164,39 +192,93 @@ jobs:
 
       - name: Build SQL connection string
         id: sql
-        if: steps.check_app.outputs.exists == 'true'
         run: |
           SQL_CONN="Server=tcp:${{ needs.provision.outputs.sql_server_fqdn }},1433;Initial Catalog=${{ github.event.inputs.database_name }};Persist Security Info=False;User ID=${{ github.event.inputs.sql_admin_login }};Password=${{ secrets.SQL_ADMIN_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
           echo "::add-mask::$SQL_CONN"
           echo "sql_connection_string=$SQL_CONN" >> "$GITHUB_OUTPUT"
 
-      - name: Set App Service connection string (SQL)
-        if: steps.check_app.outputs.exists == 'true'
+      # ── CMS App Service (site-chat-agent) ──────────────────────────────────
+      - name: Configure CMS — SQL connection string
         run: |
           az webapp config connection-string set \
-            --name "${{ github.event.inputs.cms_app_name }}" \
+            --name "${{ needs.provision.outputs.cms_app_name }}" \
             --resource-group "${{ github.event.inputs.resource_group }}" \
             --settings "Default=${{ steps.sql.outputs.sql_connection_string }}" \
             --connection-string-type SQLAzure \
             --output none
-          echo "Set ConnectionStrings:Default on ${{ github.event.inputs.cms_app_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ CMS: ConnectionStrings:Default configured" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Set App Service application setting (Blob Storage)
-        if: steps.check_app.outputs.exists == 'true'
+      - name: Configure CMS — Blob Storage connection string
         run: |
           az webapp config appsettings set \
-            --name "${{ github.event.inputs.cms_app_name }}" \
+            --name "${{ needs.provision.outputs.cms_app_name }}" \
             --resource-group "${{ github.event.inputs.resource_group }}" \
             --settings "Azure__BlobStorage__ConnectionString=${{ steps.storage.outputs.blob_connection_string }}" \
             --output none
-          echo "Set Azure__BlobStorage__ConnectionString on ${{ github.event.inputs.cms_app_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ CMS: Azure__BlobStorage__ConnectionString configured" >> "$GITHUB_STEP_SUMMARY"
+
+      # ── Agent App Service (orkinosai-agent) ────────────────────────────────
+      - name: Configure Agent — Blob Storage connection string
+        run: |
+          az webapp config appsettings set \
+            --name "${{ needs.provision.outputs.agent_app_name }}" \
+            --resource-group "${{ github.event.inputs.resource_group }}" \
+            --settings "Azure__BlobStorage__ConnectionString=${{ steps.storage.outputs.blob_connection_string }}" \
+            --output none
+          echo "✅ Agent: Azure__BlobStorage__ConnectionString configured" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Configure Agent — Azure OpenAI settings
+        env:
+          AZURE_AI_API_KEY: ${{ secrets.AZURE_AI_API_KEY }}
+          AZURE_AI_ENDPOINT: ${{ secrets.AZURE_AI_ENDPOINT }}
+          AZURE_OPENAI_DEPLOYMENT: ${{ secrets.AZURE_OPENAI_DEPLOYMENT }}
+          AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
+        run: |
+          # Validate that all required AI secrets are present before applying settings
+          MISSING=""
+          [ -z "$AZURE_AI_API_KEY" ]         && MISSING="$MISSING AZURE_AI_API_KEY"
+          [ -z "$AZURE_AI_ENDPOINT" ]        && MISSING="$MISSING AZURE_AI_ENDPOINT"
+          [ -z "$AZURE_OPENAI_DEPLOYMENT" ]  && MISSING="$MISSING AZURE_OPENAI_DEPLOYMENT"
+          [ -z "$AZURE_OPENAI_API_VERSION" ] && MISSING="$MISSING AZURE_OPENAI_API_VERSION"
+          if [ -n "$MISSING" ]; then
+            echo "::warning::The following secrets are not set and were skipped:$MISSING"
+            echo "⚠️ Agent: Azure OpenAI settings skipped — missing secrets:$MISSING" >> "$GITHUB_STEP_SUMMARY"
+            echo "Add them in Settings → Secrets and variables → Actions and re-run this workflow." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          az webapp config appsettings set \
+            --name "${{ needs.provision.outputs.agent_app_name }}" \
+            --resource-group "${{ github.event.inputs.resource_group }}" \
+            --settings \
+              "AZURE_AI_API_KEY=$AZURE_AI_API_KEY" \
+              "AZURE_AI_ENDPOINT=$AZURE_AI_ENDPOINT" \
+              "AZURE_OPENAI_DEPLOYMENT=$AZURE_OPENAI_DEPLOYMENT" \
+              "AZURE_OPENAI_API_VERSION=$AZURE_OPENAI_API_VERSION" \
+              "SCM_DO_BUILD_DURING_DEPLOYMENT=true" \
+            --output none
+          echo "✅ Agent: Azure OpenAI settings configured" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Summary
+        run: |
+          {
+            echo ""
+            echo "### ✅ App Service configuration complete"
+            echo "Both App Services are ready for deployment:"
+            echo "- CMS : https://${{ needs.provision.outputs.cms_hostname }}"
+            echo "- Agent : https://${{ needs.provision.outputs.agent_hostname }}"
+            echo ""
+            echo "Next steps:"
+            echo "1. Download publish profiles from Azure Portal and store as \`PUBLISH_PROFILE\` and \`AGENT_PUBLISH_PROFILE\` secrets."
+            echo "2. Push to \`main\` (or run the deploy workflows manually) to deploy both apps."
+          } >> "$GITHUB_STEP_SUMMARY"
 
 # ---------------------------------------------------------------------------
 # Job 3: Run EF Core migrations against Azure SQL
 # ---------------------------------------------------------------------------
   migrate:
     name: Run EF Core Migrations
-    needs: [provision]
+    needs: [provision, configure]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -226,4 +308,5 @@ jobs:
           CONNECTIONSTRINGS__DEFAULT: "Server=tcp:${{ needs.provision.outputs.sql_server_fqdn }},1433;Initial Catalog=${{ github.event.inputs.database_name }};Persist Security Info=False;User ID=${{ github.event.inputs.sql_admin_login }};Password=${{ secrets.SQL_ADMIN_PASSWORD }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
       - name: Report migration success
-        run: echo "EF Core migrations applied to ${{ needs.provision.outputs.sql_server_fqdn }}" >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          echo "✅ EF Core migrations applied to ${{ needs.provision.outputs.sql_server_fqdn }}" >> "$GITHUB_STEP_SUMMARY"
