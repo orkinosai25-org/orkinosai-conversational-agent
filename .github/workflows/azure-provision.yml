@@ -73,11 +73,12 @@ on:
         required: true
         default: 'orkinosai-agent'
       app_service_plan_sku:
-        description: 'App Service Plan SKU (S1 for dev/test — Standard quota; P1v3 for production)'
+        description: 'App Service Plan SKU (F1=Free/no-quota-cost for dev; S1=Standard for CI; P1v3 for production)'
         required: true
         default: 'S1'
         type: choice
         options:
+          - F1
           - S1
           - S2
           - S3
