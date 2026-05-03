@@ -35,7 +35,7 @@
 #   AZURE_OPENAI_API_VERSION Azure OpenAI API version (e.g. 2024-08-01-preview).
 #
 # ── What this workflow does ───────────────────────────────────────────────────
-# Job 1 — provision  : deploy infra/main.bicep (creates RG + all resources)
+# Job 1 — provision  : deploy infra/main.bicep (creates RG + all resources, default SKU: S1)
 # Job 2 — configure  : push connection strings & app settings to both App Services
 # Job 3 — migrate    : run 'dotnet ef database update' against Azure SQL
 
@@ -73,11 +73,14 @@ on:
         required: true
         default: 'orkinosai-agent'
       app_service_plan_sku:
-        description: 'App Service Plan SKU (B1 for dev/test, P1v3 for production)'
+        description: 'App Service Plan SKU (S1 for dev/test — Standard quota; P1v3 for production)'
         required: true
-        default: 'B1'
+        default: 'S1'
         type: choice
         options:
+          - S1
+          - S2
+          - S3
           - B1
           - B2
           - B3
