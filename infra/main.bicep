@@ -52,7 +52,7 @@ param agentAppName string = 'orkinosai-agent'
 
 @description('App Service Plan SKU. F1 (Free) uses shared compute and avoids vCPU quota limits - ideal when Basic/Standard quota is exhausted. Use S1 for Standard quota environments or P1v3 for production.')
 @allowed(['F1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1v3', 'P2v3', 'P3v3'])
-param appServicePlanSku string = 'S1'
+param appServicePlanSku string = 'F1'
 
 // ── Modules ───────────────────────────────────────────────────────────────────
 module appservice 'modules/appservice.bicep' = {

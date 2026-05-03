@@ -60,7 +60,7 @@ az deployment group create \
       sqlAdminPassword="<your-password>" \
       cmsAppName=site-chat-agent \
       agentAppName=orkinosai-agent \
-      appServicePlanSku=B1 \
+      appServicePlanSku=F1 \
   --query "properties.outputs"
 ```
 
@@ -233,15 +233,14 @@ manual `az deployment group create` command above), the following are created:
 
 | Resource | Name | Runtime |
 |----------|------|---------|
-| App Service Plan | `orkinosai-plan` | Linux S1 (default) |
+| App Service Plan | `orkinosai-plan` | Linux F1 (default) |
 | CMS App Service | `site-chat-agent` | .NET 10 |
 | Agent App Service | `orkinosai-agent` | Python 3.11 |
 
-> **Quota tip:** If the workflow fails with `SubscriptionIsOverQuotaForSku` (Standard or Basic
-> VM quota exhausted), re-run the workflow and select **`F1`** as the App Service Plan SKU.
-> `F1` (Free tier) runs on shared infrastructure and is **exempt from vCPU quotas**, making
-> it ideal for development environments or subscriptions with limited quota. Upgrade to `S1`
-> or `P1v3` for production once quota has been increased.
+> **Quota tip:** The default App Service Plan SKU is `F1` (Free tier), which runs on shared
+> infrastructure and is **exempt from vCPU quotas** — making it ideal for development or
+> subscriptions with limited quota. To use Standard or Premium compute, re-run the workflow
+> and select `S1` or `P1v3` as the App Service Plan SKU once quota has been confirmed.
 
 ### 3. Download the Publish Profile
 
