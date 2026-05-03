@@ -7,13 +7,38 @@ required Azure AI services.
 
 Before deploying, create the following resources in your Azure subscription.
 
-### 0. Azure SQL Database + Blob Storage (via Bicep — MVP)
+### 0. Full Azure Infrastructure (via Bicep — recommended)
 
-The CMS requires an Azure SQL Database (for identity, bots, training docs) and an
-Azure Blob Storage account (for file uploads and raw ingested artefacts).
-Both resources are provisioned with the Bicep templates in the `infra/` directory.
+All required Azure resources are provisioned by the Bicep templates in the `infra/`
+directory.  A single `az deployment group create` call (or the
+`Provision Azure Infrastructure (Full)` GitHub Actions workflow) creates:
 
-#### Deploy with Bicep
+- App Service Plan (`orkinosai-plan`)
+- CMS App Service — `site-chat-agent` (.NET 10)
+- Agent App Service — `orkinosai-agent` (Python 3.11)
+- Azure SQL Server + Database
+- Azure Blob Storage account (two containers: `training-docs`, `raw-ingested`)
+
+#### Automated provisioning (recommended)
+
+Run the **Provision Azure Infrastructure (Full)** workflow from
+**Actions → Provision Azure Infrastructure (Full) → Run workflow**.
+
+Required GitHub Secrets (add in **Settings → Secrets and variables → Actions**):
+
+| Secret | Purpose |
+|--------|---------|
+| `AZURE_CREDENTIALS` | Service principal JSON (`az ad sp create-for-rbac --sdk-auth`) |
+| `SQL_ADMIN_PASSWORD` | Strong password for the SQL administrator account |
+| `AZURE_AI_API_KEY` | Azure OpenAI API key |
+| `AZURE_AI_ENDPOINT` | Azure OpenAI endpoint URL |
+| `AZURE_OPENAI_DEPLOYMENT` | Model deployment name (e.g. `gpt-4o`) |
+| `AZURE_OPENAI_API_VERSION` | API version (e.g. `2024-08-01-preview`) |
+
+The workflow provisions every resource, wires connection strings into both App
+Services, and runs EF Core migrations — no manual Azure Portal clicks required.
+
+#### Manual provisioning (alternative)
 
 ```bash
 # 1. Login & select subscription
@@ -23,18 +48,28 @@ az account set --subscription "<your-subscription-id>"
 # 2. Create (or reuse) a resource group
 az group create --name sitechat-rg --location uksouth
 
-# 3. Deploy — supply the SQL admin password interactively or via --parameters
+# 3. Deploy all resources — App Services, SQL, Blob Storage
 az deployment group create \
   --resource-group sitechat-rg \
   --template-file infra/main.bicep \
-  --parameters baseName=orkinosai sqlAdminLogin=sqladmin \
+  --parameters \
+      baseName=orkinosai \
+      sqlAdminLogin=sqladmin \
+      sqlAdminPassword="<your-password>" \
+      cmsAppName=site-chat-agent \
+      agentAppName=orkinosai-agent \
+      appServicePlanSku=B1 \
   --query "properties.outputs"
 ```
 
 The deployment outputs `sqlServerFqdn`, `sqlConnectionStringTemplate`,
-`blobEndpoint`, and `storageAccountName`.
+`blobEndpoint`, `storageAccountName`, `cmsAppName`, `cmsDefaultHostname`,
+`agentAppName`, `agentDefaultHostname`, and `appServicePlanName`.
 
-#### Retrieve the Blob Storage connection string
+#### Retrieve the Blob Storage connection string (manual provisioning only)
+
+When provisioning manually, retrieve the Blob connection string to configure App
+Services yourself:
 
 ```bash
 STORAGE_NAME=$(az deployment group show \
@@ -48,9 +83,10 @@ az storage account show-connection-string \
   --query connectionString -o tsv
 ```
 
-#### Configure Azure App Service
+#### Configure Azure App Services (manual provisioning only)
 
-Set the following values in **Azure App Service → Configuration**:
+When provisioning manually, set the following values in
+**Azure App Service → Configuration** for each app:
 
 | Type | Name | Value |
 |------|------|-------|
@@ -185,48 +221,34 @@ Set these as environment variables (see **Configure Environment Variables** belo
 - `AZURE_OPENAI_DEPLOYMENT` — the model deployment name (e.g. `gpt-4o`)
 - `AZURE_OPENAI_API_VERSION` — the API version (e.g. `2024-08-01-preview`)
 
-### 2. Azure App Service
+### 2. Azure App Service (provisioned automatically by Bicep)
 
-The web app host for both the conversational agent (Python) and the CMS (.NET).
+The App Service Plan and both App Services (CMS and Agent) are now provisioned
+by the Bicep templates — **no manual `az webapp create` steps are required**.
 
-```bash
-# Create App Service plan (Linux, B1 tier is sufficient for dev/test)
-az appservice plan create \
-  --name orkinosai-plan \
-  --resource-group sitechat-rg \
-  --sku B1 \
-  --is-linux
+When you run the `Provision Azure Infrastructure (Full)` workflow (or the
+manual `az deployment group create` command above), the following are created:
 
-# Create the web app for the conversational agent (Python)
-az webapp create \
-  --name orkinosai-agent \
-  --resource-group sitechat-rg \
-  --plan orkinosai-plan \
-  --runtime "PYTHON:3.11"
-
-# Create the web app for the CMS (.NET)
-az webapp create \
-  --name sitechat \
-  --resource-group sitechat-rg \
-  --plan orkinosai-plan \
-  --runtime "DOTNETCORE:8.0"
-```
+| Resource | Name | Runtime |
+|----------|------|---------|
+| App Service Plan | `orkinosai-plan` | Linux B1 |
+| CMS App Service | `site-chat-agent` | .NET 10 |
+| Agent App Service | `orkinosai-agent` | Python 3.11 |
 
 ### 3. Download the Publish Profile
 
-The GitHub Actions workflow authenticates to Azure using a **publish profile**.
+The GitHub Actions deploy workflows authenticate to Azure using a **publish profile**.
+Download these **after** the provisioning workflow has created the App Services.
 
 1. Go to the [Azure Portal](https://portal.azure.com).
-2. Open the App Service (`sitechat` or `orkinosai-agent-b3f5c3cac0fzgteh`).
+2. Open the **`site-chat-agent`** App Service.
 3. Click **Overview** → **Get publish profile** (downloads a `.PublishSettings` file).
 4. In your GitHub repository, go to **Settings → Secrets and variables → Actions**.
-5. Create a new secret named **`CMS_PUBLISH_PROFILE`** (for the `sitechat` CMS) or
-   **`AGENT_PUBLISH_PROFILE`** (for the `orkinosai-agent-b3f5c3cac0fzgteh` Python app) and paste the full
-   contents of the downloaded `.PublishSettings` file as the value.
+5. Create a secret named **`PUBLISH_PROFILE`** and paste the full contents of the downloaded file.
+6. Repeat steps 2–5 for the **`orkinosai-agent`** App Service, saving as **`AGENT_PUBLISH_PROFILE`**.
 
-> **Tip:** Each App Service has its own publish profile. If you deploy both the CMS
-> and the Python agent from GitHub Actions, create separate secrets for each
-> (e.g. `CMS_PUBLISH_PROFILE` for the CMS, `AGENT_PUBLISH_PROFILE` for the Python app).
+> **Tip:** Each App Service has its own publish profile. Both secrets must be set before
+> the respective deploy workflow can succeed.
 
 ---
 
@@ -479,18 +501,23 @@ az monitor autoscale rule create \
 
 ### GitHub Actions
 
-The repository's `.github/workflows/main_papagan.yml` deploys the CMS to the `sitechat`
-Azure Web App automatically on every push to `main`.
+Three workflows handle the full lifecycle:
 
-**Required secret:** Add `CMS_PUBLISH_PROFILE` in your repository's
-**Settings → Secrets and variables → Actions** (see **Download the Publish Profile** above).
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `Provision Azure Infrastructure (Full)` | Manual (`workflow_dispatch`) | Create/update all Azure resources via Bicep |
+| `Build and deploy ASP.Net Core app` (`main_papagan.yml`) | Push to `main` | Deploy CMS to `site-chat-agent` |
+| `Build and deploy Python app` (`main_orkinosai-agent.yml`) | Push to `main` | Deploy agent to `orkinosai-agent` |
 
-The repository's `.github/workflows/main_orkinosai-agent.yml` deploys the Python agent to the
-`orkinosai-agent-b3f5c3cac0fzgteh` Azure Web App automatically on every push to `main`.
+**Recommended first-time setup order:**
+1. Add all required secrets (see table in section 0 above, plus `PUBLISH_PROFILE` and `AGENT_PUBLISH_PROFILE`).
+2. Run **Provision Azure Infrastructure (Full)** — this creates everything and wires config.
+3. Download publish profiles from the newly created App Services and save as secrets.
+4. Push to `main` — both deploy workflows will fire automatically.
 
-**Required secret:** Add `AGENT_PUBLISH_PROFILE` in your repository's
-**Settings → Secrets and variables → Actions** (see **Download the Publish Profile** above for
-the `orkinosai-agent-b3f5c3cac0fzgteh` App Service).
+**Required secrets for deploy workflows:**
+- `PUBLISH_PROFILE` — publish profile for the `site-chat-agent` CMS App Service
+- `AGENT_PUBLISH_PROFILE` — publish profile for the `orkinosai-agent` Python App Service
 
 ## Troubleshooting
 
