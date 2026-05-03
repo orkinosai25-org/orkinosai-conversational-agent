@@ -3,7 +3,7 @@
 # Provisions ALL required Azure resources using Bicep (idempotent — safe to re-run):
 #   - Resource Group
 #   - App Service Plan
-#   - CMS App Service  (.NET 8)
+#   - CMS App Service  (.NET 10)
 #   - Agent App Service (Python 3.11)
 #   - Azure SQL Server + Database
 #   - Azure Blob Storage

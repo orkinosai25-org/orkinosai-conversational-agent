@@ -32,7 +32,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   }
 }
 
-// ── CMS App Service (.NET 8) ──────────────────────────────────────────────────
+// ── CMS App Service (.NET 10) ─────────────────────────────────────────────────
 resource cmsApp 'Microsoft.Web/sites@2023-01-01' = {
   name: cmsAppName
   location: location
@@ -40,7 +40,7 @@ resource cmsApp 'Microsoft.Web/sites@2023-01-01' = {
     serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
-      linuxFxVersion: 'DOTNETCORE|8.0'
+      linuxFxVersion: 'DOTNETCORE|10.0'
       alwaysOn: false // Disabled on B1 (no always-on support); enable on P1v3+
       // SCM_DO_BUILD_DURING_DEPLOYMENT is NOT set here — publish-profile deploys
       // a pre-built artifact so Oryx build is not needed.

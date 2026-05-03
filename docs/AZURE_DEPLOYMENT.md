@@ -14,7 +14,7 @@ directory.  A single `az deployment group create` call (or the
 `Provision Azure Infrastructure (Full)` GitHub Actions workflow) creates:
 
 - App Service Plan (`orkinosai-plan`)
-- CMS App Service — `site-chat-agent` (.NET 8)
+- CMS App Service — `site-chat-agent` (.NET 10)
 - Agent App Service — `orkinosai-agent` (Python 3.11)
 - Azure SQL Server + Database
 - Azure Blob Storage account (two containers: `training-docs`, `raw-ingested`)
@@ -232,7 +232,7 @@ manual `az deployment group create` command above), the following are created:
 | Resource | Name | Runtime |
 |----------|------|---------|
 | App Service Plan | `orkinosai-plan` | Linux B1 |
-| CMS App Service | `site-chat-agent` | .NET 8 |
+| CMS App Service | `site-chat-agent` | .NET 10 |
 | Agent App Service | `orkinosai-agent` | Python 3.11 |
 
 ### 3. Download the Publish Profile
