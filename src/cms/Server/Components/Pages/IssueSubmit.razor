@@ -169,7 +169,11 @@
     {
         titleError = string.IsNullOrWhiteSpace(title);
         descriptionError = string.IsNullOrWhiteSpace(description);
-        emailError = string.IsNullOrWhiteSpace(submitterEmail) || !submitterEmail.Contains('@');
+        var email = submitterEmail?.Trim() ?? "";
+        emailError = string.IsNullOrWhiteSpace(email)
+            || !System.Text.RegularExpressions.Regex.IsMatch(email,
+                @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
         return !titleError && !descriptionError && !emailError;
     }
 

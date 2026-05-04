@@ -57,3 +57,11 @@ public class IssueStatsDto
     public int ClosedIssues { get; set; }
     public int CriticalIssues { get; set; }
 }
+
+/// <summary>
+/// Payload for resolving an issue with optional admin notes
+/// </summary>
+public class ResolveIssueDto
+{
+    public string? AdminNotes { get; set; }
+}

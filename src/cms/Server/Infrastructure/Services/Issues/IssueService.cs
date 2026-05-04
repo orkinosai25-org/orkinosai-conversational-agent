@@ -94,50 +94,65 @@ public class IssueService : IIssueService
 
     public Task<Issue> UpdateIssueAsync(Issue issue)
     {
-        var index = _issues.FindIndex(i => i.Id == issue.Id);
-        if (index < 0)
-            return Task.FromException<Issue>(new KeyNotFoundException($"Issue {issue.Id} not found."));
+        lock (_syncLock)
+        {
+            var index = _issues.FindIndex(i => i.Id == issue.Id);
+            if (index < 0)
+                return Task.FromException<Issue>(new KeyNotFoundException($"Issue {issue.Id} not found."));
 
-        issue.UpdatedAt = DateTime.UtcNow;
-        _issues[index] = issue;
-        return Task.FromResult(issue);
+            issue.UpdatedAt = DateTime.UtcNow;
+            _issues[index] = issue;
+            return Task.FromResult(issue);
+        }
     }
 
     public Task<bool> DeleteIssueAsync(int id)
     {
-        var issue = _issues.FirstOrDefault(i => i.Id == id);
-        if (issue == null) return Task.FromResult(false);
-        _issues.Remove(issue);
-        return Task.FromResult(true);
+        lock (_syncLock)
+        {
+            var issue = _issues.FirstOrDefault(i => i.Id == id);
+            if (issue == null) return Task.FromResult(false);
+            _issues.Remove(issue);
+            return Task.FromResult(true);
+        }
     }
 
-    public async Task<bool> StartIssueAsync(int id)
+    public Task<bool> StartIssueAsync(int id)
     {
-        var issue = await GetIssueByIdAsync(id);
-        if (issue == null) return false;
-        issue.Status = IssueStatus.InProgress;
-        issue.UpdatedAt = DateTime.UtcNow;
-        return true;
+        lock (_syncLock)
+        {
+            var issue = _issues.FirstOrDefault(i => i.Id == id);
+            if (issue == null) return Task.FromResult(false);
+            issue.Status = IssueStatus.InProgress;
+            issue.UpdatedAt = DateTime.UtcNow;
+            return Task.FromResult(true);
+        }
     }
 
-    public async Task<bool> ResolveIssueAsync(int id, string? adminNotes = null)
+    public Task<bool> ResolveIssueAsync(int id, string? adminNotes = null)
     {
-        var issue = await GetIssueByIdAsync(id);
-        if (issue == null) return false;
-        issue.Status = IssueStatus.Resolved;
-        issue.ResolvedAt = DateTime.UtcNow;
-        issue.UpdatedAt = DateTime.UtcNow;
-        if (adminNotes != null)
-            issue.AdminNotes = adminNotes;
-        return true;
+        lock (_syncLock)
+        {
+            var issue = _issues.FirstOrDefault(i => i.Id == id);
+            if (issue == null) return Task.FromResult(false);
+            issue.Status = IssueStatus.Resolved;
+            issue.ResolvedAt = DateTime.UtcNow;
+            issue.UpdatedAt = DateTime.UtcNow;
+            if (adminNotes != null)
+                issue.AdminNotes = adminNotes;
+            return Task.FromResult(true);
+        }
     }
 
-    public async Task<bool> CloseIssueAsync(int id)
+    public Task<bool> CloseIssueAsync(int id)
     {
-        var issue = await GetIssueByIdAsync(id);
-        if (issue == null) return false;
-        issue.Status = IssueStatus.Closed;
-        issue.UpdatedAt = DateTime.UtcNow;
-        return true;
+        lock (_syncLock)
+        {
+            var issue = _issues.FirstOrDefault(i => i.Id == id);
+            if (issue == null) return Task.FromResult(false);
+            issue.Status = IssueStatus.Closed;
+            issue.UpdatedAt = DateTime.UtcNow;
+            return Task.FromResult(true);
+        }
     }
 }

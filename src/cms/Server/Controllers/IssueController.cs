@@ -180,9 +180,9 @@ public class IssueController : ControllerBase
     [HttpPost("admin/{id:int}/resolve")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
-    public async Task<IActionResult> ResolveIssue(int id, [FromBody] string? adminNotes = null)
+    public async Task<IActionResult> ResolveIssue(int id, [FromBody] ResolveIssueDto? dto = null)
     {
-        var success = await _issueService.ResolveIssueAsync(id, adminNotes);
+        var success = await _issueService.ResolveIssueAsync(id, dto?.AdminNotes);
         if (!success) return NotFound();
         return NoContent();
     }
