@@ -9,6 +9,7 @@ using SiteChatCMS.Core.Interfaces.Services;
 using SiteChatCMS.Infrastructure.Data;
 using SiteChatCMS.Infrastructure.Services;
 using SiteChatCMS.Infrastructure.Services.Adverts;
+using SiteChatCMS.Infrastructure.Services.Issues;
 using SiteChatCMS.Infrastructure.Services.Auth;
 using SiteChatCMS.Infrastructure.Services.Bots;
 using SiteChatCMS.Infrastructure.Services.Onboarding;
@@ -127,6 +128,9 @@ builder.Services.AddScoped<IStripeService, StripeService>();
 
 // Register advert service
 builder.Services.AddSingleton<IAdvertService, AdvertService>();
+
+// Register issue service
+builder.Services.AddSingleton<IIssueService, IssueService>();
 
 var app = builder.Build();
 

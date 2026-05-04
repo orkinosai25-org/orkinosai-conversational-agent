@@ -1,0 +1,226 @@
+@page "/issues/submit"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using SiteChatCMS.Shared.DTOs.Issues
+
+<PageTitle>Submit an Issue — Orkinosai CMS</PageTitle>
+
+<div class="issue-submit">
+
+    <!-- ── Hero ── -->
+    <div class="hero">
+        <h1>🐛 Report an Issue</h1>
+        <p>Found a bug, have a feature request or a question? Fill in the form below and our team will get back to you.</p>
+    </div>
+
+    @if (submitted)
+    {
+        <div class="success-card">
+            <div class="success-icon">✅</div>
+            <h2>Issue Submitted!</h2>
+            <p>Thank you, <strong>@submittedName</strong>! Your issue has been logged and our team will review it shortly. A confirmation will be sent to <strong>@submittedEmail</strong>.</p>
+            <div class="success-actions">
+                <button class="btn btn-primary" @onclick="StartOver">Submit Another Issue</button>
+                <a href="/" class="btn btn-secondary">Go to Home</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="form-card">
+            <h2>Issue Details</h2>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+
+            <div class="form-group">
+                <label for="title">Title <span class="required">*</span></label>
+                <input id="title" class="form-control @(titleError ? "is-invalid" : "")"
+                       placeholder="Short description of the issue"
+                       @bind="title" @bind:event="oninput" />
+                @if (titleError)
+                {
+                    <span class="validation-error">Title is required.</span>
+                }
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="type">Type <span class="required">*</span></label>
+                    <select id="type" class="form-control" @bind="type">
+                        <option value="Bug">🐛 Bug</option>
+                        <option value="FeatureRequest">💡 Feature Request</option>
+                        <option value="Question">❓ Question</option>
+                        <option value="Other">📌 Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="priority">Priority <span class="required">*</span></label>
+                    <select id="priority" class="form-control" @bind="priority">
+                        <option value="Low">🟢 Low</option>
+                        <option value="Medium">🟡 Medium</option>
+                        <option value="High">🟠 High</option>
+                        <option value="Critical">🔴 Critical</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description <span class="required">*</span></label>
+                <textarea id="description" class="form-control @(descriptionError ? "is-invalid" : "")"
+                          rows="6"
+                          placeholder="Describe the issue in detail. Include steps to reproduce, expected behaviour and actual behaviour."
+                          @bind="description" @bind:event="oninput"></textarea>
+                @if (descriptionError)
+                {
+                    <span class="validation-error">Description is required.</span>
+                }
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input id="name" class="form-control" placeholder="Jane Smith" @bind="submitterName" />
+                </div>
+                <div class="form-group">
+                    <label for="email">Your Email <span class="required">*</span></label>
+                    <input id="email" type="email" class="form-control @(emailError ? "is-invalid" : "")"
+                           placeholder="jane@example.com"
+                           @bind="submitterEmail" @bind:event="oninput" />
+                    @if (emailError)
+                    {
+                        <span class="validation-error">A valid email address is required.</span>
+                    }
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" @onclick="SubmitIssue" disabled="@submitting">
+                    @if (submitting)
+                    {
+                        <span class="spinner-sm"></span>
+                        <span>Submitting…</span>
+                    }
+                    else
+                    {
+                        <span>📨 Submit Issue</span>
+                    }
+                </button>
+                <a href="/" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .issue-submit { max-width: 760px; margin: 2rem auto; padding: 0 1rem; font-family: var(--font-sans, sans-serif); }
+    .hero { text-align: center; margin-bottom: 2rem; }
+    .hero h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    .hero p { color: #555; font-size: 1.05rem; }
+    .success-card { background: #E8F5E9; border: 1px solid #A5D6A7; border-radius: 8px; padding: 2.5rem; text-align: center; }
+    .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .success-card h2 { color: #2E7D32; margin-bottom: 0.75rem; }
+    .success-actions { margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .form-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 2rem; }
+    .form-card h2 { margin: 0 0 1.5rem; }
+    .form-group { display: flex; flex-direction: column; margin-bottom: 1.25rem; }
+    .form-group label { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; color: #333; }
+    .required { color: #F44336; }
+    .form-control { padding: 0.5rem 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; width: 100%; box-sizing: border-box; }
+    .form-control:focus { outline: none; border-color: #4CAF50; box-shadow: 0 0 0 2px rgba(76,175,80,0.15); }
+    .form-control.is-invalid { border-color: #F44336; }
+    .validation-error { color: #F44336; font-size: 0.8rem; margin-top: 0.2rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @@media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
+    .form-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 0.95rem; }
+    .btn:disabled { opacity: 0.65; cursor: not-allowed; }
+    .btn-primary { background: #4CAF50; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #388E3C; }
+    .btn-secondary { background: #9E9E9E; color: #fff; }
+    .btn-secondary:hover { background: #757575; }
+    .alert { padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1rem; }
+    .alert-danger { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+    .spinner-sm { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+@code {
+    private string title = "";
+    private string description = "";
+    private string type = "Bug";
+    private string priority = "Medium";
+    private string submitterName = "";
+    private string submitterEmail = "";
+
+    private bool submitted = false;
+    private bool submitting = false;
+    private string submittedName = "";
+    private string submittedEmail = "";
+    private string errorMessage = "";
+
+    private bool titleError = false;
+    private bool descriptionError = false;
+    private bool emailError = false;
+
+    private bool Validate()
+    {
+        titleError = string.IsNullOrWhiteSpace(title);
+        descriptionError = string.IsNullOrWhiteSpace(description);
+        emailError = string.IsNullOrWhiteSpace(submitterEmail) || !submitterEmail.Contains('@');
+        return !titleError && !descriptionError && !emailError;
+    }
+
+    private async Task SubmitIssue()
+    {
+        errorMessage = "";
+        if (!Validate()) return;
+
+        submitting = true;
+        try
+        {
+            var dto = new CreateIssueDto
+            {
+                Title = title.Trim(),
+                Description = description.Trim(),
+                Type = type,
+                Priority = priority,
+                SubmitterName = submitterName.Trim(),
+                SubmitterEmail = submitterEmail.Trim()
+            };
+
+            var response = await Http.PostAsJsonAsync("api/issue", dto);
+            if (response.IsSuccessStatusCode)
+            {
+                submittedName = string.IsNullOrWhiteSpace(submitterName) ? "there" : submitterName.Trim();
+                submittedEmail = submitterEmail.Trim();
+                submitted = true;
+            }
+            else
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                errorMessage = string.IsNullOrEmpty(body) ? "Something went wrong. Please try again." : body;
+            }
+        }
+        catch
+        {
+            errorMessage = "Unable to connect to the server. Please try again later.";
+        }
+        finally
+        {
+            submitting = false;
+        }
+    }
+
+    private void StartOver()
+    {
+        submitted = false;
+        title = description = submitterName = submitterEmail = "";
+        type = "Bug";
+        priority = "Medium";
+        errorMessage = "";
+        titleError = descriptionError = emailError = false;
+    }
+}
