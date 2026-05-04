@@ -49,8 +49,9 @@ az account set --subscription "<your-subscription-id>"
 az group create --name sitechat-rg --location uksouth
 
 # 3. Deploy all resources — App Services, SQL, Blob Storage
-#    Use appServicePlanSku=F1 if your subscription has Basic/Standard vCPU quota exhausted.
-#    F1 (Free tier) is quota-exempt and suitable for development. Use S1 or P1v3 for production.
+#    Use appServicePlanSku=B1 (Basic) for most deployments — it does not consume Free VM quota.
+#    F1 (Free tier) can be used for development but is subject to the Azure Free VM quota (max 3 per subscription/region).
+#    Use S1 or P1v3 for higher-scale production environments.
 az deployment group create \
   --resource-group sitechat-rg \
   --template-file infra/main.bicep \
@@ -60,7 +61,7 @@ az deployment group create \
       sqlAdminPassword="<your-password>" \
       cmsAppName=site-chat-agent \
       agentAppName=orkinosai-agent \
-      appServicePlanSku=F1 \
+      appServicePlanSku=B1 \
   --query "properties.outputs"
 ```
 
@@ -233,14 +234,15 @@ manual `az deployment group create` command above), the following are created:
 
 | Resource | Name | Runtime |
 |----------|------|---------|
-| App Service Plan | `orkinosai-plan` | Linux F1 (default) |
+| App Service Plan | `orkinosai-plan` | Linux B1 (default) |
 | CMS App Service | `site-chat-agent` | .NET 10 |
 | Agent App Service | `orkinosai-agent` | Python 3.11 |
 
-> **Quota tip:** The default App Service Plan SKU is `F1` (Free tier), which runs on shared
-> infrastructure and is **exempt from vCPU quotas** — making it ideal for development or
-> subscriptions with limited quota. To use Standard or Premium compute, re-run the workflow
-> and select `S1` or `P1v3` as the App Service Plan SKU once quota has been confirmed.
+> **Quota tip:** The default App Service Plan SKU is `B1` (Basic tier), which runs on dedicated
+> compute and **does not consume the Azure Free VM quota** — making it reliable for development
+> and production alike. Use `F1` (Free tier) only if you specifically need a zero-cost plan and
+> your subscription has Free VM quota available (max 3 per subscription/region). Use `S1` or
+> `P1v3` for higher-scale production environments.
 
 ### 3. Download the Publish Profile
 

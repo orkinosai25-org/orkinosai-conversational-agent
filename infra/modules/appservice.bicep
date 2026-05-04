@@ -9,9 +9,9 @@ param baseName string
 @description('Azure region for all resources')
 param location string = resourceGroup().location
 
-@description('App Service Plan SKU. F1 (Free) uses shared compute and avoids vCPU quota limits - ideal when Basic/Standard quota is exhausted. Use S1 for Standard quota environments or P1v3 for production.')
+@description('App Service Plan SKU. B1 (Basic) is the default — it does not consume Free VM quota and is production-ready. Use S1/P1v3 for higher scale, or F1 only if you need the Free tier.')
 @allowed(['F1', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1v3', 'P2v3', 'P3v3'])
-param planSku string = 'F1'
+param planSku string = 'B1'
 
 @description('Name of the CMS Azure App Service (.NET)')
 param cmsAppName string = 'site-chat-agent'
