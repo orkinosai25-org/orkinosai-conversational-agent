@@ -525,8 +525,8 @@
     private bool showCreateModal = false;
     private bool isCreating = false;
     private string? errorMessage;
-    private readonly IReadOnlyList<BotModelOptionDto> modelOptions = BotModelCatalog.All;
-    private readonly IReadOnlyList<BotRoutingModeOptionDto> routingModes = BotRoutingCatalog.All;
+    private static readonly IReadOnlyList<BotModelOptionDto> modelOptions = BotModelCatalog.All;
+    private static readonly IReadOnlyList<BotRoutingModeOptionDto> routingModes = BotRoutingCatalog.All;
     private CreateBotDto createBotDto = new()
     {
         Temperature = 0.7,

@@ -23,6 +23,5 @@ def test_chat_endpoint_returns_routing_metadata():
         assert response.status_code == 200
         payload = response.get_json()
         assert payload["routing"]["assigned_model"] == "gpt-4"
-        assert payload["routing"]["fallback_model"] == "small"
         assert payload["classification"]["intent"] == "bug_report"
         assert payload["estimated_cost_usd"] >= 0

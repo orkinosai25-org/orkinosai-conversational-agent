@@ -617,8 +617,8 @@
     [Parameter]
     public string BotId { get; set; } = string.Empty;
 
-    private readonly IReadOnlyList<BotModelOptionDto> modelOptions = BotModelCatalog.All;
-    private readonly IReadOnlyList<BotRoutingModeOptionDto> routingModes = BotRoutingCatalog.All;
+    private static readonly IReadOnlyList<BotModelOptionDto> modelOptions = BotModelCatalog.All;
+    private static readonly IReadOnlyList<BotRoutingModeOptionDto> routingModes = BotRoutingCatalog.All;
     private BotDto? bot;
     private UpdateBotDto updateDto = new()
     {
@@ -811,7 +811,7 @@
     private static string GetModelSummary(string? modelId)
     {
         var model = BotModelCatalog.Get(modelId);
-        return $"{model.DisplayName} is optimized for {model.Description.ToLowerInvariant()}";
+        return $"{model.DisplayName}: {model.Description}";
     }
 
     private void GoBack()

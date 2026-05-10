@@ -183,7 +183,10 @@ class MessageRouter:
             and classification.confidence >= 0.8
             and classification.complexity in {"medium", "high"}
         )
-        escalate_to_human = classification.intent in {"complaint", "bug_report"} or classification.complexity == "high"
+        escalate_to_human = (
+            (classification.intent in {"complaint", "bug_report"} and classification.confidence >= 0.8)
+            or (classification.complexity == "high" and classification.confidence >= 0.85)
+        )
 
         return RoutingDecision(
             mode=mode,

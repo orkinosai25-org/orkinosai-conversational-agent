@@ -191,17 +191,35 @@ class ConversationManager:
                     max_tokens=max_tokens,
                     model=selected_model,
                 )
-            except Exception:
+            except Exception as primary_error:
                 if routing.fallback_model == selected_model:
                     raise
 
-                selected_model = routing.fallback_model
-                response = self.azure_client.chat_completion(
-                    messages=messages,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                    model=selected_model,
+                logger.warning(
+                    "Primary model '%s' failed for conversation %s, retrying with fallback '%s'",
+                    selected_model,
+                    conversation_id,
+                    routing.fallback_model,
+                    exc_info=primary_error,
                 )
+
+                selected_model = routing.fallback_model
+
+                try:
+                    response = self.azure_client.chat_completion(
+                        messages=messages,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                        model=selected_model,
+                    )
+                except Exception as fallback_error:
+                    logger.error(
+                        "Fallback model '%s' also failed for conversation %s",
+                        selected_model,
+                        conversation_id,
+                        exc_info=fallback_error,
+                    )
+                    raise fallback_error from primary_error
             
             # Add assistant response to conversation
             conversation.add_message("assistant", response["content"])
