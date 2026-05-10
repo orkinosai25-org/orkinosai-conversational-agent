@@ -61,6 +61,9 @@ public class BotService : IBotService
             SystemPrompt = dto.SystemPrompt,
             Temperature = dto.Temperature,
             MaxTokens = dto.MaxTokens,
+            PrimaryModel = BotModelCatalog.Normalize(dto.PrimaryModel, BotModelCatalog.DefaultPrimaryModel),
+            FallbackModel = BotModelCatalog.Normalize(dto.FallbackModel, BotModelCatalog.DefaultFallbackModel),
+            RoutingMode = BotRoutingCatalog.Normalize(dto.RoutingMode),
             UserId = userId,
             OrganizationId = user.OrganizationId,
             CreatedAt = DateTime.UtcNow,
@@ -93,6 +96,9 @@ public class BotService : IBotService
         if (dto.IsPublic.HasValue) bot.IsPublic = dto.IsPublic.Value;
         if (dto.WidgetColor != null) bot.WidgetColor = dto.WidgetColor;
         if (dto.WidgetPosition != null) bot.WidgetPosition = dto.WidgetPosition;
+        if (dto.PrimaryModel != null) bot.PrimaryModel = BotModelCatalog.Normalize(dto.PrimaryModel, bot.PrimaryModel);
+        if (dto.FallbackModel != null) bot.FallbackModel = BotModelCatalog.Normalize(dto.FallbackModel, bot.FallbackModel);
+        if (dto.RoutingMode != null) bot.RoutingMode = BotRoutingCatalog.Normalize(dto.RoutingMode);
 
         bot.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
@@ -335,6 +341,9 @@ public class BotService : IBotService
             WidgetColor = bot.WidgetColor,
             WidgetPosition = bot.WidgetPosition,
             EmbedCode = bot.EmbedCode,
+            PrimaryModel = BotModelCatalog.Normalize(bot.PrimaryModel, BotModelCatalog.DefaultPrimaryModel),
+            FallbackModel = BotModelCatalog.Normalize(bot.FallbackModel, BotModelCatalog.DefaultFallbackModel),
+            RoutingMode = BotRoutingCatalog.Normalize(bot.RoutingMode),
             CreatedAt = bot.CreatedAt
         };
     }

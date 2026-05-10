@@ -81,6 +81,43 @@
             <label>Max Tokens: @maxTokens</label>
             <input type="range" min="100" max="2000" step="100" @bind="maxTokens" @bind:event="oninput" />
         </div>
+        <div class="setting-group">
+            <label>Routing Mode</label>
+            <InputSelect class="form-control" @bind-Value="routingMode">
+                @foreach (var mode in routingModes)
+                {
+                    <option value="@mode.Id">@mode.DisplayName</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="setting-group">
+            <label>Preferred Model</label>
+            <InputSelect class="form-control" @bind-Value="selectedModel">
+                @foreach (var model in modelOptions)
+                {
+                    <option value="@model.Id">@model.DisplayName (@model.CostLabel)</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="setting-group">
+            <label>Fallback Model</label>
+            <InputSelect class="form-control" @bind-Value="fallbackModel">
+                @foreach (var model in modelOptions)
+                {
+                    <option value="@model.Id">@model.DisplayName (@model.CostLabel)</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+
+    <div class="chat-routing-card">
+        <strong>@GetSelectedModel().DisplayName</strong>
+        <span>@GetSelectedModel().Description</span>
+        <small>Route: @BotRoutingCatalog.Get(routingMode).DisplayName · Speed: @GetSelectedModel().Speed · Quality: @GetSelectedModel().Quality</small>
+        @if (lastRouting != null)
+        {
+            <small>Last reply used @lastRouting.assigned_model via @lastRouting.mode · est. $@lastEstimatedCost.ToString("0.0000")</small>
+        }
     </div>
 </div>
 
@@ -94,6 +131,8 @@
     private string conversationId = Guid.NewGuid().ToString();
     private double temperature = 0.7;
     private int maxTokens = 1000;
+    private readonly IReadOnlyList<BotModelOptionDto> modelOptions = BotModelCatalog.All;
+    private readonly IReadOnlyList<BotRoutingModeOptionDto> routingModes = BotRoutingCatalog.All;
     private HttpClient? httpClient;
     private string? seatId;
     private string? allowedDomain;
@@ -102,6 +141,11 @@
     private string trainingManageUrl = string.Empty;
     private string trainingUrlsApiUrl = string.Empty;
     private string trainingDocumentsApiUrl = string.Empty;
+    private string selectedModel = BotModelCatalog.DefaultPrimaryModel;
+    private string fallbackModel = BotModelCatalog.DefaultFallbackModel;
+    private string routingMode = BotRoutingCatalog.DefaultMode;
+    private RoutingResponse? lastRouting;
+    private decimal lastEstimatedCost;
 
     private class ChatMessage
     {
@@ -161,7 +205,10 @@
                 message = message,
                 seat_id = seatId,
                 temperature = temperature,
-                max_tokens = maxTokens
+                max_tokens = maxTokens,
+                model_preference = selectedModel,
+                fallback_model = fallbackModel,
+                routing_mode = routingMode
             });
 
             if (response.IsSuccessStatusCode)
@@ -176,6 +223,8 @@
                         Content = SanitizeLinksForSeat(result.assistant_message),
                         Timestamp = DateTime.Now
                     });
+                    lastRouting = result.routing;
+                    lastEstimatedCost = result.estimated_cost_usd;
                     Logger.LogInformation("Received successful response from backend");
                 }
             }
@@ -251,6 +300,15 @@
         public string? assistant_message { get; set; }
         public object? usage { get; set; }
         public string? timestamp { get; set; }
+        public RoutingResponse? routing { get; set; }
+        public decimal estimated_cost_usd { get; set; }
+    }
+
+    private class RoutingResponse
+    {
+        public string? mode { get; set; }
+        public string? assigned_model { get; set; }
+        public string? fallback_model { get; set; }
     }
 
     private async Task LoadSeatContext()
@@ -287,6 +345,11 @@
             seatId = seat.Id;
             allowedDomain = GetDomainHost(seat.SiteUrl);
             seatContextLabel = allowedDomain ?? seat.Name;
+            temperature = seat.Temperature;
+            maxTokens = seat.MaxTokens;
+            selectedModel = seat.PrimaryModel;
+            fallbackModel = seat.FallbackModel;
+            routingMode = seat.RoutingMode;
 
             if (!isPublicMode)
             {
@@ -352,6 +415,8 @@
     {
         return $"{(string.IsNullOrWhiteSpace(seat) ? "public" : seat)}-{Guid.NewGuid()}";
     }
+
+    private BotModelOptionDto GetSelectedModel() => BotModelCatalog.Get(selectedModel);
 }
 
 <style>
@@ -544,15 +609,16 @@
 
     .chat-settings {
         display: flex;
+        flex-wrap: wrap;
         gap: 20px;
         padding: 15px;
         background: #f8f9fa;
         border-top: 1px solid #ddd;
-        border-radius: 0 0 8px 8px;
     }
 
     .setting-group {
         flex: 1;
+        min-width: 160px;
     }
 
     .setting-group label {
@@ -564,5 +630,24 @@
 
     .setting-group input[type="range"] {
         width: 100%;
+    }
+
+    .chat-routing-card {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 12px 15px 15px;
+        background: #f8f9fa;
+        border-top: 1px solid #e5e7eb;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .chat-routing-card strong {
+        color: #111827;
+    }
+
+    .chat-routing-card span,
+    .chat-routing-card small {
+        color: #4b5563;
     }
 </style>

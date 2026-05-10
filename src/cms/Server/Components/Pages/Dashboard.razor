@@ -145,6 +145,44 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label>Routing Mode</label>
+                            <InputSelect class="form-control" @bind-Value="createBotDto.RoutingMode">
+                                @foreach (var routingMode in routingModes)
+                                {
+                                    <option value="@routingMode.Id">@routingMode.DisplayName</option>
+                                }
+                            </InputSelect>
+                            <small>@GetRoutingDescription(createBotDto.RoutingMode)</small>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Primary Model</label>
+                                <InputSelect class="form-control" @bind-Value="createBotDto.PrimaryModel">
+                                    @foreach (var option in modelOptions)
+                                    {
+                                        <option value="@option.Id">@option.DisplayName (@option.CostLabel)</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Fallback Model</label>
+                                <InputSelect class="form-control" @bind-Value="createBotDto.FallbackModel">
+                                    @foreach (var option in modelOptions)
+                                    {
+                                        <option value="@option.Id">@option.DisplayName (@option.CostLabel)</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="model-summary">
+                            <strong>Selected model profile:</strong>
+                            <span>@GetModelSummary(createBotDto.PrimaryModel)</span>
+                        </div>
+
                         @if (!string.IsNullOrEmpty(errorMessage))
                         {
                             <div class="alert alert-danger">
@@ -447,6 +485,20 @@
         gap: 15px;
     }
 
+    .model-summary {
+        padding: 12px 14px;
+        background: #f6fff6;
+        border: 1px solid #d8f3dc;
+        border-radius: 8px;
+        color: #2d6a4f;
+        margin-bottom: 20px;
+    }
+
+    .model-summary span {
+        display: block;
+        margin-top: 4px;
+    }
+
     .modal-actions {
         display: flex;
         gap: 15px;
@@ -473,7 +525,16 @@
     private bool showCreateModal = false;
     private bool isCreating = false;
     private string? errorMessage;
-    private CreateBotDto createBotDto = new() { Temperature = 0.7, MaxTokens = 1000 };
+    private readonly IReadOnlyList<BotModelOptionDto> modelOptions = BotModelCatalog.All;
+    private readonly IReadOnlyList<BotRoutingModeOptionDto> routingModes = BotRoutingCatalog.All;
+    private CreateBotDto createBotDto = new()
+    {
+        Temperature = 0.7,
+        MaxTokens = 1000,
+        PrimaryModel = BotModelCatalog.DefaultPrimaryModel,
+        FallbackModel = BotModelCatalog.DefaultFallbackModel,
+        RoutingMode = BotRoutingCatalog.DefaultMode
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -507,7 +568,14 @@
 
     private void ShowCreateBotModal()
     {
-        createBotDto = new() { Temperature = 0.7, MaxTokens = 1000 };
+        createBotDto = new()
+        {
+            Temperature = 0.7,
+            MaxTokens = 1000,
+            PrimaryModel = BotModelCatalog.DefaultPrimaryModel,
+            FallbackModel = BotModelCatalog.DefaultFallbackModel,
+            RoutingMode = BotRoutingCatalog.DefaultMode
+        };
         errorMessage = null;
         showCreateModal = true;
     }
@@ -556,6 +624,14 @@
         {
             isCreating = false;
         }
+    }
+
+    private static string GetRoutingDescription(string? routingMode) => BotRoutingCatalog.Get(routingMode).Description;
+
+    private static string GetModelSummary(string? modelId)
+    {
+        var model = BotModelCatalog.Get(modelId);
+        return $"{model.Description} Speed: {model.Speed}. Quality: {model.Quality}.";
     }
 
     private void ManageBot(string botId)

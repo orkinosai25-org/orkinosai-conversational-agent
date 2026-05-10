@@ -143,6 +143,44 @@
                         </div>
 
                         <div class="form-group">
+                            <label>Routing Mode</label>
+                            <InputSelect class="form-control" @bind-Value="updateDto.RoutingMode">
+                                @foreach (var routingMode in routingModes)
+                                {
+                                    <option value="@routingMode.Id">@routingMode.DisplayName</option>
+                                }
+                            </InputSelect>
+                            <small>@GetRoutingDescription(updateDto.RoutingMode)</small>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Primary Model</label>
+                                <InputSelect class="form-control" @bind-Value="updateDto.PrimaryModel">
+                                    @foreach (var option in modelOptions)
+                                    {
+                                        <option value="@option.Id">@option.DisplayName (@option.CostLabel)</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Fallback Model</label>
+                                <InputSelect class="form-control" @bind-Value="updateDto.FallbackModel">
+                                    @foreach (var option in modelOptions)
+                                    {
+                                        <option value="@option.Id">@option.DisplayName (@option.CostLabel)</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="model-routing-summary">
+                            <strong>Current orchestration:</strong>
+                            <span>@GetModelSummary(updateDto.PrimaryModel)</span>
+                        </div>
+
+                        <div class="form-group">
                             <label class="checkbox-label">
                                 <InputCheckbox @bind-Value="IsActiveValue" />
                                 Active
@@ -460,6 +498,20 @@
         gap: 15px;
     }
 
+    .model-routing-summary {
+        padding: 12px 14px;
+        background: #f6fff6;
+        border: 1px solid #d8f3dc;
+        border-radius: 8px;
+        color: #2d6a4f;
+        margin-bottom: 20px;
+    }
+
+    .model-routing-summary span {
+        display: block;
+        margin-top: 4px;
+    }
+
     .checkbox-label {
         display: flex;
         align-items: center;
@@ -565,8 +617,17 @@
     [Parameter]
     public string BotId { get; set; } = string.Empty;
 
+    private readonly IReadOnlyList<BotModelOptionDto> modelOptions = BotModelCatalog.All;
+    private readonly IReadOnlyList<BotRoutingModeOptionDto> routingModes = BotRoutingCatalog.All;
     private BotDto? bot;
-    private UpdateBotDto updateDto = new() { IsActive = true, IsPublic = false };
+    private UpdateBotDto updateDto = new()
+    {
+        IsActive = true,
+        IsPublic = false,
+        PrimaryModel = BotModelCatalog.DefaultPrimaryModel,
+        FallbackModel = BotModelCatalog.DefaultFallbackModel,
+        RoutingMode = BotRoutingCatalog.DefaultMode
+    };
     private List<TrainingDocumentDto> documents = new();
     private List<TrainingUrlDto> urls = new();
     private string activeTab = "train";
@@ -615,7 +676,10 @@
                     IsActive = bot.IsActive,
                     IsPublic = bot.IsPublic,
                     WidgetColor = bot.WidgetColor ?? "#4CAF50",
-                    WidgetPosition = bot.WidgetPosition ?? "bottom-right"
+                    WidgetPosition = bot.WidgetPosition ?? "bottom-right",
+                    PrimaryModel = bot.PrimaryModel,
+                    FallbackModel = bot.FallbackModel,
+                    RoutingMode = bot.RoutingMode
                 };
             }
         }
@@ -740,6 +804,14 @@
         {
             await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", chatPageUrl);
         }
+    }
+
+    private static string GetRoutingDescription(string? routingMode) => BotRoutingCatalog.Get(routingMode).Description;
+
+    private static string GetModelSummary(string? modelId)
+    {
+        var model = BotModelCatalog.Get(modelId);
+        return $"{model.DisplayName} is optimized for {model.Description.ToLowerInvariant()}";
     }
 
     private void GoBack()
