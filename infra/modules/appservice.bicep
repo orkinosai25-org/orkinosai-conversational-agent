@@ -19,6 +19,10 @@ param cmsAppName string = 'site-chat-agent'
 @description('Name of the Agent Azure App Service (Python)')
 param agentAppName string = 'orkinosai-agent'
 
+@description('Azure SQL connection string injected as the Default connection string for the CMS app.')
+@secure()
+param sqlConnectionString string = ''
+
 // ── App Service Plan (Linux) ──────────────────────────────────────────────────
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   name: '${baseName}-plan'
@@ -44,6 +48,15 @@ resource cmsApp 'Microsoft.Web/sites@2023-01-01' = {
       alwaysOn: false // Set to true on S1+ or P1v3+ if you need always-on (B1 does not support it)
       // SCM_DO_BUILD_DURING_DEPLOYMENT is NOT set here — publish-profile deploys
       // a pre-built artifact so Oryx build is not needed.
+      connectionStrings: !empty(sqlConnectionString)
+        ? [
+            {
+              name: 'Default'
+              connectionString: sqlConnectionString
+              type: 'SQLAzure'
+            }
+          ]
+        : []
     }
   }
 }
@@ -80,3 +93,4 @@ output agentDefaultHostname string = agentApp.properties.defaultHostName
 
 @description('Resource name of the App Service Plan')
 output appServicePlanName string = appServicePlan.name
+

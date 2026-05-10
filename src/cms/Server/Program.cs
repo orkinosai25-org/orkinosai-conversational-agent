@@ -129,10 +129,19 @@ builder.Services.AddScoped<IStripeService, StripeService>();
 // Register advert service
 builder.Services.AddSingleton<IAdvertService, AdvertService>();
 
-// Register issue service
-builder.Services.AddSingleton<IIssueService, IssueService>();
+// Register issue service (scoped — depends on the scoped ApplicationDbContext)
+builder.Services.AddScoped<IIssueService, IssueService>();
 
 var app = builder.Build();
+
+// Apply pending EF Core migrations automatically on startup (production only).
+// In development the InMemory provider is used, so migrations do not apply.
+if (!app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

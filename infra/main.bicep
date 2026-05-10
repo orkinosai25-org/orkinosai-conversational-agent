@@ -63,6 +63,10 @@ module appservice 'modules/appservice.bicep' = {
     planSku: appServicePlanSku
     cmsAppName: cmsAppName
     agentAppName: agentAppName
+    // Build the full ADO.NET connection string from SQL outputs + supplied credentials.
+    // This is injected automatically as the "Default" connection string in the CMS App Service,
+    // so no manual portal step is required after deployment.
+    sqlConnectionString: 'Server=tcp:${sql.outputs.sqlServerFqdn},1433;Initial Catalog=${databaseName};Persist Security Info=False;User ID=${sqlAdminLogin};Password=${sqlAdminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
   }
 }
 
