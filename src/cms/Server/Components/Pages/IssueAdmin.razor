@@ -1,17 +1,18 @@
+@page "/admin/support-hub"
 @page "/admin/issues"
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @using SiteChatCMS.Shared.DTOs.Issues
 
-<PageTitle>Issue Management — Admin Console</PageTitle>
+<PageTitle>AI Support Hub — Admin Console</PageTitle>
 
 <div class="issue-admin">
     <div class="admin-header">
         <div>
-            <h1>🐛 Issue Management Console</h1>
-            <p class="subtitle">Review support requests, track progress and resolve issues raised by users.</p>
+            <h1>🤖 AI Support Hub</h1>
+            <p class="subtitle">Review AI-analysed support tickets, track progress and resolve user requests.</p>
         </div>
-        <a href="/issues/submit" class="btn btn-outline">📝 Submit an Issue</a>
+        <a href="/support/submit" class="btn btn-outline">💬 Get Support</a>
     </div>
 
     @if (loading)
@@ -31,7 +32,7 @@
                     <div class="stat-icon">📋</div>
                     <div class="stat-body">
                         <div class="stat-value">@stats.TotalIssues</div>
-                        <div class="stat-label">Total Issues</div>
+                        <div class="stat-label">Total Tickets</div>
                     </div>
                 </div>
                 <div class="stat-card open">
@@ -72,10 +73,10 @@
             </div>
         }
 
-        <!-- ── Issues table ── -->
+        <!-- ── Tickets table ── -->
         <div class="section">
             <div class="section-header">
-                <h2>📂 All Issues</h2>
+                <h2>📂 Support Tickets</h2>
                 <div class="filter-bar">
                     <label>Filter by status:</label>
                     <select @bind="statusFilter" @bind:after="ApplyFilter">
@@ -91,7 +92,7 @@
             @if (filteredIssues == null || !filteredIssues.Any())
             {
                 <div class="empty-state">
-                    <p>No issues found.</p>
+                    <p>No tickets found.</p>
                 </div>
             }
             else
@@ -119,7 +120,14 @@
                                         <span class="issue-title">@issue.Title</span>
                                         @if (!string.IsNullOrEmpty(issue.AdminNotes))
                                         {
-                                            <span class="has-notes" title="Has admin notes">📌</span>
+                                            @if (issue.AdminNotes.StartsWith("[AI Summary]", StringComparison.Ordinal))
+                                            {
+                                                <span class="has-notes ai-origin" title="Auto-created from AI conversation">🤖</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="has-notes" title="Has admin notes">📌</span>
+                                            }
                                         }
                                     </td>
                                     <td><span class="badge type-@issue.Type.ToLower()">@issue.Type</span></td>
@@ -160,10 +168,17 @@
             <div class="modal-backdrop" @onclick="CloseDetail"></div>
             <div class="modal-panel">
                 <div class="modal-header">
-                    <h3>Issue #@selectedIssue.Id</h3>
+                    <h3>Ticket #@selectedIssue.Id</h3>
                     <button class="close-btn" @onclick="CloseDetail">✕</button>
                 </div>
                 <div class="modal-body">
+                    @if (selectedIssue.AdminNotes?.StartsWith("[AI Summary]", StringComparison.Ordinal) == true)
+                    {
+                        <div class="ai-analysis-banner">
+                            <span class="ai-badge">🤖 AI Analysed</span>
+                            <span class="ai-note-preview">@ParseAiSummary(selectedIssue.AdminNotes)</span>
+                        </div>
+                    }
                     <div class="detail-row">
                         <strong>Title:</strong>
                         <input class="form-control" @bind="editTitle" />
@@ -307,6 +322,9 @@
     .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.75rem 1.25rem; border-radius: 6px; z-index: 200; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: fadeIn 0.3s ease; }
     .toast-success { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
     .toast-error { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+    .ai-analysis-banner { display: flex; align-items: flex-start; gap: 0.5rem; background: #E8F5E9; border: 1px solid #A5D6A7; border-radius: 6px; padding: 0.65rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #2E7D32; }
+    .ai-badge { white-space: nowrap; font-weight: 600; }
+    .ai-note-preview { color: #333; font-style: italic; }
     @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 
@@ -481,5 +499,21 @@
         };
         toastTimer.AutoReset = false;
         toastTimer.Start();
+    }
+
+    /// <summary>
+    /// Extracts the human-readable AI summary line from AdminNotes written by the
+    /// from-conversation endpoint (format: "[AI Summary] …\n[Sentiment] …").
+    /// </summary>
+    private static string ParseAiSummary(string? adminNotes)
+    {
+        if (string.IsNullOrWhiteSpace(adminNotes)) return string.Empty;
+        var lines = adminNotes.Split('\n');
+        var summaryLine = lines.FirstOrDefault(l => l.StartsWith("[AI Summary]", StringComparison.Ordinal));
+        var sentimentLine = lines.FirstOrDefault(l => l.StartsWith("[Sentiment]", StringComparison.Ordinal));
+        var parts = new List<string>();
+        if (summaryLine != null) parts.Add(summaryLine.Replace("[AI Summary]", "Summary:", StringComparison.Ordinal).Trim());
+        if (sentimentLine != null) parts.Add(sentimentLine.Replace("[Sentiment]", "Sentiment:", StringComparison.Ordinal).Trim());
+        return string.Join(" · ", parts);
     }
 }

@@ -65,3 +65,46 @@ public class ResolveIssueDto
 {
     public string? AdminNotes { get; set; }
 }
+
+/// <summary>
+/// Payload for auto-creating a support ticket from an AI chat conversation transcript
+/// </summary>
+public class ConversationToTicketDto
+{
+    /// <summary>Full conversation transcript (alternating user / agent turns)</summary>
+    public string Transcript { get; set; } = string.Empty;
+
+    /// <summary>Website or channel where the conversation occurred</summary>
+    public string? SourceUrl { get; set; }
+
+    /// <summary>Name of the user who started the conversation (optional)</summary>
+    public string? SubmitterName { get; set; }
+
+    /// <summary>Contact email of the user — required to route the ticket</summary>
+    public string SubmitterEmail { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Result returned when a ticket is auto-created from a conversation.
+/// Includes the created ticket plus the AI analysis that drove its classification.
+/// </summary>
+public class ConversationTicketResult
+{
+    /// <summary>The support ticket that was created</summary>
+    public IssueDto Ticket { get; set; } = new();
+
+    /// <summary>Detected sentiment: Positive, Neutral, Negative, or Mixed</summary>
+    public string Sentiment { get; set; } = "Neutral";
+
+    /// <summary>Sentiment confidence score in the range 0.0 – 1.0</summary>
+    public double SentimentScore { get; set; }
+
+    /// <summary>Extractive summary of the conversation</summary>
+    public string Summary { get; set; } = string.Empty;
+
+    /// <summary>Auto-detected issue type (Bug / FeatureRequest / Question / Other)</summary>
+    public string DetectedType { get; set; } = string.Empty;
+
+    /// <summary>Auto-detected priority (Low / Medium / High / Critical)</summary>
+    public string DetectedPriority { get; set; } = string.Empty;
+}

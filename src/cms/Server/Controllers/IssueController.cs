@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SiteChatCMS.Core.Entities.Issues;
 using SiteChatCMS.Core.Interfaces.Services;
+using SiteChatCMS.Infrastructure.Services.Issues;
 using SiteChatCMS.Shared.DTOs.Issues;
 
 namespace SiteChatCMS.Controllers;
@@ -63,6 +64,74 @@ public class IssueController : ControllerBase
         {
             _logger.LogError(ex, "Error creating issue");
             return StatusCode(500, "An error occurred while submitting the issue.");
+        }
+    }
+
+    /// <summary>
+    /// Auto-create a support ticket from a SiteChat conversation transcript.
+    /// The transcript is analysed for sentiment, summarised, and classified by
+    /// type and priority — no external AI service is required.
+    /// </summary>
+    [HttpPost("from-conversation")]
+    [ProducesResponseType(typeof(ConversationTicketResult), 201)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> CreateFromConversation([FromBody] ConversationToTicketDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Transcript))
+            return BadRequest("Conversation transcript is required.");
+        if (string.IsNullOrWhiteSpace(dto.SubmitterEmail))
+            return BadRequest("Submitter email is required.");
+
+        try
+        {
+            // ── AI analysis ────────────────────────────────────────────────────
+            var (sentiment, sentimentScore) = ConversationAnalyser.DetectSentiment(dto.Transcript);
+            var summary = ConversationAnalyser.Summarise(dto.Transcript);
+            var detectedType = ConversationAnalyser.DetectType(dto.Transcript);
+            var detectedPriority = ConversationAnalyser.DetectPriority(dto.Transcript);
+
+            if (!Enum.TryParse<IssueType>(detectedType, out var issueType))
+                issueType = IssueType.Other;
+            if (!Enum.TryParse<IssuePriority>(detectedPriority, out var issuePriority))
+                issuePriority = IssuePriority.Medium;
+
+            // Use the summary as the ticket title (capped at 100 chars)
+            var title = summary.Length > 100 ? summary[..97] + "…" : summary;
+
+            // Persist AI analysis in AdminNotes so admins see it immediately
+            var adminNotes = $"{ConversationAnalyser.SummaryPrefix} {summary}\n{ConversationAnalyser.SentimentPrefix} {sentiment} ({sentimentScore:P0})";
+            if (!string.IsNullOrWhiteSpace(dto.SourceUrl))
+                adminNotes += $"\n[Source] {dto.SourceUrl}";
+
+            var issue = new Issue
+            {
+                Title = title,
+                Description = dto.Transcript,
+                Type = issueType,
+                Priority = issuePriority,
+                SubmitterName = dto.SubmitterName ?? "SiteChat Visitor",
+                SubmitterEmail = dto.SubmitterEmail,
+                AdminNotes = adminNotes
+            };
+
+            var created = await _issueService.CreateIssueAsync(issue);
+
+            var result = new ConversationTicketResult
+            {
+                Ticket = MapIssue(created),
+                Sentiment = sentiment,
+                SentimentScore = sentimentScore,
+                Summary = summary,
+                DetectedType = detectedType,
+                DetectedPriority = detectedPriority
+            };
+
+            return CreatedAtAction(nameof(GetIssue), new { id = created.Id }, result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating ticket from conversation");
+            return StatusCode(500, "An error occurred while processing the conversation.");
         }
     }
 
