@@ -250,6 +250,16 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation, 
 - Python 3.8 or higher
 - (Optional) Azure OpenAI Service account and deployment for production use
 
+## IDE Setup
+
+**New to the project?** Choose your preferred development environment:
+
+- **[Visual Studio 2022/2026 Setup Guide](VISUAL_STUDIO_GUIDE.md)** - Step-by-step instructions for opening and running this Python Flask project in Visual Studio
+- **[Quick Start Guide](QUICKSTART.md)** - Get running in 2 minutes with any IDE
+- **[Full Setup Guide](SETUP.md)** - Comprehensive setup and configuration
+
+**Note:** This is a Python Flask application, not a .NET Blazor project. See the Visual Studio Guide for clarification and proper setup instructions.
+
 ## Installation
 
 1. Clone the repository:
