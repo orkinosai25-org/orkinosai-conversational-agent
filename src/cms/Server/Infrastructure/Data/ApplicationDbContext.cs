@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SiteChatCMS.Core.Entities.Identity;
+using SiteChatCMS.Core.Entities.Issues;
 
 namespace SiteChatCMS.Infrastructure.Data;
 
@@ -18,6 +19,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Bot> Bots { get; set; }
     public DbSet<TrainingDocument> TrainingDocuments { get; set; }
     public DbSet<TrainingUrl> TrainingUrls { get; set; }
+    public DbSet<Issue> Issues { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -83,6 +85,22 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Url).IsRequired().HasMaxLength(2000);
             entity.Property(e => e.BotId).IsRequired();
+        });
+
+        // Issue configuration
+        builder.Entity<Issue>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(4000);
+            entity.Property(e => e.SubmitterName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.SubmitterEmail).IsRequired().HasMaxLength(300);
+            entity.Property(e => e.AdminNotes).HasMaxLength(4000);
+            entity.Property(e => e.Type).IsRequired();
+            entity.Property(e => e.Priority).IsRequired();
+            entity.Property(e => e.Status).IsRequired();
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.CreatedAt);
         });
     }
 }

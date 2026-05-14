@@ -9,6 +9,7 @@ using SiteChatCMS.Core.Interfaces.Services;
 using SiteChatCMS.Infrastructure.Data;
 using SiteChatCMS.Infrastructure.Services;
 using SiteChatCMS.Infrastructure.Services.Adverts;
+using SiteChatCMS.Infrastructure.Services.Issues;
 using SiteChatCMS.Infrastructure.Services.Auth;
 using SiteChatCMS.Infrastructure.Services.Bots;
 using SiteChatCMS.Infrastructure.Services.Onboarding;
@@ -128,7 +129,17 @@ builder.Services.AddScoped<IStripeService, StripeService>();
 // Register advert service
 builder.Services.AddSingleton<IAdvertService, AdvertService>();
 
+// Register issue service (scoped — depends on the scoped ApplicationDbContext)
+builder.Services.AddScoped<IIssueService, IssueService>();
+
 var app = builder.Build();
+
+// EF Core migrations are applied by the CI/CD pipeline (GitHub Actions) before each
+// deployment — see .github/workflows/main_papagan.yml (migrate job) and
+// .github/workflows/azure-provision.yml (migrate job).
+// No automatic migration is run at startup to avoid race conditions during
+// rolling restarts and to keep migration failures visible in deployment logs
+// rather than silently swallowed in application logs.
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
