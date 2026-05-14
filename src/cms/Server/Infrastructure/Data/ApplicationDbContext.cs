@@ -111,14 +111,17 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.SessionId).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.TenantId).HasMaxLength(450);
             entity.Property(e => e.BotId).HasMaxLength(450);
             entity.Property(e => e.SeatSlug).HasMaxLength(200);
             entity.Property(e => e.SourceUrl).HasMaxLength(2000);
             entity.Property(e => e.Language).HasMaxLength(20);
             entity.Property(e => e.VisitorName).HasMaxLength(200);
             entity.Property(e => e.VisitorEmail).HasMaxLength(254);
+            entity.Property(e => e.Status).IsRequired();
             entity.HasIndex(e => e.SessionId).IsUnique();
             entity.HasIndex(e => e.SeatSlug);
+            entity.HasIndex(e => e.TenantId);
             entity.HasIndex(e => e.CreatedAt);
             entity.HasMany(e => e.Messages)
                 .WithOne(e => e.Conversation)
@@ -136,7 +139,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Role).IsRequired().HasMaxLength(50);
             entity.Property(e => e.Content).IsRequired().HasMaxLength(50000);
+            entity.Property(e => e.Model).HasMaxLength(100);
             entity.HasIndex(e => e.ConversationId);
+            entity.HasIndex(e => new { e.ConversationId, e.SequenceNumber });
             entity.HasIndex(e => e.Timestamp);
         });
     }

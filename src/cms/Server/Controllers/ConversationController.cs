@@ -43,12 +43,13 @@ public class ConversationController : ControllerBase
         {
             var conversation = await _conversationService.StartConversationAsync(
                 dto.SessionId,
-                dto.BotId,
-                dto.SeatSlug,
-                dto.SourceUrl,
-                dto.Language,
-                dto.VisitorName,
-                dto.VisitorEmail);
+                tenantId: dto.TenantId,
+                botId: dto.BotId,
+                seatSlug: dto.SeatSlug,
+                sourceUrl: dto.SourceUrl,
+                language: dto.Language,
+                visitorName: dto.VisitorName,
+                visitorEmail: dto.VisitorEmail);
 
             var result = MapConversation(conversation);
 
@@ -66,7 +67,7 @@ public class ConversationController : ControllerBase
     }
 
     /// <summary>
-    /// Append a message (user or assistant) to an existing conversation.
+    /// Append a message (user, assistant, or system) to an existing conversation.
     /// Creates the conversation record automatically if not yet started.
     /// </summary>
     [HttpPost("{sessionId}/messages")]
@@ -83,14 +84,17 @@ public class ConversationController : ControllerBase
             return BadRequest("Role is required.");
         if (string.IsNullOrWhiteSpace(dto.Content))
             return BadRequest("Content is required.");
-        if (!dto.Role.Equals("user", StringComparison.OrdinalIgnoreCase) &&
-            !dto.Role.Equals("assistant", StringComparison.OrdinalIgnoreCase))
-            return BadRequest("Role must be 'user' or 'assistant'.");
+
+        var normalizedRole = dto.Role.ToLowerInvariant();
+        if (normalizedRole is not ("user" or "assistant" or "system"))
+            return BadRequest("Role must be 'user', 'assistant', or 'system'.");
 
         try
         {
             var message = await _conversationService.AddMessageAsync(
-                sessionId, dto.Role, dto.Content, botId, seatSlug);
+                sessionId, dto.Role, dto.Content,
+                botId, seatSlug,
+                dto.Model, dto.TokensInput, dto.TokensOutput, dto.Confidence);
 
             return CreatedAtAction(
                 nameof(GetBySession),
@@ -102,6 +106,19 @@ public class ConversationController : ControllerBase
             _logger.LogError(ex, "Error adding message to session {SessionId}", SanitizeForLog(sessionId));
             return StatusCode(500, "An error occurred while saving the message.");
         }
+    }
+
+    /// <summary>List all messages for a conversation in order.</summary>
+    [HttpGet("{sessionId}/messages")]
+    [ProducesResponseType(typeof(IEnumerable<ConversationMessageDto>), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> GetMessages(string sessionId)
+    {
+        var conversation = await _conversationService.GetBySessionIdAsync(sessionId);
+        if (conversation == null) return NotFound();
+
+        var messages = await _conversationService.GetMessagesAsync(sessionId);
+        return Ok(messages.Select(MapMessage));
     }
 
     /// <summary>Get a conversation by its external session ID, including all messages.</summary>
@@ -154,6 +171,28 @@ public class ConversationController : ControllerBase
         {
             _logger.LogError(ex, "Error setting outcome for session {SessionId}", SanitizeForLog(sessionId));
             return StatusCode(500, "An error occurred while recording the outcome.");
+        }
+    }
+
+    /// <summary>Mark the conversation as escalated to human support.</summary>
+    [HttpPost("{sessionId}/escalate")]
+    [ProducesResponseType(typeof(ConversationDto), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> Escalate(string sessionId)
+    {
+        try
+        {
+            var conversation = await _conversationService.EscalateConversationAsync(sessionId);
+            return Ok(MapConversation(conversation));
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error escalating session {SessionId}", SanitizeForLog(sessionId));
+            return StatusCode(500, "An error occurred while escalating the conversation.");
         }
     }
 
@@ -224,6 +263,16 @@ public class ConversationController : ControllerBase
         return Ok(conversations.Select(MapSummary));
     }
 
+    /// <summary>Admin: list conversations for a specific tenant (organisation).</summary>
+    [Authorize]
+    [HttpGet("admin/tenant/{tenantId}")]
+    [ProducesResponseType(typeof(IEnumerable<ConversationSummaryDto>), 200)]
+    public async Task<IActionResult> GetByTenant(string tenantId)
+    {
+        var conversations = await _conversationService.GetByTenantIdAsync(tenantId);
+        return Ok(conversations.Select(MapSummary));
+    }
+
     /// <summary>Admin: get full conversation details by primary key.</summary>
     [Authorize]
     [HttpGet("admin/{id:int}")]
@@ -267,16 +316,20 @@ public class ConversationController : ControllerBase
     {
         Id = c.Id,
         SessionId = c.SessionId,
+        TenantId = c.TenantId,
         BotId = c.BotId,
         SeatSlug = c.SeatSlug,
         SourceUrl = c.SourceUrl,
         Language = c.Language,
         VisitorName = c.VisitorName,
         VisitorEmail = c.VisitorEmail,
+        Status = c.Status.ToString(),
         IsResolved = c.IsResolved,
+        WasEscalated = c.WasEscalated,
         IsTicketCreated = c.IsTicketCreated,
         TicketId = c.TicketId,
         CreatedAt = c.CreatedAt,
+        LastActivityAtUtc = c.LastActivityAtUtc,
         UpdatedAt = c.UpdatedAt,
         EndedAt = c.EndedAt,
         Messages = c.Messages.Select(MapMessage).ToList()
@@ -286,16 +339,20 @@ public class ConversationController : ControllerBase
     {
         Id = c.Id,
         SessionId = c.SessionId,
+        TenantId = c.TenantId,
         BotId = c.BotId,
         SeatSlug = c.SeatSlug,
         SourceUrl = c.SourceUrl,
         Language = c.Language,
         VisitorName = c.VisitorName,
+        Status = c.Status.ToString(),
         IsResolved = c.IsResolved,
+        WasEscalated = c.WasEscalated,
         IsTicketCreated = c.IsTicketCreated,
         TicketId = c.TicketId,
         MessageCount = c.Messages.Count,
         CreatedAt = c.CreatedAt,
+        LastActivityAtUtc = c.LastActivityAtUtc,
         UpdatedAt = c.UpdatedAt,
         EndedAt = c.EndedAt
     };
@@ -303,8 +360,13 @@ public class ConversationController : ControllerBase
     private static ConversationMessageDto MapMessage(Core.Entities.Conversations.ConversationMessage m) => new()
     {
         Id = m.Id,
+        SequenceNumber = m.SequenceNumber,
         Role = m.Role,
         Content = m.Content,
-        Timestamp = m.Timestamp
+        Timestamp = m.Timestamp,
+        Model = m.Model,
+        TokensInput = m.TokensInput,
+        TokensOutput = m.TokensOutput,
+        Confidence = m.Confidence
     };
 }

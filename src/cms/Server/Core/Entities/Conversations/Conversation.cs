@@ -10,14 +10,24 @@ namespace SiteChatCMS.Core.Entities.Conversations;
 /// </summary>
 public class Conversation : BaseEntity
 {
-    /// <summary>External session ID supplied by the chat client (UUID).</summary>
-    public string SessionId { get; set; } = string.Empty;
+    // ── Tenant / site association ─────────────────────────────────────────────
+
+    /// <summary>
+    /// Organisation/tenant identifier — mirrors <c>Organization.Id</c> for fast
+    /// multi-tenant filtering without an extra join.
+    /// </summary>
+    public string? TenantId { get; set; }
 
     /// <summary>ID of the Bot (seat) that handled the conversation.</summary>
     public string? BotId { get; set; }
 
     /// <summary>Slug of the Bot seat — mirrors Bot.SeatSlug for fast querying.</summary>
     public string? SeatSlug { get; set; }
+
+    // ── Session identification ────────────────────────────────────────────────
+
+    /// <summary>External session ID supplied by the chat client (UUID).</summary>
+    public string SessionId { get; set; } = string.Empty;
 
     /// <summary>Source page or URL where the conversation started.</summary>
     public string? SourceUrl { get; set; }
@@ -31,10 +41,27 @@ public class Conversation : BaseEntity
     /// <summary>Visitor's email address (optional).</summary>
     public string? VisitorEmail { get; set; }
 
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Current lifecycle state of the conversation.
+    /// <see cref="ConversationStatus.Active"/> while in progress.
+    /// </summary>
+    public ConversationStatus Status { get; set; } = ConversationStatus.Active;
+
+    /// <summary>UTC timestamp of the most recent message or state change.</summary>
+    public DateTime LastActivityAtUtc { get; set; } = DateTime.UtcNow;
+
+    /// <summary>When the conversation session ended (null if still active).</summary>
+    public DateTime? EndedAt { get; set; }
+
     // ── Outcome fields ────────────────────────────────────────────────────────
 
     /// <summary>Whether the AI successfully resolved the visitor's query.</summary>
     public bool IsResolved { get; set; }
+
+    /// <summary>Whether the conversation was escalated (to a human / ticket).</summary>
+    public bool WasEscalated { get; set; }
 
     /// <summary>Whether a support ticket was created for this conversation.</summary>
     public bool IsTicketCreated { get; set; }
@@ -42,8 +69,12 @@ public class Conversation : BaseEntity
     /// <summary>FK to the Issue (support ticket) created from this conversation.</summary>
     public int? TicketId { get; set; }
 
-    /// <summary>When the conversation session ended (null if still active).</summary>
-    public DateTime? EndedAt { get; set; }
+    // ── Extensibility ─────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Optional JSON bag for future extensibility (e.g. UTM params, custom fields).
+    /// </summary>
+    public string? MetadataJson { get; set; }
 
     // ── Navigation ────────────────────────────────────────────────────────────
 
