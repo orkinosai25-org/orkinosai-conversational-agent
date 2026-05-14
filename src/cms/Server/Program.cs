@@ -139,8 +139,19 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+        logger.LogInformation("Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while applying database migrations. " +
+            "The application will continue but the database schema may be out of date. " +
+            "Check the connection string configuration and review the migration history in the __EFMigrationsHistory table.");
+    }
 }
 
 // Configure the HTTP request pipeline.

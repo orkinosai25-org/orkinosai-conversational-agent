@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SiteChatCMS.Core.Entities.Issues;
 using SiteChatCMS.Core.Interfaces.Services;
@@ -135,7 +136,7 @@ public class IssueController : ControllerBase
         }
     }
 
-    /// <summary>Get a single issue by ID</summary>
+    /// <summary>Get a single issue by ID — returns a public view without sensitive admin data</summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(IssueDto), 200)]
     [ProducesResponseType(404)]
@@ -143,12 +144,13 @@ public class IssueController : ControllerBase
     {
         var issue = await _issueService.GetIssueByIdAsync(id);
         if (issue == null) return NotFound();
-        return Ok(MapIssue(issue));
+        return Ok(MapIssuePublic(issue));
     }
 
     // ── Admin endpoints ──────────────────────────────────────────────────────
 
     /// <summary>Admin: get all issues</summary>
+    [Authorize]
     [HttpGet("admin/all")]
     [ProducesResponseType(typeof(IEnumerable<IssueDto>), 200)]
     public async Task<IActionResult> GetAllIssues()
@@ -158,6 +160,7 @@ public class IssueController : ControllerBase
     }
 
     /// <summary>Admin: get issues filtered by status</summary>
+    [Authorize]
     [HttpGet("admin/status/{status}")]
     [ProducesResponseType(typeof(IEnumerable<IssueDto>), 200)]
     [ProducesResponseType(400)]
@@ -171,6 +174,7 @@ public class IssueController : ControllerBase
     }
 
     /// <summary>Admin: get dashboard statistics</summary>
+    [Authorize]
     [HttpGet("admin/stats")]
     [ProducesResponseType(typeof(IssueStatsDto), 200)]
     public async Task<IActionResult> GetStats()
@@ -189,6 +193,7 @@ public class IssueController : ControllerBase
     }
 
     /// <summary>Admin: update an issue</summary>
+    [Authorize]
     [HttpPut("admin/{id:int}")]
     [ProducesResponseType(typeof(IssueDto), 200)]
     [ProducesResponseType(400)]
@@ -224,6 +229,7 @@ public class IssueController : ControllerBase
     }
 
     /// <summary>Admin: delete an issue</summary>
+    [Authorize]
     [HttpDelete("admin/{id:int}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
@@ -235,6 +241,7 @@ public class IssueController : ControllerBase
     }
 
     /// <summary>Admin: mark an issue as in-progress</summary>
+    [Authorize]
     [HttpPost("admin/{id:int}/start")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
@@ -246,6 +253,7 @@ public class IssueController : ControllerBase
     }
 
     /// <summary>Admin: resolve an issue</summary>
+    [Authorize]
     [HttpPost("admin/{id:int}/resolve")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
@@ -257,6 +265,7 @@ public class IssueController : ControllerBase
     }
 
     /// <summary>Admin: close an issue</summary>
+    [Authorize]
     [HttpPost("admin/{id:int}/close")]
     [ProducesResponseType(204)]
     [ProducesResponseType(404)]
@@ -267,8 +276,11 @@ public class IssueController : ControllerBase
         return NoContent();
     }
 
-    // ── Mapper ───────────────────────────────────────────────────────────────
+    // ── Mappers ──────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Full mapping including sensitive fields — for authenticated admin responses only.
+    /// </summary>
     private static IssueDto MapIssue(Issue issue) => new()
     {
         Id = issue.Id,
@@ -280,6 +292,26 @@ public class IssueController : ControllerBase
         SubmitterName = issue.SubmitterName,
         SubmitterEmail = issue.SubmitterEmail,
         AdminNotes = issue.AdminNotes,
+        ResolvedAt = issue.ResolvedAt,
+        CreatedAt = issue.CreatedAt,
+        UpdatedAt = issue.UpdatedAt
+    };
+
+    /// <summary>
+    /// Redacted mapping for public (unauthenticated) responses.
+    /// AdminNotes and SubmitterEmail are omitted to prevent PII/admin-data leakage.
+    /// </summary>
+    private static IssueDto MapIssuePublic(Issue issue) => new()
+    {
+        Id = issue.Id,
+        Title = issue.Title,
+        Description = issue.Description,
+        Type = issue.Type.ToString(),
+        Priority = issue.Priority.ToString(),
+        Status = issue.Status.ToString(),
+        SubmitterName = issue.SubmitterName,
+        SubmitterEmail = null,
+        AdminNotes = null,
         ResolvedAt = issue.ResolvedAt,
         CreatedAt = issue.CreatedAt,
         UpdatedAt = issue.UpdatedAt

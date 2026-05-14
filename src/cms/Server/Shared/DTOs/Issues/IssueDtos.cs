@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace SiteChatCMS.Shared.DTOs.Issues;
 
 /// <summary>
@@ -12,7 +14,7 @@ public class IssueDto
     public string Priority { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public string SubmitterName { get; set; } = string.Empty;
-    public string SubmitterEmail { get; set; } = string.Empty;
+    public string? SubmitterEmail { get; set; }
     public string? AdminNotes { get; set; }
     public DateTime? ResolvedAt { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -24,11 +26,26 @@ public class IssueDto
 /// </summary>
 public class CreateIssueDto
 {
+    [Required]
+    [MaxLength(200)]
     public string Title { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(5000)]
     public string Description { get; set; } = string.Empty;
+
+    [MaxLength(50)]
     public string Type { get; set; } = string.Empty;
+
+    [MaxLength(50)]
     public string Priority { get; set; } = string.Empty;
+
+    [MaxLength(200)]
     public string SubmitterName { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(254)]
+    [EmailAddress]
     public string SubmitterEmail { get; set; } = string.Empty;
 }
 
@@ -37,11 +54,24 @@ public class CreateIssueDto
 /// </summary>
 public class UpdateIssueDto
 {
+    [Required]
+    [MaxLength(200)]
     public string Title { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(5000)]
     public string Description { get; set; } = string.Empty;
+
+    [MaxLength(50)]
     public string Type { get; set; } = string.Empty;
+
+    [MaxLength(50)]
     public string Priority { get; set; } = string.Empty;
+
+    [MaxLength(50)]
     public string Status { get; set; } = string.Empty;
+
+    [MaxLength(2000)]
     public string? AdminNotes { get; set; }
 }
 
@@ -72,15 +102,22 @@ public class ResolveIssueDto
 public class ConversationToTicketDto
 {
     /// <summary>Full conversation transcript (alternating user / agent turns)</summary>
+    [Required]
+    [MaxLength(50000)]
     public string Transcript { get; set; } = string.Empty;
 
     /// <summary>Website or channel where the conversation occurred</summary>
+    [MaxLength(2048)]
     public string? SourceUrl { get; set; }
 
     /// <summary>Name of the user who started the conversation (optional)</summary>
+    [MaxLength(200)]
     public string? SubmitterName { get; set; }
 
     /// <summary>Contact email of the user — required to route the ticket</summary>
+    [Required]
+    [MaxLength(254)]
+    [EmailAddress]
     public string SubmitterEmail { get; set; } = string.Empty;
 }
 
