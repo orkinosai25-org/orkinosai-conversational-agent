@@ -134,25 +134,12 @@ builder.Services.AddScoped<IIssueService, IssueService>();
 
 var app = builder.Build();
 
-// Apply pending EF Core migrations automatically on startup (production only).
-// In development the InMemory provider is used, so migrations do not apply.
-if (!app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    try
-    {
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        db.Database.Migrate();
-        logger.LogInformation("Database migrations applied successfully.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "An error occurred while applying database migrations. " +
-            "The application will continue but the database schema may be out of date. " +
-            "Check the connection string configuration and review the migration history in the __EFMigrationsHistory table.");
-    }
-}
+// EF Core migrations are applied by the CI/CD pipeline (GitHub Actions) before each
+// deployment — see .github/workflows/main_papagan.yml (migrate job) and
+// .github/workflows/azure-provision.yml (migrate job).
+// No automatic migration is run at startup to avoid race conditions during
+// rolling restarts and to keep migration failures visible in deployment logs
+// rather than silently swallowed in application logs.
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
