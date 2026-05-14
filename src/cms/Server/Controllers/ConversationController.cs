@@ -60,7 +60,7 @@ public class ConversationController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error starting conversation {SessionId}", dto.SessionId);
+            _logger.LogError(ex, "Error starting conversation {SessionId}", SanitizeForLog(dto.SessionId));
             return StatusCode(500, "An error occurred while starting the conversation.");
         }
     }
@@ -99,7 +99,7 @@ public class ConversationController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding message to session {SessionId}", sessionId);
+            _logger.LogError(ex, "Error adding message to session {SessionId}", SanitizeForLog(sessionId));
             return StatusCode(500, "An error occurred while saving the message.");
         }
     }
@@ -152,7 +152,7 @@ public class ConversationController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error setting outcome for session {SessionId}", sessionId);
+            _logger.LogError(ex, "Error setting outcome for session {SessionId}", SanitizeForLog(sessionId));
             return StatusCode(500, "An error occurred while recording the outcome.");
         }
     }
@@ -174,7 +174,7 @@ public class ConversationController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error ending session {SessionId}", sessionId);
+            _logger.LogError(ex, "Error ending session {SessionId}", SanitizeForLog(sessionId));
             return StatusCode(500, "An error occurred while ending the conversation.");
         }
     }
@@ -197,7 +197,7 @@ public class ConversationController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error linking ticket to session {SessionId}", sessionId);
+            _logger.LogError(ex, "Error linking ticket to session {SessionId}", SanitizeForLog(sessionId));
             return StatusCode(500, "An error occurred while linking the ticket.");
         }
     }
@@ -256,6 +256,13 @@ public class ConversationController : ControllerBase
 
     // ── Mappers ───────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Strips newline and carriage-return characters from a user-provided value
+    /// so that it cannot inject extra lines into structured log output (log forging).
+    /// </summary>
+    private static string SanitizeForLog(string? value) =>
+        value?.Replace('\n', ' ').Replace('\r', ' ') ?? string.Empty;
+
     private static ConversationDto MapConversation(Core.Entities.Conversations.Conversation c) => new()
     {
         Id = c.Id,
@@ -298,7 +305,6 @@ public class ConversationController : ControllerBase
         Id = m.Id,
         Role = m.Role,
         Content = m.Content,
-        Timestamp = m.Timestamp,
-        CreatedAt = m.CreatedAt
+        Timestamp = m.Timestamp
     };
 }

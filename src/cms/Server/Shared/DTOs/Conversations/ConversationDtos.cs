@@ -75,8 +75,9 @@ public class ConversationMessageDto
     public int Id { get; set; }
     public string Role { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
+
+    /// <summary>UTC time when this message was sent in the conversation.</summary>
     public DateTime Timestamp { get; set; }
-    public DateTime CreatedAt { get; set; }
 }
 
 /// <summary>Full conversation details including all messages.</summary>
