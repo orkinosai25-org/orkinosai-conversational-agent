@@ -9,6 +9,7 @@ using SiteChatCMS.Core.Interfaces.Services;
 using SiteChatCMS.Infrastructure.Data;
 using SiteChatCMS.Infrastructure.Services;
 using SiteChatCMS.Infrastructure.Services.Adverts;
+using SiteChatCMS.Infrastructure.Services.Conversations;
 using SiteChatCMS.Infrastructure.Services.Issues;
 using SiteChatCMS.Infrastructure.Services.Auth;
 using SiteChatCMS.Infrastructure.Services.Bots;
@@ -131,6 +132,9 @@ builder.Services.AddSingleton<IAdvertService, AdvertService>();
 
 // Register issue service (scoped — depends on the scoped ApplicationDbContext)
 builder.Services.AddScoped<IIssueService, IssueService>();
+
+// Register conversation service (scoped — depends on the scoped ApplicationDbContext)
+builder.Services.AddScoped<IConversationService, ConversationService>();
 
 var app = builder.Build();
 
