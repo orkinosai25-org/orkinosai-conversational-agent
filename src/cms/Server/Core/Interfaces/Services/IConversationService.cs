@@ -85,4 +85,33 @@ public interface IConversationService
 
     /// <summary>Returns conversations for a specific tenant (organisation), newest first.</summary>
     Task<IEnumerable<Conversation>> GetByTenantIdAsync(string tenantId);
+
+    // ── Training metadata ─────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Runs the <see cref="SiteChatCMS.Infrastructure.Services.Issues.ConversationAnalyser"/>
+    /// against the conversation transcript and persists the derived training metadata
+    /// (summary, intent, sentiment, category) back to the conversation record.
+    /// </summary>
+    Task<Conversation> AnalyseConversationAsync(string sessionId);
+
+    /// <summary>
+    /// Manually overrides training metadata on a conversation.
+    /// Any non-null parameter value replaces the existing column value.
+    /// </summary>
+    Task<Conversation> SetTrainingMetadataAsync(
+        string sessionId,
+        string? answerQuality = null,
+        string? resolutionSource = null,
+        string? escalationReason = null,
+        string? intent = null);
+
+    // ── Dataset export ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Returns all conversations as export-ready records containing the conversation
+    /// metadata, training labels, transcript, and linked ticket information.
+    /// Ordered by creation date ascending (oldest first) for stable export batches.
+    /// </summary>
+    Task<IEnumerable<Conversation>> GetAllForExportAsync();
 }

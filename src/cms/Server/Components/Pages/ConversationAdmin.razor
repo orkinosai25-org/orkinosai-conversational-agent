@@ -1,0 +1,528 @@
+@page "/admin/conversations"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using SiteChatCMS.Shared.DTOs.Conversations
+
+<PageTitle>Conversation History — Admin</PageTitle>
+
+<div class="conversation-admin">
+    <div class="admin-header">
+        <div>
+            <h1>💬 Conversation History</h1>
+            <p class="subtitle">Browse SiteChat sessions, transcripts, training labels, and linked support tickets.</p>
+        </div>
+        <a href="/api/conversation/admin/export" class="btn btn-outline" target="_blank">⬇ Export Dataset</a>
+    </div>
+
+    @if (loading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading conversations…</p>
+        </div>
+    }
+    else if (errorMessage != null)
+    {
+        <div class="alert alert-error">@errorMessage</div>
+    }
+    else
+    {
+        <!-- ── Filter bar ── -->
+        <div class="filter-bar">
+            <input class="filter-input" placeholder="Search by session, visitor, seat…"
+                   @bind="searchTerm" @bind:event="oninput" />
+            <select class="filter-select" @bind="filterStatus">
+                <option value="">All statuses</option>
+                <option value="Active">Active</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Unresolved">Unresolved</option>
+                <option value="Escalated">Escalated</option>
+                <option value="Closed">Closed</option>
+            </select>
+            <select class="filter-select" @bind="filterResolved">
+                <option value="">All outcomes</option>
+                <option value="true">Resolved</option>
+                <option value="false">Unresolved</option>
+            </select>
+        </div>
+
+        <!-- ── Stats strip ── -->
+        <div class="stats-strip">
+            <span class="stat-pill">Total: <strong>@conversations.Count</strong></span>
+            <span class="stat-pill resolved">Resolved: <strong>@conversations.Count(c => c.IsResolved)</strong></span>
+            <span class="stat-pill escalated">Escalated: <strong>@conversations.Count(c => c.WasEscalated)</strong></span>
+            <span class="stat-pill ticket">Tickets: <strong>@conversations.Count(c => c.IsTicketCreated)</strong></span>
+        </div>
+
+        <!-- ── Conversation list ── -->
+        @if (Filtered.Count == 0)
+        {
+            <div class="empty-state">No conversations match your filter.</div>
+        }
+        else
+        {
+            <div class="conv-list">
+                @foreach (var c in Filtered)
+                {
+                    <div class="conv-card @(selectedConv?.Id == c.Id ? "selected" : "")"
+                         @onclick="() => SelectConversation(c)">
+                        <div class="conv-card-header">
+                            <span class="conv-visitor">@(c.VisitorName ?? "Anonymous")</span>
+                            <span class="conv-status badge @StatusClass(c.Status)">@c.Status</span>
+                            @if (c.IsTicketCreated)
+                            {
+                                <span class="badge badge-ticket">🎫 Ticket</span>
+                            }
+                        </div>
+                        <div class="conv-meta">
+                            <span title="Session">🆔 @c.SessionId[..Math.Min(12, c.SessionId.Length)]…</span>
+                            @if (!string.IsNullOrEmpty(c.SeatSlug))
+                            {
+                                <span title="Bot seat">🤖 @c.SeatSlug</span>
+                            }
+                            <span title="Messages">💬 @c.MessageCount msgs</span>
+                            <span title="Created">🕐 @c.CreatedAt.ToString("dd MMM yyyy HH:mm")</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(c.Summary))
+                        {
+                            <p class="conv-summary">@c.Summary</p>
+                        }
+                        <div class="conv-labels">
+                            @if (!string.IsNullOrEmpty(c.Sentiment))
+                            {
+                                <span class="label-pill sentiment-@c.Sentiment.ToLower()">@c.Sentiment</span>
+                            }
+                            @if (!string.IsNullOrEmpty(c.Category))
+                            {
+                                <span class="label-pill">@c.Category</span>
+                            }
+                            @if (!string.IsNullOrEmpty(c.AnswerQuality))
+                            {
+                                <span class="label-pill quality-@c.AnswerQuality.ToLower()">Q: @c.AnswerQuality</span>
+                            }
+                            @if (!string.IsNullOrEmpty(c.ResolutionSource))
+                            {
+                                <span class="label-pill">via @c.ResolutionSource</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+<!-- ── Detail drawer ── -->
+@if (selectedConv != null)
+{
+    <div class="drawer-overlay" @onclick="CloseDrawer"></div>
+    <div class="conv-drawer">
+        <div class="drawer-header">
+            <h2>💬 Conversation Detail</h2>
+            <button class="btn-icon" @onclick="CloseDrawer" title="Close">✕</button>
+        </div>
+
+        <div class="drawer-body">
+
+            <!-- Meta -->
+            <section class="detail-section">
+                <h3>Session</h3>
+                <dl class="meta-grid">
+                    <dt>Session ID</dt><dd>@selectedConv.SessionId</dd>
+                    <dt>Visitor</dt><dd>@(selectedConv.VisitorName ?? "—")</dd>
+                    <dt>Email</dt><dd>@(selectedConv.VisitorEmail ?? "—")</dd>
+                    <dt>Bot / Seat</dt><dd>@(selectedConv.SeatSlug ?? "—")</dd>
+                    <dt>Language</dt><dd>@(selectedConv.Language ?? "—")</dd>
+                    <dt>Source URL</dt><dd><a href="@selectedConv.SourceUrl" target="_blank">@(selectedConv.SourceUrl ?? "—")</a></dd>
+                    <dt>Started</dt><dd>@selectedConv.CreatedAt.ToString("dd MMM yyyy HH:mm:ss")</dd>
+                    <dt>Ended</dt><dd>@(selectedConv.EndedAt?.ToString("dd MMM yyyy HH:mm:ss") ?? "ongoing")</dd>
+                    <dt>Status</dt><dd><span class="badge @StatusClass(selectedConv.Status)">@selectedConv.Status</span></dd>
+                    <dt>Resolved</dt><dd>@(selectedConv.IsResolved ? "✅ Yes" : "❌ No")</dd>
+                    <dt>Escalated</dt><dd>@(selectedConv.WasEscalated ? "⚠️ Yes" : "No")</dd>
+                    @if (selectedConv.TicketId.HasValue)
+                    {
+                        <dt>Ticket</dt><dd><a href="/admin/support-hub">🎫 #@selectedConv.TicketId</a></dd>
+                    }
+                </dl>
+            </section>
+
+            <!-- Training labels -->
+            <section class="detail-section">
+                <h3>Training Labels</h3>
+                @if (!string.IsNullOrEmpty(selectedConv.Summary) || !string.IsNullOrEmpty(selectedConv.Sentiment))
+                {
+                    <dl class="meta-grid">
+                        @if (!string.IsNullOrEmpty(selectedConv.Summary))
+                        {
+                            <dt>Summary</dt><dd>@selectedConv.Summary</dd>
+                        }
+                        @if (!string.IsNullOrEmpty(selectedConv.Sentiment))
+                        {
+                            <dt>Sentiment</dt><dd>@selectedConv.Sentiment (@(selectedConv.SentimentScore.HasValue ? selectedConv.SentimentScore.Value.ToString("P0") : "—"))</dd>
+                        }
+                        @if (!string.IsNullOrEmpty(selectedConv.Category))
+                        {
+                            <dt>Category</dt><dd>@selectedConv.Category</dd>
+                        }
+                        @if (!string.IsNullOrEmpty(selectedConv.AnswerQuality))
+                        {
+                            <dt>Answer Quality</dt><dd>@selectedConv.AnswerQuality</dd>
+                        }
+                        @if (!string.IsNullOrEmpty(selectedConv.ResolutionSource))
+                        {
+                            <dt>Resolution Source</dt><dd>@selectedConv.ResolutionSource</dd>
+                        }
+                    </dl>
+                }
+                else
+                {
+                    <p class="text-muted">Not yet analysed.</p>
+                }
+
+                <div class="drawer-actions">
+                    <button class="btn btn-sm" @onclick="() => AnalyseConversation(selectedConv.SessionId)"
+                            disabled="@analysing">
+                        @(analysing ? "Analysing…" : "🔍 Auto-Analyse")
+                    </button>
+                    @if (!selectedConv.IsTicketCreated && !selectedConv.IsResolved)
+                    {
+                        <button class="btn btn-sm btn-warning" @onclick="() => AnalyseAndCreateTicket(selectedConv.SessionId)"
+                                disabled="@analysing">
+                            🎫 Analyse + Create Ticket
+                        </button>
+                    }
+                </div>
+
+                <!-- Manual label overrides -->
+                <div class="label-form">
+                    <h4>Override Labels</h4>
+                    <div class="form-row">
+                        <label>Answer Quality</label>
+                        <select @bind="editAnswerQuality">
+                            <option value="">—</option>
+                            <option value="Good">Good</option>
+                            <option value="Partial">Partial</option>
+                            <option value="Bad">Bad</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Resolution Source</label>
+                        <select @bind="editResolutionSource">
+                            <option value="">—</option>
+                            <option value="AI">AI</option>
+                            <option value="Human">Human</option>
+                            <option value="Unresolved">Unresolved</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Intent</label>
+                        <input @bind="editIntent" placeholder="e.g. report_bug" />
+                    </div>
+                    <div class="form-row">
+                        <label>Escalation Reason</label>
+                        <input @bind="editEscalationReason" placeholder="e.g. unanswered billing question" />
+                    </div>
+                    <button class="btn btn-sm btn-primary" @onclick="SaveMetadata">💾 Save Labels</button>
+                </div>
+            </section>
+
+            <!-- Transcript -->
+            <section class="detail-section">
+                <h3>Transcript</h3>
+                @if (transcriptLoading)
+                {
+                    <p class="text-muted">Loading transcript…</p>
+                }
+                else if (!string.IsNullOrEmpty(transcript))
+                {
+                    <div class="transcript-box">
+                        @foreach (var line in transcript.Split('\n'))
+                        {
+                            <div class="transcript-line @(line.StartsWith("User:") ? "user-line" : line.StartsWith("Assistant:") ? "assistant-line" : "")">@line</div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No messages in this conversation.</p>
+                }
+            </section>
+        </div>
+
+        @if (!string.IsNullOrEmpty(drawerMessage))
+        {
+            <div class="drawer-toast @(drawerSuccess ? "toast-success" : "toast-error")">@drawerMessage</div>
+        }
+    </div>
+}
+
+<style>
+    .conversation-admin { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
+    .admin-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .admin-header h1 { font-size: 1.8rem; margin: 0; }
+    .subtitle { color: #666; margin: 0.25rem 0 0; }
+    .filter-bar { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filter-input { flex: 1; min-width: 200px; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; }
+    .filter-select { padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; }
+    .stats-strip { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .stat-pill { background: #f1f5f9; border-radius: 20px; padding: 0.35rem 0.9rem; font-size: 0.85rem; }
+    .stat-pill.resolved { background: #d1fae5; color: #065f46; }
+    .stat-pill.escalated { background: #fef3c7; color: #92400e; }
+    .stat-pill.ticket { background: #dbeafe; color: #1e40af; }
+    .conv-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .conv-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem 1.25rem; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+    .conv-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-color: #a0aec0; }
+    .conv-card.selected { border-color: #4CAF50; box-shadow: 0 0 0 2px rgba(76,175,80,0.25); }
+    .conv-card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .conv-visitor { font-weight: 600; font-size: 1rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 12px; font-size: 0.78rem; font-weight: 600; }
+    .badge-Active { background: #dbeafe; color: #1e40af; }
+    .badge-Resolved { background: #d1fae5; color: #065f46; }
+    .badge-Unresolved { background: #fee2e2; color: #991b1b; }
+    .badge-Escalated { background: #fef3c7; color: #92400e; }
+    .badge-Closed { background: #f1f5f9; color: #64748b; }
+    .badge-ticket { background: #ede9fe; color: #5b21b6; margin-left: auto; }
+    .conv-meta { display: flex; flex-wrap: wrap; gap: 0.6rem; font-size: 0.8rem; color: #64748b; margin-bottom: 0.4rem; }
+    .conv-summary { font-size: 0.85rem; color: #374151; margin: 0.3rem 0 0.5rem; font-style: italic; }
+    .conv-labels { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .label-pill { background: #f1f5f9; border-radius: 12px; padding: 0.2rem 0.6rem; font-size: 0.75rem; font-weight: 500; }
+    .label-pill.sentiment-positive { background: #d1fae5; color: #065f46; }
+    .label-pill.sentiment-negative { background: #fee2e2; color: #991b1b; }
+    .label-pill.sentiment-mixed { background: #fef3c7; color: #92400e; }
+    .label-pill.quality-good { background: #d1fae5; color: #065f46; }
+    .label-pill.quality-bad { background: #fee2e2; color: #991b1b; }
+    .empty-state { text-align: center; color: #94a3b8; padding: 3rem 0; }
+    .loading-state { display: flex; flex-direction: column; align-items: center; padding: 3rem 0; gap: 1rem; color: #64748b; }
+    .spinner { width: 36px; height: 36px; border: 3px solid #e2e8f0; border-top-color: #4CAF50; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @@keyframes spin { to { transform: rotate(360deg); } }
+    /* Drawer */
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; }
+    .conv-drawer { position: fixed; top: 0; right: 0; width: 480px; max-width: 98vw; height: 100vh; background: #fff; box-shadow: -4px 0 24px rgba(0,0,0,0.15); z-index: 201; display: flex; flex-direction: column; overflow: hidden; }
+    .drawer-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; }
+    .drawer-header h2 { margin: 0; font-size: 1.2rem; }
+    .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #64748b; padding: 0.25rem 0.5rem; border-radius: 4px; }
+    .btn-icon:hover { background: #f1f5f9; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem; }
+    .detail-section { margin-bottom: 2rem; }
+    .detail-section h3 { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; margin: 0 0 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid #e2e8f0; }
+    .meta-grid { display: grid; grid-template-columns: 130px 1fr; gap: 0.4rem 0.75rem; font-size: 0.875rem; margin: 0; }
+    .meta-grid dt { color: #64748b; }
+    .meta-grid dd { margin: 0; font-weight: 500; word-break: break-all; }
+    .drawer-actions { display: flex; gap: 0.6rem; margin: 0.75rem 0; flex-wrap: wrap; }
+    .label-form { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-top: 0.75rem; }
+    .label-form h4 { margin: 0 0 0.75rem; font-size: 0.85rem; color: #374151; }
+    .form-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; font-size: 0.875rem; }
+    .form-row label { width: 130px; color: #64748b; flex-shrink: 0; }
+    .form-row select, .form-row input { flex: 1; padding: 0.35rem 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem; }
+    .transcript-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; font-size: 0.83rem; line-height: 1.6; max-height: 380px; overflow-y: auto; }
+    .transcript-line { padding: 0.2rem 0; }
+    .user-line { color: #1e40af; }
+    .assistant-line { color: #065f46; }
+    .text-muted { color: #94a3b8; font-size: 0.875rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1.2rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: background 0.15s; }
+    .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.82rem; }
+    .btn-outline { background: transparent; border: 1.5px solid #4CAF50; color: #4CAF50; }
+    .btn-outline:hover { background: #4CAF50; color: #fff; }
+    .btn-primary { background: #4CAF50; color: #fff; }
+    .btn-primary:hover { background: #2E7D32; }
+    .btn-warning { background: #F59E0B; color: #fff; }
+    .btn-warning:hover { background: #D97706; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .drawer-toast { padding: 0.75rem 1.5rem; font-size: 0.875rem; text-align: center; }
+    .toast-success { background: #d1fae5; color: #065f46; }
+    .toast-error { background: #fee2e2; color: #991b1b; }
+    .alert-error { background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; }
+</style>
+
+@code {
+    private bool loading = true;
+    private string? errorMessage;
+    private List<ConversationSummaryDto> conversations = new();
+    private ConversationSummaryDto? selectedConv;
+    private string transcript = string.Empty;
+    private bool transcriptLoading;
+    private bool analysing;
+
+    // Filters
+    private string searchTerm = string.Empty;
+    private string filterStatus = string.Empty;
+    private string filterResolved = string.Empty;
+
+    // Edit fields
+    private string editAnswerQuality = string.Empty;
+    private string editResolutionSource = string.Empty;
+    private string editIntent = string.Empty;
+    private string editEscalationReason = string.Empty;
+
+    // Toast
+    private string drawerMessage = string.Empty;
+    private bool drawerSuccess;
+
+    private List<ConversationSummaryDto> Filtered =>
+        conversations
+            .Where(c =>
+                (string.IsNullOrEmpty(searchTerm) ||
+                 c.SessionId.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                 (c.VisitorName?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                 (c.SeatSlug?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)) &&
+                (string.IsNullOrEmpty(filterStatus) || c.Status == filterStatus) &&
+                (string.IsNullOrEmpty(filterResolved) || c.IsResolved.ToString().ToLower() == filterResolved))
+            .ToList();
+
+    protected override async Task OnInitializedAsync() => await LoadData();
+
+    private async Task LoadData()
+    {
+        loading = true;
+        errorMessage = null;
+        try
+        {
+            var result = await Http.GetFromJsonAsync<List<ConversationSummaryDto>>("api/conversation/admin/all");
+            conversations = result ?? new();
+        }
+        catch
+        {
+            errorMessage = "Failed to load conversations. Are you signed in?";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task SelectConversation(ConversationSummaryDto conv)
+    {
+        selectedConv = conv;
+        drawerMessage = string.Empty;
+        editAnswerQuality = conv.AnswerQuality ?? string.Empty;
+        editResolutionSource = conv.ResolutionSource ?? string.Empty;
+        editIntent = string.Empty;
+        editEscalationReason = string.Empty;
+        transcript = string.Empty;
+        transcriptLoading = true;
+
+        try
+        {
+            var dto = await Http.GetFromJsonAsync<ConversationTranscriptDto>(
+                $"api/conversation/admin/{conv.Id}/transcript");
+            transcript = dto?.Transcript ?? string.Empty;
+        }
+        catch
+        {
+            transcript = string.Empty;
+        }
+        finally
+        {
+            transcriptLoading = false;
+        }
+    }
+
+    private void CloseDrawer()
+    {
+        selectedConv = null;
+        transcript = string.Empty;
+    }
+
+    private async Task AnalyseConversation(string sessionId)
+    {
+        analysing = true;
+        drawerMessage = string.Empty;
+        try
+        {
+            var response = await Http.PostAsync($"api/conversation/{sessionId}/analyse", null);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadData();
+                // Refresh selected drawer data
+                var updated = conversations.FirstOrDefault(c => c.SessionId == sessionId);
+                if (updated != null) selectedConv = updated;
+                ShowDrawerToast("Analysis complete.", true);
+            }
+            else
+            {
+                ShowDrawerToast("Analysis failed.", false);
+            }
+        }
+        catch
+        {
+            ShowDrawerToast("An error occurred.", false);
+        }
+        finally
+        {
+            analysing = false;
+        }
+    }
+
+    private async Task AnalyseAndCreateTicket(string sessionId)
+    {
+        analysing = true;
+        drawerMessage = string.Empty;
+        try
+        {
+            var response = await Http.PostAsync($"api/conversation/{sessionId}/analyse?createTicket=true", null);
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadData();
+                var updated = conversations.FirstOrDefault(c => c.SessionId == sessionId);
+                if (updated != null) selectedConv = updated;
+                ShowDrawerToast("Analysis complete. Support ticket created.", true);
+            }
+            else
+            {
+                ShowDrawerToast("Failed to analyse and create ticket.", false);
+            }
+        }
+        catch
+        {
+            ShowDrawerToast("An error occurred.", false);
+        }
+        finally
+        {
+            analysing = false;
+        }
+    }
+
+    private async Task SaveMetadata()
+    {
+        if (selectedConv == null) return;
+        drawerMessage = string.Empty;
+
+        var dto = new SetTrainingMetadataDto
+        {
+            AnswerQuality = string.IsNullOrEmpty(editAnswerQuality) ? null : editAnswerQuality,
+            ResolutionSource = string.IsNullOrEmpty(editResolutionSource) ? null : editResolutionSource,
+            Intent = string.IsNullOrEmpty(editIntent) ? null : editIntent,
+            EscalationReason = string.IsNullOrEmpty(editEscalationReason) ? null : editEscalationReason
+        };
+
+        var response = await Http.PostAsJsonAsync($"api/conversation/{selectedConv.SessionId}/metadata", dto);
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadData();
+            var updated = conversations.FirstOrDefault(c => c.SessionId == selectedConv.SessionId);
+            if (updated != null) selectedConv = updated;
+            ShowDrawerToast("Labels saved.", true);
+        }
+        else
+        {
+            ShowDrawerToast("Failed to save labels.", false);
+        }
+    }
+
+    private void ShowDrawerToast(string message, bool success)
+    {
+        drawerMessage = message;
+        drawerSuccess = success;
+    }
+
+    private static string StatusClass(string status) => status switch
+    {
+        "Active" => "badge-Active",
+        "Resolved" => "badge-Resolved",
+        "Unresolved" => "badge-Unresolved",
+        "Escalated" => "badge-Escalated",
+        _ => "badge-Closed"
+    };
+}

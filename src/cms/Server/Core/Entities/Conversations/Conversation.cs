@@ -69,6 +69,37 @@ public class Conversation : BaseEntity
     /// <summary>FK to the Issue (support ticket) created from this conversation.</summary>
     public int? TicketId { get; set; }
 
+    // ── Training-ready metadata ───────────────────────────────────────────────
+
+    /// <summary>Extractive AI summary of the conversation (set by analyser).</summary>
+    public string? Summary { get; set; }
+
+    /// <summary>Detected user intent (e.g. "billing question", "bug report").</summary>
+    public string? Intent { get; set; }
+
+    /// <summary>Detected sentiment label: Positive, Negative, Mixed, or Neutral.</summary>
+    public string? Sentiment { get; set; }
+
+    /// <summary>Sentiment confidence score 0.0 – 1.0 (1.0 = fully positive).</summary>
+    public double? SentimentScore { get; set; }
+
+    /// <summary>Classified issue category: Bug, FeatureRequest, Question, or Other.</summary>
+    public string? Category { get; set; }
+
+    /// <summary>Reason the conversation was escalated (if WasEscalated is true).</summary>
+    public string? EscalationReason { get; set; }
+
+    /// <summary>
+    /// Quality label for the AI's final answer: Good, Bad, Partial, or Unknown.
+    /// Set by human review or automated heuristics.
+    /// </summary>
+    public string? AnswerQuality { get; set; }
+
+    /// <summary>
+    /// How the conversation was ultimately resolved: AI, Human, Unresolved, or Pending.
+    /// </summary>
+    public string? ResolutionSource { get; set; }
+
     // ── Extensibility ─────────────────────────────────────────────────────────
 
     /// <summary>

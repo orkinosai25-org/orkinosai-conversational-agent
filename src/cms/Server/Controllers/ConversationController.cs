@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SiteChatCMS.Core.Interfaces.Services;
+using SiteChatCMS.Infrastructure.Services.Issues;
 using SiteChatCMS.Shared.DTOs.Conversations;
+using SiteChatCMS.Shared.DTOs.Issues;
 
 namespace SiteChatCMS.Controllers;
 
@@ -14,13 +16,16 @@ namespace SiteChatCMS.Controllers;
 public class ConversationController : ControllerBase
 {
     private readonly IConversationService _conversationService;
+    private readonly IIssueService _issueService;
     private readonly ILogger<ConversationController> _logger;
 
     public ConversationController(
         IConversationService conversationService,
+        IIssueService issueService,
         ILogger<ConversationController> logger)
     {
         _conversationService = conversationService;
+        _issueService = issueService;
         _logger = logger;
     }
 
@@ -241,6 +246,128 @@ public class ConversationController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Analyse a conversation transcript using the rule-based analyser and store
+    /// the derived training metadata (sentiment, summary, category, intent).
+    /// If the conversation is unresolved and <paramref name="createTicket"/> is true,
+    /// a support ticket is automatically created and linked.
+    /// </summary>
+    [HttpPost("{sessionId}/analyse")]
+    [ProducesResponseType(typeof(ConversationAnalysisResultDto), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> Analyse(string sessionId, [FromQuery] bool createTicket = false)
+    {
+        var conversation = await _conversationService.GetBySessionIdAsync(sessionId);
+        if (conversation == null) return NotFound();
+
+        try
+        {
+            conversation = await _conversationService.AnalyseConversationAsync(sessionId);
+
+            IssueTicketRef? ticketRef = null;
+
+            if (createTicket && !conversation.IsTicketCreated && !conversation.IsResolved)
+            {
+                var transcript = await _conversationService.BuildTranscriptAsync(sessionId);
+
+                if (!string.IsNullOrWhiteSpace(transcript))
+                {
+                    var (sentiment, sentimentScore) = ConversationAnalyser.DetectSentiment(transcript);
+                    var summary = ConversationAnalyser.Summarise(transcript);
+                    var detectedType = ConversationAnalyser.DetectType(transcript);
+                    var detectedPriority = ConversationAnalyser.DetectPriority(transcript);
+
+                    if (!Enum.TryParse<Core.Entities.Issues.IssueType>(detectedType, out var issueType))
+                        issueType = Core.Entities.Issues.IssueType.Other;
+                    if (!Enum.TryParse<Core.Entities.Issues.IssuePriority>(detectedPriority, out var issuePriority))
+                        issuePriority = Core.Entities.Issues.IssuePriority.Medium;
+
+                    var title = summary.Length > 100 ? summary[..97] + "…" : summary;
+                    var adminNotes = $"{ConversationAnalyser.SummaryPrefix} {summary}\n{ConversationAnalyser.SentimentPrefix} {sentiment} ({sentimentScore:P0})";
+                    if (!string.IsNullOrWhiteSpace(conversation.SourceUrl))
+                        adminNotes += $"\n[Source] {conversation.SourceUrl}";
+
+                    var issue = new Core.Entities.Issues.Issue
+                    {
+                        Title = title,
+                        Description = transcript,
+                        Type = issueType,
+                        Priority = issuePriority,
+                        SubmitterName = conversation.VisitorName ?? "SiteChat Visitor",
+                        SubmitterEmail = conversation.VisitorEmail ?? "noreply@sitechat.ai",
+                        AdminNotes = adminNotes
+                    };
+
+                    var created = await _issueService.CreateIssueAsync(issue);
+                    await _conversationService.LinkTicketAsync(sessionId, created.Id);
+                    await _conversationService.EscalateConversationAsync(sessionId);
+
+                    conversation = await _conversationService.GetBySessionIdAsync(sessionId)
+                                   ?? conversation;
+
+                    ticketRef = new IssueTicketRef
+                    {
+                        Id = created.Id,
+                        Title = created.Title,
+                        Status = created.Status.ToString()
+                    };
+                }
+            }
+
+            var result = new ConversationAnalysisResultDto
+            {
+                Conversation = MapConversation(conversation),
+                Sentiment = conversation.Sentiment ?? string.Empty,
+                SentimentScore = conversation.SentimentScore ?? 0,
+                Summary = conversation.Summary ?? string.Empty,
+                Category = conversation.Category ?? string.Empty,
+                Intent = conversation.Intent ?? string.Empty,
+                CreatedTicket = ticketRef
+            };
+
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error analysing session {SessionId}", SanitizeForLog(sessionId));
+            return StatusCode(500, "An error occurred while analysing the conversation.");
+        }
+    }
+
+    /// <summary>
+    /// Manually set training-review labels on a conversation.
+    /// Used by human reviewers to rate answer quality, resolution source, etc.
+    /// </summary>
+    [HttpPost("{sessionId}/metadata")]
+    [ProducesResponseType(typeof(ConversationDto), 200)]
+    [ProducesResponseType(404)]
+    public async Task<IActionResult> SetMetadata(string sessionId, [FromBody] SetTrainingMetadataDto dto)
+    {
+        try
+        {
+            var conversation = await _conversationService.SetTrainingMetadataAsync(
+                sessionId,
+                answerQuality: dto.AnswerQuality,
+                resolutionSource: dto.ResolutionSource,
+                escalationReason: dto.EscalationReason,
+                intent: dto.Intent);
+            return Ok(MapConversation(conversation));
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting metadata for session {SessionId}", SanitizeForLog(sessionId));
+            return StatusCode(500, "An error occurred while setting the metadata.");
+        }
+    }
+
     // ── Admin endpoints ───────────────────────────────────────────────────────
 
     /// <summary>Admin: list all conversations (summaries, no messages).</summary>
@@ -303,6 +430,27 @@ public class ConversationController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Admin: export all conversations as a dataset suitable for training / analytics.
+    /// Returns full transcripts, training labels, and linked ticket data.
+    /// </summary>
+    [Authorize]
+    [HttpGet("admin/export")]
+    [ProducesResponseType(typeof(IEnumerable<ConversationExportDto>), 200)]
+    public async Task<IActionResult> Export()
+    {
+        var conversations = await _conversationService.GetAllForExportAsync();
+        var result = new List<ConversationExportDto>();
+
+        foreach (var c in conversations)
+        {
+            var transcript = await _conversationService.BuildTranscriptAsync(c.SessionId);
+            result.Add(MapExport(c, transcript));
+        }
+
+        return Ok(result);
+    }
+
     // ── Mappers ───────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -345,6 +493,7 @@ public class ConversationController : ControllerBase
         SourceUrl = c.SourceUrl,
         Language = c.Language,
         VisitorName = c.VisitorName,
+        VisitorEmail = c.VisitorEmail,
         Status = c.Status.ToString(),
         IsResolved = c.IsResolved,
         WasEscalated = c.WasEscalated,
@@ -354,7 +503,13 @@ public class ConversationController : ControllerBase
         CreatedAt = c.CreatedAt,
         LastActivityAtUtc = c.LastActivityAtUtc,
         UpdatedAt = c.UpdatedAt,
-        EndedAt = c.EndedAt
+        EndedAt = c.EndedAt,
+        Summary = c.Summary,
+        Sentiment = c.Sentiment,
+        SentimentScore = c.SentimentScore,
+        Category = c.Category,
+        AnswerQuality = c.AnswerQuality,
+        ResolutionSource = c.ResolutionSource
     };
 
     private static ConversationMessageDto MapMessage(Core.Entities.Conversations.ConversationMessage m) => new()
@@ -368,5 +523,47 @@ public class ConversationController : ControllerBase
         TokensInput = m.TokensInput,
         TokensOutput = m.TokensOutput,
         Confidence = m.Confidence
+    };
+
+    private static ConversationExportDto MapExport(
+        Core.Entities.Conversations.Conversation c,
+        string transcript) => new()
+    {
+        Id = c.Id,
+        SessionId = c.SessionId,
+        TenantId = c.TenantId,
+        BotId = c.BotId,
+        SeatSlug = c.SeatSlug,
+        SourceUrl = c.SourceUrl,
+        Language = c.Language,
+        VisitorName = c.VisitorName,
+        Status = c.Status.ToString(),
+        CreatedAt = c.CreatedAt,
+        EndedAt = c.EndedAt,
+        MessageCount = c.Messages.Count,
+        IsResolved = c.IsResolved,
+        WasEscalated = c.WasEscalated,
+        IsTicketCreated = c.IsTicketCreated,
+        TicketId = c.TicketId,
+        Summary = c.Summary,
+        Intent = c.Intent,
+        Sentiment = c.Sentiment,
+        SentimentScore = c.SentimentScore,
+        Category = c.Category,
+        EscalationReason = c.EscalationReason,
+        AnswerQuality = c.AnswerQuality,
+        ResolutionSource = c.ResolutionSource,
+        Transcript = transcript,
+        Ticket = c.Ticket == null ? null : new ExportedTicketDto
+        {
+            Id = c.Ticket.Id,
+            Title = c.Ticket.Title,
+            Type = c.Ticket.Type.ToString(),
+            Priority = c.Ticket.Priority.ToString(),
+            Status = c.Ticket.Status.ToString(),
+            AdminNotes = c.Ticket.AdminNotes,
+            ResolvedAt = c.Ticket.ResolvedAt,
+            CreatedAt = c.Ticket.CreatedAt
+        }
     };
 }

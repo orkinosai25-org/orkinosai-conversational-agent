@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SiteChatCMS.Core.Entities.Conversations;
 using SiteChatCMS.Core.Interfaces.Services;
 using SiteChatCMS.Infrastructure.Data;
+using SiteChatCMS.Infrastructure.Services.Issues;
 
 namespace SiteChatCMS.Infrastructure.Services.Conversations;
 
@@ -207,17 +208,20 @@ public class ConversationService : IConversationService
 
     public async Task<IEnumerable<Conversation>> GetAllAsync() =>
         await _db.Conversations
+            .Include(c => c.Messages)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
 
     public async Task<IEnumerable<Conversation>> GetBySeatSlugAsync(string seatSlug) =>
         await _db.Conversations
+            .Include(c => c.Messages)
             .Where(c => c.SeatSlug == seatSlug)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
 
     public async Task<IEnumerable<Conversation>> GetByTenantIdAsync(string tenantId) =>
         await _db.Conversations
+            .Include(c => c.Messages)
             .Where(c => c.TenantId == tenantId)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
@@ -231,4 +235,74 @@ public class ConversationService : IConversationService
             ?? throw new KeyNotFoundException(
                 $"Conversation with session ID '{sessionId}' was not found.");
     }
+
+    // ── Training metadata ─────────────────────────────────────────────────────
+
+    public async Task<Conversation> AnalyseConversationAsync(string sessionId)
+    {
+        var conversation = await RequireConversationAsync(sessionId);
+        var transcript = await BuildTranscriptAsync(sessionId);
+
+        if (!string.IsNullOrWhiteSpace(transcript))
+        {
+            var (sentimentLabel, sentimentScore) = ConversationAnalyser.DetectSentiment(transcript);
+            var summary = ConversationAnalyser.Summarise(transcript);
+            var category = ConversationAnalyser.DetectType(transcript);
+
+            conversation.Sentiment = sentimentLabel;
+            conversation.SentimentScore = sentimentScore;
+            conversation.Summary = summary.Length > 1000 ? summary[..997] + "…" : summary;
+            conversation.Category = category;
+
+            // Derive intent label from category and sentiment
+            conversation.Intent = BuildIntentLabel(category, sentimentLabel);
+        }
+
+        conversation.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+        return conversation;
+    }
+
+    public async Task<Conversation> SetTrainingMetadataAsync(
+        string sessionId,
+        string? answerQuality = null,
+        string? resolutionSource = null,
+        string? escalationReason = null,
+        string? intent = null)
+    {
+        var conversation = await RequireConversationAsync(sessionId);
+
+        if (answerQuality != null)
+            conversation.AnswerQuality = answerQuality;
+        if (resolutionSource != null)
+            conversation.ResolutionSource = resolutionSource;
+        if (escalationReason != null)
+            conversation.EscalationReason = escalationReason;
+        if (intent != null)
+            conversation.Intent = intent;
+
+        conversation.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+        return conversation;
+    }
+
+    // ── Dataset export ────────────────────────────────────────────────────────
+
+    public async Task<IEnumerable<Conversation>> GetAllForExportAsync() =>
+        await _db.Conversations
+            .Include(c => c.Messages.OrderBy(m => m.SequenceNumber).ThenBy(m => m.Timestamp))
+            .Include(c => c.Ticket)
+            .OrderBy(c => c.CreatedAt)
+            .ToListAsync();
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    private static string BuildIntentLabel(string category, string sentiment) => category switch
+    {
+        "Bug" => "report_bug",
+        "FeatureRequest" => "request_feature",
+        "Question" => "ask_question",
+        _ => sentiment == "Negative" ? "express_frustration" : "general_enquiry"
+    };
+
 }
