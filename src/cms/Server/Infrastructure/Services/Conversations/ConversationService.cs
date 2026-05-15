@@ -14,6 +14,9 @@ public class ConversationService : IConversationService
 {
     private readonly ApplicationDbContext _db;
 
+    /// <summary>Maximum character length for the Summary column (matches entity MaxLength(1000)).</summary>
+    private const int SummaryMaxLength = 1000;
+
     public ConversationService(ApplicationDbContext db)
     {
         _db = db;
@@ -251,7 +254,9 @@ public class ConversationService : IConversationService
 
             conversation.Sentiment = sentimentLabel;
             conversation.SentimentScore = sentimentScore;
-            conversation.Summary = summary.Length > 1000 ? summary[..997] + "…" : summary;
+            conversation.Summary = summary.Length > SummaryMaxLength
+                ? summary[..(SummaryMaxLength - 3)] + "…"
+                : summary;
             conversation.Category = category;
 
             // Derive intent label from category and sentiment

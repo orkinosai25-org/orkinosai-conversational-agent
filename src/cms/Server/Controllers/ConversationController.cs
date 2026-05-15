@@ -294,7 +294,9 @@ public class ConversationController : ControllerBase
                         Type = issueType,
                         Priority = issuePriority,
                         SubmitterName = conversation.VisitorName ?? "SiteChat Visitor",
-                        SubmitterEmail = conversation.VisitorEmail ?? "noreply@sitechat.ai",
+                        // Use anonymous placeholder — real email not available for unauthenticated visitors.
+                        // ".invalid" TLD is reserved and will never route real mail (RFC 2606).
+                        SubmitterEmail = conversation.VisitorEmail ?? "anonymous@sitechat.invalid",
                         AdminNotes = adminNotes
                     };
 

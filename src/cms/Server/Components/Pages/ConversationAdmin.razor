@@ -75,7 +75,7 @@
                             }
                         </div>
                         <div class="conv-meta">
-                            <span title="Session">🆔 @c.SessionId[..Math.Min(12, c.SessionId.Length)]…</span>
+                            <span title="Session">🆔 @(c.SessionId.Length > 12 ? c.SessionId[..12] + "…" : c.SessionId)</span>
                             @if (!string.IsNullOrEmpty(c.SeatSlug))
                             {
                                 <span title="Bot seat">🤖 @c.SeatSlug</span>
