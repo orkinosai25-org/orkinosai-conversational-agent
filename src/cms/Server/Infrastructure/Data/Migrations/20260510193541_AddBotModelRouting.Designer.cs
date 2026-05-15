@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SiteChatCMS.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SiteChatCMS.Infrastructure.Data;
 namespace PapaganCMS.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260510193541_AddBotModelRouting")]
+    partial class AddBotModelRouting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -583,251 +586,6 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
                     b.Navigation("Bots");
                 });
 
-            modelBuilder.Entity("SiteChatCMS.Core.Entities.Issues.Issue", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AdminNotes")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SubmitterEmail")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("SubmitterName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("Issues");
-                });
-
-            modelBuilder.Entity("SiteChatCMS.Core.Entities.Conversations.Conversation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AnswerQuality")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("BotId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Category")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("EndedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EscalationReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Intent")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<bool>("IsResolved")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsTicketCreated")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("WasEscalated")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("LastActivityAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Language")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("MetadataJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResolutionSource")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("SeatSlug")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Sentiment")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<double?>("SentimentScore")
-                        .HasColumnType("float");
-
-                    b.Property<string>("SessionId")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("SourceUrl")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Summary")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("TenantId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int?>("TicketId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("VisitorEmail")
-                        .HasMaxLength(254)
-                        .HasColumnType("nvarchar(254)");
-
-                    b.Property<string>("VisitorName")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt")
-                        .HasDatabaseName("IX_Conversations_CreatedAt");
-
-                    b.HasIndex("SeatSlug")
-                        .HasDatabaseName("IX_Conversations_SeatSlug");
-
-                    b.HasIndex("SessionId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Conversations_SessionId");
-
-                    b.HasIndex("TenantId")
-                        .HasDatabaseName("IX_Conversations_TenantId");
-
-                    b.HasIndex("TicketId")
-                        .HasDatabaseName("IX_Conversations_TicketId");
-
-                    b.ToTable("Conversations");
-                });
-
-            modelBuilder.Entity("SiteChatCMS.Core.Entities.Conversations.ConversationMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<double?>("Confidence")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(50000)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ConversationId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("MessageMetadataJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Model")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("SequenceNumber")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("TokensInput")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokensOutput")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConversationId")
-                        .HasDatabaseName("IX_ConversationMessages_ConversationId");
-
-                    b.HasIndex("Timestamp")
-                        .HasDatabaseName("IX_ConversationMessages_Timestamp");
-
-                    b.HasIndex("ConversationId", "SequenceNumber")
-                        .HasDatabaseName("IX_ConversationMessages_ConversationId_SequenceNumber");
-
-                    b.ToTable("ConversationMessages");
-                });
-
             modelBuilder.Entity("SiteChatCMS.Core.Entities.Identity.Bot", b =>
                 {
                     b.Navigation("TrainingDocuments");
@@ -840,32 +598,6 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
                     b.Navigation("Bots");
 
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("SiteChatCMS.Core.Entities.Conversations.Conversation", b =>
-                {
-                    b.HasOne("SiteChatCMS.Core.Entities.Issues.Issue", "Ticket")
-                        .WithMany()
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Ticket");
-                });
-
-            modelBuilder.Entity("SiteChatCMS.Core.Entities.Conversations.ConversationMessage", b =>
-                {
-                    b.HasOne("SiteChatCMS.Core.Entities.Conversations.Conversation", "Conversation")
-                        .WithMany("Messages")
-                        .HasForeignKey("ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Conversation");
-                });
-
-            modelBuilder.Entity("SiteChatCMS.Core.Entities.Conversations.Conversation", b =>
-                {
-                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

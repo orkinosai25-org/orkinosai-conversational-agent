@@ -174,7 +174,10 @@ def create_app(config_path: Optional[str] = None) -> Flask:
                 "conversation_id": "optional-conversation-id",
                 "message": "user message",
                 "temperature": 0.7,  // optional
-                "max_tokens": 1000   // optional
+                "max_tokens": 1000,  // optional
+                "model_preference": "gpt-4",  // optional
+                "fallback_model": "sumotx",   // optional
+                "routing_mode": "auto"        // optional
             }
         
         Returns:
@@ -190,13 +193,19 @@ def create_app(config_path: Optional[str] = None) -> Flask:
             user_message = data["message"]
             temperature = data.get("temperature")
             max_tokens = data.get("max_tokens")
+            model_preference = data.get("model_preference")
+            fallback_model = data.get("fallback_model")
+            routing_mode = data.get("routing_mode")
             
             # Generate response
             response = conversation_manager.chat(
                 conversation_id=conversation_id or "default",
                 user_message=user_message,
                 temperature=temperature,
-                max_tokens=max_tokens
+                max_tokens=max_tokens,
+                preferred_model=model_preference,
+                fallback_model=fallback_model,
+                routing_mode=routing_mode,
             )
             
             return jsonify(response)

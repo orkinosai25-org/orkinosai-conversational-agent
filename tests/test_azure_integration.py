@@ -154,6 +154,9 @@ def test_conversation_manager_chat(mock_settings):
     assert "assistant_message" in response
     assert "timestamp" in response
     assert "usage" in response
+    assert response["routing"]["assigned_model"] == "gpt-4"
+    assert response["classification"]["normalized_message"] == "Hello World"
+    assert response["estimated_cost_usd"] >= 0
 
 
 def test_conversation_history_limit(mock_settings):
@@ -249,6 +252,38 @@ def test_temperature_override(mock_settings):
     
     assert response is not None
     # The override should work without errors
+
+
+def test_conversation_manager_routes_low_cost_messages(mock_settings):
+    """Cheap routing mode should choose the small model."""
+    manager = ConversationManager(mock_settings)
+
+    response = manager.chat(
+        conversation_id="cheap-route",
+        user_message="What are your pricing options?",
+        preferred_model="gpt-4",
+        fallback_model="sumotx",
+        routing_mode="cheap",
+    )
+
+    assert response["routing"]["mode"] == "cheap"
+    assert response["routing"]["assigned_model"] == "small"
+    assert response["classification"]["intent"] == "faq"
+
+
+def test_conversation_manager_flags_escalation_requests(mock_settings):
+    """Complaints should recommend escalation and ticketing."""
+    manager = ConversationManager(mock_settings)
+
+    response = manager.chat(
+        conversation_id="escalation-route",
+        user_message="This is urgent, your support is broken and I want a refund.",
+        routing_mode="auto",
+    )
+
+    assert response["routing"]["assigned_model"] == "gpt-4"
+    assert response["routing"]["create_issue"] is True
+    assert response["routing"]["escalate_to_human"] is True
 
 
 def _has_valid_azure_credentials():

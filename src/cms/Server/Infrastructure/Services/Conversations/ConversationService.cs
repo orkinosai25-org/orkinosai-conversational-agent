@@ -32,13 +32,22 @@ public class ConversationService : IConversationService
         string? sourceUrl = null,
         string? language = null,
         string? visitorName = null,
-        string? visitorEmail = null)
+        string? visitorEmail = null,
+        string? metadataJson = null)
     {
         var existing = await _db.Conversations
             .FirstOrDefaultAsync(c => c.SessionId == sessionId);
 
         if (existing != null)
+        {
+            if (!string.IsNullOrWhiteSpace(metadataJson))
+            {
+                existing.MetadataJson = metadataJson;
+                existing.UpdatedAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
+            }
             return existing;
+        }
 
         var now = DateTime.UtcNow;
         var conversation = new Conversation
@@ -51,6 +60,7 @@ public class ConversationService : IConversationService
             Language = language,
             VisitorName = visitorName,
             VisitorEmail = visitorEmail,
+            MetadataJson = metadataJson,
             Status = ConversationStatus.Active,
             LastActivityAtUtc = now,
             CreatedAt = now
@@ -82,7 +92,8 @@ public class ConversationService : IConversationService
         string? model = null,
         int? tokensInput = null,
         int? tokensOutput = null,
-        double? confidence = null)
+        double? confidence = null,
+        string? messageMetadataJson = null)
     {
         // Ensure the conversation exists
         var conversation = await _db.Conversations
@@ -112,6 +123,7 @@ public class ConversationService : IConversationService
             TokensInput = tokensInput,
             TokensOutput = tokensOutput,
             Confidence = confidence,
+            MessageMetadataJson = messageMetadataJson,
             CreatedAt = now
         };
 
@@ -273,7 +285,8 @@ public class ConversationService : IConversationService
         string? answerQuality = null,
         string? resolutionSource = null,
         string? escalationReason = null,
-        string? intent = null)
+        string? intent = null,
+        string? metadataJson = null)
     {
         var conversation = await RequireConversationAsync(sessionId);
 
@@ -285,6 +298,8 @@ public class ConversationService : IConversationService
             conversation.EscalationReason = escalationReason;
         if (intent != null)
             conversation.Intent = intent;
+        if (metadataJson != null)
+            conversation.MetadataJson = metadataJson;
 
         conversation.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();

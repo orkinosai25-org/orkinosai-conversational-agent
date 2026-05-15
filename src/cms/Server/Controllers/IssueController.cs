@@ -223,7 +223,7 @@ public class IssueController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating issue {IssueId}", id);
+            _logger.LogError(ex, "Error updating issue");
             return StatusCode(500, "An error occurred while updating the issue.");
         }
     }

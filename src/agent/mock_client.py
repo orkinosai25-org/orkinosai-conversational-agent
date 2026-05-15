@@ -25,6 +25,7 @@ class MockAIClient:
         messages: List[Dict[str, str]],
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
+        model: Optional[str] = None,
         stream: bool = False
     ) -> Dict[str, Any]:
         """Generate a mock chat completion.
@@ -55,7 +56,9 @@ class MockAIClient:
             
             result = {
                 "id": f"mock-{int(time.time())}",
-                "model": "mock-gpt-4",
+                "model": model or "mock-gpt-4",
+                "requested_model": model or "mock-gpt-4",
+                "deployment_name": "mock",
                 "created": int(time.time()),
                 "content": response_content,
                 "role": "assistant",

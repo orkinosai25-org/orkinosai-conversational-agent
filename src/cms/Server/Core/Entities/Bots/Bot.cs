@@ -19,6 +19,9 @@ public class Bot
     public string? SystemPrompt { get; set; }
     public double Temperature { get; set; } = 0.7;
     public int MaxTokens { get; set; } = 1000;
+    public string PrimaryModel { get; set; } = "gpt-4";
+    public string FallbackModel { get; set; } = "sumotx";
+    public string RoutingMode { get; set; } = "auto";
     public bool IsActive { get; set; } = true;
     public bool IsPublic { get; set; } = false;
     

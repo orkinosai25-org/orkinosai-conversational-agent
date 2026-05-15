@@ -63,6 +63,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.SiteUrl).HasMaxLength(1000);
             entity.Property(e => e.SeatSlug).IsRequired().HasMaxLength(200);
             entity.Property(e => e.UserId).IsRequired();
+            entity.Property(e => e.PrimaryModel).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.FallbackModel).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.RoutingMode).IsRequired().HasMaxLength(50);
             entity.HasIndex(e => e.SeatSlug).IsUnique();
             entity.HasMany(e => e.TrainingDocuments)
                 .WithOne(e => e.Bot)

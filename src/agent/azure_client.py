@@ -36,6 +36,7 @@ class AzureAIClient:
         messages: List[Dict[str, str]],
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
+        model: Optional[str] = None,
         stream: bool = False
     ) -> Dict[str, Any]:
         """Generate a chat completion.
@@ -65,6 +66,8 @@ class AzureAIClient:
             result = {
                 "id": response.id,
                 "model": response.model,
+                "requested_model": model or self.azure_config.model,
+                "deployment_name": self.azure_config.deployment_name,
                 "created": response.created,
                 "content": response.choices[0].message.content,
                 "role": response.choices[0].message.role,

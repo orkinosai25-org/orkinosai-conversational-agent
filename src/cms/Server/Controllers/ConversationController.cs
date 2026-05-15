@@ -54,7 +54,8 @@ public class ConversationController : ControllerBase
                 sourceUrl: dto.SourceUrl,
                 language: dto.Language,
                 visitorName: dto.VisitorName,
-                visitorEmail: dto.VisitorEmail);
+                visitorEmail: dto.VisitorEmail,
+                metadataJson: dto.MetadataJson);
 
             var result = MapConversation(conversation);
 
@@ -99,7 +100,7 @@ public class ConversationController : ControllerBase
             var message = await _conversationService.AddMessageAsync(
                 sessionId, dto.Role, dto.Content,
                 botId, seatSlug,
-                dto.Model, dto.TokensInput, dto.TokensOutput, dto.Confidence);
+                dto.Model, dto.TokensInput, dto.TokensOutput, dto.Confidence, dto.MessageMetadataJson);
 
             return CreatedAtAction(
                 nameof(GetBySession),
@@ -356,7 +357,8 @@ public class ConversationController : ControllerBase
                 answerQuality: dto.AnswerQuality,
                 resolutionSource: dto.ResolutionSource,
                 escalationReason: dto.EscalationReason,
-                intent: dto.Intent);
+                intent: dto.Intent,
+                metadataJson: dto.MetadataJson);
             return Ok(MapConversation(conversation));
         }
         catch (KeyNotFoundException)
@@ -482,6 +484,7 @@ public class ConversationController : ControllerBase
         LastActivityAtUtc = c.LastActivityAtUtc,
         UpdatedAt = c.UpdatedAt,
         EndedAt = c.EndedAt,
+        MetadataJson = c.MetadataJson,
         Messages = c.Messages.Select(MapMessage).ToList()
     };
 
@@ -506,6 +509,7 @@ public class ConversationController : ControllerBase
         LastActivityAtUtc = c.LastActivityAtUtc,
         UpdatedAt = c.UpdatedAt,
         EndedAt = c.EndedAt,
+        MetadataJson = c.MetadataJson,
         Summary = c.Summary,
         Sentiment = c.Sentiment,
         SentimentScore = c.SentimentScore,
@@ -524,7 +528,8 @@ public class ConversationController : ControllerBase
         Model = m.Model,
         TokensInput = m.TokensInput,
         TokensOutput = m.TokensOutput,
-        Confidence = m.Confidence
+        Confidence = m.Confidence,
+        MessageMetadataJson = m.MessageMetadataJson
     };
 
     private static ConversationExportDto MapExport(
@@ -555,6 +560,8 @@ public class ConversationController : ControllerBase
         EscalationReason = c.EscalationReason,
         AnswerQuality = c.AnswerQuality,
         ResolutionSource = c.ResolutionSource,
+        MetadataJson = c.MetadataJson,
+        Messages = c.Messages.Select(MapMessage).ToList(),
         Transcript = transcript,
         Ticket = c.Ticket == null ? null : new ExportedTicketDto
         {
