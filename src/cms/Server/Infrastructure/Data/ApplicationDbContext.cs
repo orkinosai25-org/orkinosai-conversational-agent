@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SiteChatCMS.Core.Entities.Conversations;
 using SiteChatCMS.Core.Entities.Identity;
 using SiteChatCMS.Core.Entities.Issues;
 
@@ -20,6 +21,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<TrainingDocument> TrainingDocuments { get; set; }
     public DbSet<TrainingUrl> TrainingUrls { get; set; }
     public DbSet<Issue> Issues { get; set; }
+    public DbSet<Conversation> Conversations { get; set; }
+    public DbSet<ConversationMessage> ConversationMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -101,6 +104,45 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.Status).IsRequired();
             entity.HasIndex(e => e.Status);
             entity.HasIndex(e => e.CreatedAt);
+        });
+
+        // Conversation configuration
+        builder.Entity<Conversation>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.SessionId).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.TenantId).HasMaxLength(450);
+            entity.Property(e => e.BotId).HasMaxLength(450);
+            entity.Property(e => e.SeatSlug).HasMaxLength(200);
+            entity.Property(e => e.SourceUrl).HasMaxLength(2000);
+            entity.Property(e => e.Language).HasMaxLength(20);
+            entity.Property(e => e.VisitorName).HasMaxLength(200);
+            entity.Property(e => e.VisitorEmail).HasMaxLength(254);
+            entity.Property(e => e.Status).IsRequired();
+            entity.HasIndex(e => e.SessionId).IsUnique();
+            entity.HasIndex(e => e.SeatSlug);
+            entity.HasIndex(e => e.TenantId);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasMany(e => e.Messages)
+                .WithOne(e => e.Conversation)
+                .HasForeignKey(e => e.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Ticket)
+                .WithMany()
+                .HasForeignKey(e => e.TicketId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // ConversationMessage configuration
+        builder.Entity<ConversationMessage>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Role).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Content).IsRequired().HasMaxLength(50000);
+            entity.Property(e => e.Model).HasMaxLength(100);
+            entity.HasIndex(e => e.ConversationId);
+            entity.HasIndex(e => new { e.ConversationId, e.SequenceNumber });
+            entity.HasIndex(e => e.Timestamp);
         });
     }
 }
