@@ -62,10 +62,76 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
+  # Migrate job — applies EF Core migrations to Azure SQL before the new app code goes live.
+  # Runs on ubuntu-latest so the dotnet-ef tool can connect directly to Azure SQL.
+  # Skipped gracefully when SQL_CONNECTION_STRING is not configured (e.g. first-time
+  # setup before infra is provisioned — use azure-provision.yml for that).
+  #
+  # Required GitHub Secret (optional — workflow degrades gracefully if absent):
+  #   SQL_CONNECTION_STRING — full ADO.NET connection string for Azure SQL
+  #                           (set via Settings > Secrets and variables > Actions)
+  migrate:
+    name: Apply EF Core Migrations
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Check SQL_CONNECTION_STRING secret
+        id: check-secret
+        shell: bash
+        env:
+          SQL_CONNECTION_STRING: ${{ secrets.SQL_CONNECTION_STRING }}
+        run: |
+          if [ -z "$SQL_CONNECTION_STRING" ]; then
+            echo "⚠️  SQL_CONNECTION_STRING secret is not set — skipping migrations." >> "$GITHUB_STEP_SUMMARY"
+            echo "   Add the Azure SQL connection string as a repository secret to enable" >> "$GITHUB_STEP_SUMMARY"
+            echo "   automatic migrations on deploy (Settings → Secrets and variables → Actions)." >> "$GITHUB_STEP_SUMMARY"
+            echo "   Alternatively, run the 'Provision Azure Infrastructure (Full)' workflow" >> "$GITHUB_STEP_SUMMARY"
+            echo "   which provisions infra and migrates in a single operation." >> "$GITHUB_STEP_SUMMARY"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dotnet-ef tool
+        if: steps.check-secret.outputs.skip == 'false'
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Restore packages
+        if: steps.check-secret.outputs.skip == 'false'
+        run: dotnet restore src/cms/Server/PapaganCMS.csproj
+
+      - name: Build project (required for dotnet-ef to locate DbContext)
+        if: steps.check-secret.outputs.skip == 'false'
+        run: dotnet build src/cms/Server/PapaganCMS.csproj --no-restore --configuration Release
+
+      - name: Apply EF Core migrations
+        if: steps.check-secret.outputs.skip == 'false'
+        run: dotnet ef database update --project src/cms/Server/PapaganCMS.csproj --no-build
+        env:
+          # The ApplicationDbContextDesignTimeFactory reads the CONNECTIONSTRINGS__DEFAULT
+          # environment variable. SQL_CONNECTION_STRING is the GitHub secret name; it is
+          # mapped here to the correct env var name that the factory expects.
+          CONNECTIONSTRINGS__DEFAULT: ${{ secrets.SQL_CONNECTION_STRING }}
+
+      - name: Report migration result
+        if: steps.check-secret.outputs.skip == 'false'
+        run: echo "✅ EF Core migrations applied successfully." >> "$GITHUB_STEP_SUMMARY"
+
   # Deploy job - deploys the published application to Azure using publish profile
   deploy:
     runs-on: windows-latest
-    needs: build
+    needs: migrate
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}

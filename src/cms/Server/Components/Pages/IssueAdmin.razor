@@ -1,0 +1,519 @@
+@page "/admin/support-hub"
+@page "/admin/issues"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using SiteChatCMS.Shared.DTOs.Issues
+
+<PageTitle>AI Support Hub — Admin Console</PageTitle>
+
+<div class="issue-admin">
+    <div class="admin-header">
+        <div>
+            <h1>🤖 AI Support Hub</h1>
+            <p class="subtitle">Review AI-analysed support tickets, track progress and resolve user requests.</p>
+        </div>
+        <a href="/support/submit" class="btn btn-outline">💬 Get Support</a>
+    </div>
+
+    @if (loading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading issues...</p>
+        </div>
+    }
+    else
+    {
+        <!-- ── Stats dashboard ── -->
+        @if (stats != null)
+        {
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-body">
+                        <div class="stat-value">@stats.TotalIssues</div>
+                        <div class="stat-label">Total Tickets</div>
+                    </div>
+                </div>
+                <div class="stat-card open">
+                    <div class="stat-icon">🔓</div>
+                    <div class="stat-body">
+                        <div class="stat-value">@stats.OpenIssues</div>
+                        <div class="stat-label">Open</div>
+                    </div>
+                </div>
+                <div class="stat-card in-progress">
+                    <div class="stat-icon">🔧</div>
+                    <div class="stat-body">
+                        <div class="stat-value">@stats.InProgressIssues</div>
+                        <div class="stat-label">In Progress</div>
+                    </div>
+                </div>
+                <div class="stat-card resolved">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-body">
+                        <div class="stat-value">@stats.ResolvedIssues</div>
+                        <div class="stat-label">Resolved</div>
+                    </div>
+                </div>
+                <div class="stat-card closed">
+                    <div class="stat-icon">🔒</div>
+                    <div class="stat-body">
+                        <div class="stat-value">@stats.ClosedIssues</div>
+                        <div class="stat-label">Closed</div>
+                    </div>
+                </div>
+                <div class="stat-card critical">
+                    <div class="stat-icon">🚨</div>
+                    <div class="stat-body">
+                        <div class="stat-value">@stats.CriticalIssues</div>
+                        <div class="stat-label">Critical</div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- ── Tickets table ── -->
+        <div class="section">
+            <div class="section-header">
+                <h2>📂 Support Tickets</h2>
+                <div class="filter-bar">
+                    <label>Filter by status:</label>
+                    <select @bind="statusFilter" @bind:after="ApplyFilter">
+                        <option value="">All</option>
+                        <option value="Open">Open</option>
+                        <option value="InProgress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+            </div>
+
+            @if (filteredIssues == null || !filteredIssues.Any())
+            {
+                <div class="empty-state">
+                    <p>No tickets found.</p>
+                </div>
+            }
+            else
+            {
+                <div class="issues-table-wrapper">
+                    <table class="issues-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Submitted By</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var issue in filteredIssues)
+                            {
+                                <tr class="issue-row @issue.Status.ToLower().Replace(" ", "-")">
+                                    <td>@issue.Id</td>
+                                    <td>
+                                        <span class="issue-title">@issue.Title</span>
+                                        @if (!string.IsNullOrEmpty(issue.AdminNotes))
+                                        {
+                                            @if (issue.AdminNotes.StartsWith("[AI Summary]", StringComparison.Ordinal))
+                                            {
+                                                <span class="has-notes ai-origin" title="Auto-created from AI conversation">🤖</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="has-notes" title="Has admin notes">📌</span>
+                                            }
+                                        }
+                                    </td>
+                                    <td><span class="badge type-@issue.Type.ToLower()">@issue.Type</span></td>
+                                    <td><span class="badge priority-@issue.Priority.ToLower()">@issue.Priority</span></td>
+                                    <td><span class="badge status-@issue.Status.ToLower().Replace(" ", "-")">@issue.Status</span></td>
+                                    <td>
+                                        <span>@issue.SubmitterName</span><br />
+                                        <small>@issue.SubmitterEmail</small>
+                                    </td>
+                                    <td>@issue.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                    <td class="actions">
+                                        <button class="btn btn-sm btn-info" @onclick="() => OpenDetail(issue)">View</button>
+                                        @if (issue.Status == "Open")
+                                        {
+                                            <button class="btn btn-sm btn-primary" @onclick="() => StartIssue(issue.Id)">Start</button>
+                                        }
+                                        @if (issue.Status == "Open" || issue.Status == "InProgress")
+                                        {
+                                            <button class="btn btn-sm btn-success" @onclick="() => ResolveIssue(issue.Id)">Resolve</button>
+                                        }
+                                        @if (issue.Status != "Closed")
+                                        {
+                                            <button class="btn btn-sm btn-secondary" @onclick="() => CloseIssue(issue.Id)">Close</button>
+                                        }
+                                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteIssue(issue.Id)">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <!-- ── Detail / edit panel ── -->
+        @if (selectedIssue != null)
+        {
+            <div class="modal-backdrop" @onclick="CloseDetail"></div>
+            <div class="modal-panel">
+                <div class="modal-header">
+                    <h3>Ticket #@selectedIssue.Id</h3>
+                    <button class="close-btn" @onclick="CloseDetail">✕</button>
+                </div>
+                <div class="modal-body">
+                    @if (selectedIssue.AdminNotes?.StartsWith("[AI Summary]", StringComparison.Ordinal) == true)
+                    {
+                        <div class="ai-analysis-banner">
+                            <span class="ai-badge">🤖 AI Analysed</span>
+                            <span class="ai-note-preview">@ParseAiSummary(selectedIssue.AdminNotes)</span>
+                        </div>
+                    }
+                    <div class="detail-row">
+                        <strong>Title:</strong>
+                        <input class="form-control" @bind="editTitle" />
+                    </div>
+                    <div class="detail-row">
+                        <strong>Description:</strong>
+                        <textarea class="form-control" rows="4" @bind="editDescription"></textarea>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Type:</strong>
+                        <select class="form-control" @bind="editType">
+                            <option value="Bug">Bug</option>
+                            <option value="FeatureRequest">Feature Request</option>
+                            <option value="Question">Question</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Priority:</strong>
+                        <select class="form-control" @bind="editPriority">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Status:</strong>
+                        <select class="form-control" @bind="editStatus">
+                            <option value="Open">Open</option>
+                            <option value="InProgress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Admin Notes:</strong>
+                        <textarea class="form-control" rows="3" @bind="editAdminNotes"></textarea>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Submitted by:</strong>
+                        <span>@selectedIssue.SubmitterName (@selectedIssue.SubmitterEmail)</span>
+                    </div>
+                    @if (selectedIssue.ResolvedAt.HasValue)
+                    {
+                        <div class="detail-row">
+                            <strong>Resolved at:</strong>
+                            <span>@selectedIssue.ResolvedAt.Value.ToString("yyyy-MM-dd HH:mm") UTC</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(saveError))
+                    {
+                        <div class="alert alert-danger">@saveError</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" @onclick="SaveIssue">💾 Save Changes</button>
+                    <button class="btn btn-secondary" @onclick="CloseDetail">Cancel</button>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(actionMessage))
+        {
+            <div class="toast @(actionSuccess ? "toast-success" : "toast-error")">@actionMessage</div>
+        }
+    }
+</div>
+
+<style>
+    .issue-admin { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; font-family: var(--font-sans, sans-serif); }
+    .admin-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .admin-header h1 { margin: 0; font-size: 1.8rem; }
+    .subtitle { color: #666; margin: 0.25rem 0 0; }
+    .loading-state { text-align: center; padding: 3rem; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: #4CAF50; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem; }
+    @@keyframes spin { to { transform: rotate(360deg); } }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; display: flex; align-items: center; gap: 0.75rem; }
+    .stat-icon { font-size: 1.8rem; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .stat-label { font-size: 0.8rem; color: #666; }
+    .stat-card.open { border-left: 4px solid #2196F3; }
+    .stat-card.in-progress { border-left: 4px solid #FF9800; }
+    .stat-card.resolved { border-left: 4px solid #4CAF50; }
+    .stat-card.closed { border-left: 4px solid #9E9E9E; }
+    .stat-card.critical { border-left: 4px solid #F44336; }
+    .section { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .section-header h2 { margin: 0; }
+    .filter-bar { display: flex; align-items: center; gap: 0.5rem; }
+    .filter-bar select { padding: 0.4rem 0.75rem; border: 1px solid #ccc; border-radius: 4px; }
+    .issues-table-wrapper { overflow-x: auto; }
+    .issues-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .issues-table th { background: #f5f5f5; padding: 0.75rem 0.5rem; text-align: left; border-bottom: 2px solid #e0e0e0; white-space: nowrap; }
+    .issues-table td { padding: 0.6rem 0.5rem; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    .issues-table tr:hover td { background: #fafafa; }
+    .issue-title { font-weight: 500; }
+    .has-notes { margin-left: 0.25rem; font-size: 0.85rem; }
+    .badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .badge.type-bug { background: #FFEBEE; color: #C62828; }
+    .badge.type-featurerequest { background: #E3F2FD; color: #1565C0; }
+    .badge.type-question { background: #F3E5F5; color: #6A1B9A; }
+    .badge.type-other { background: #F5F5F5; color: #424242; }
+    .badge.priority-low { background: #E8F5E9; color: #2E7D32; }
+    .badge.priority-medium { background: #FFF8E1; color: #F57F17; }
+    .badge.priority-high { background: #FFF3E0; color: #E65100; }
+    .badge.priority-critical { background: #FFEBEE; color: #B71C1C; }
+    .badge.status-open { background: #E3F2FD; color: #1565C0; }
+    .badge.status-inprogress { background: #FFF8E1; color: #F57F17; }
+    .badge.status-resolved { background: #E8F5E9; color: #2E7D32; }
+    .badge.status-closed { background: #F5F5F5; color: #757575; }
+    .actions { white-space: nowrap; }
+    .btn { display: inline-block; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 0.9rem; }
+    .btn-sm { padding: 0.25rem 0.6rem; font-size: 0.8rem; margin: 0.1rem; }
+    .btn-primary { background: #4CAF50; color: #fff; }
+    .btn-primary:hover { background: #388E3C; }
+    .btn-secondary { background: #9E9E9E; color: #fff; }
+    .btn-secondary:hover { background: #757575; }
+    .btn-info { background: #2196F3; color: #fff; }
+    .btn-info:hover { background: #1565C0; }
+    .btn-success { background: #4CAF50; color: #fff; }
+    .btn-success:hover { background: #388E3C; }
+    .btn-danger { background: #F44336; color: #fff; }
+    .btn-danger:hover { background: #C62828; }
+    .btn-outline { background: transparent; border: 1px solid #4CAF50; color: #4CAF50; }
+    .btn-outline:hover { background: #4CAF50; color: #fff; }
+    .empty-state { text-align: center; padding: 2rem; color: #999; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; }
+    .modal-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #fff; border-radius: 8px; width: 90%; max-width: 640px; max-height: 90vh; overflow-y: auto; z-index: 101; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #e0e0e0; }
+    .modal-header h3 { margin: 0; }
+    .close-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #666; }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #e0e0e0; display: flex; gap: 0.5rem; justify-content: flex-end; }
+    .detail-row { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+    .detail-row strong { font-size: 0.85rem; color: #555; }
+    .form-control { width: 100%; padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; box-sizing: border-box; }
+    .alert { padding: 0.75rem 1rem; border-radius: 4px; margin-top: 0.5rem; }
+    .alert-danger { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.75rem 1.25rem; border-radius: 6px; z-index: 200; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: fadeIn 0.3s ease; }
+    .toast-success { background: #E8F5E9; color: #2E7D32; border: 1px solid #A5D6A7; }
+    .toast-error { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; }
+    .ai-analysis-banner { display: flex; align-items: flex-start; gap: 0.5rem; background: #E8F5E9; border: 1px solid #A5D6A7; border-radius: 6px; padding: 0.65rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #2E7D32; }
+    .ai-badge { white-space: nowrap; font-weight: 600; }
+    .ai-note-preview { color: #333; font-style: italic; }
+    @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+@code {
+    private bool loading = true;
+    private IssueStatsDto? stats;
+    private List<IssueDto>? allIssues;
+    private List<IssueDto>? filteredIssues;
+    private string statusFilter = "";
+
+    private IssueDto? selectedIssue;
+    private string editTitle = "";
+    private string editDescription = "";
+    private string editType = "";
+    private string editPriority = "";
+    private string editStatus = "";
+    private string? editAdminNotes;
+    private string? saveError;
+
+    private string actionMessage = "";
+    private bool actionSuccess = true;
+    private System.Timers.Timer? toastTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        try
+        {
+            var issuesTask = Http.GetFromJsonAsync<List<IssueDto>>("api/issue/admin/all");
+            var statsTask = Http.GetFromJsonAsync<IssueStatsDto>("api/issue/admin/stats");
+            await Task.WhenAll(issuesTask, statsTask);
+            allIssues = issuesTask.Result ?? new();
+            stats = statsTask.Result;
+            ApplyFilter();
+        }
+        catch
+        {
+            allIssues = new();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void ApplyFilter()
+    {
+        if (string.IsNullOrEmpty(statusFilter))
+            filteredIssues = allIssues?.ToList();
+        else
+            filteredIssues = allIssues?.Where(i => i.Status == statusFilter).ToList();
+    }
+
+    private void OpenDetail(IssueDto issue)
+    {
+        selectedIssue = issue;
+        editTitle = issue.Title;
+        editDescription = issue.Description;
+        editType = issue.Type;
+        editPriority = issue.Priority;
+        editStatus = issue.Status;
+        editAdminNotes = issue.AdminNotes;
+        saveError = null;
+    }
+
+    private void CloseDetail()
+    {
+        selectedIssue = null;
+        saveError = null;
+    }
+
+    private async Task SaveIssue()
+    {
+        if (selectedIssue == null) return;
+        saveError = null;
+
+        var dto = new UpdateIssueDto
+        {
+            Title = editTitle,
+            Description = editDescription,
+            Type = editType,
+            Priority = editPriority,
+            Status = editStatus,
+            AdminNotes = editAdminNotes
+        };
+
+        var response = await Http.PutAsJsonAsync($"api/issue/admin/{selectedIssue.Id}", dto);
+        if (response.IsSuccessStatusCode)
+        {
+            CloseDetail();
+            await LoadData();
+            ShowToast("Issue updated successfully.", true);
+        }
+        else
+        {
+            saveError = "Failed to save changes. Please try again.";
+        }
+    }
+
+    private async Task StartIssue(int id)
+    {
+        var response = await Http.PostAsync($"api/issue/admin/{id}/start", null);
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadData();
+            ShowToast("Issue marked as In Progress.", true);
+        }
+        else
+        {
+            ShowToast("Could not update issue.", false);
+        }
+    }
+
+    private async Task ResolveIssue(int id)
+    {
+        var response = await Http.PostAsync($"api/issue/admin/{id}/resolve", null);
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadData();
+            ShowToast("Issue resolved.", true);
+        }
+        else
+        {
+            ShowToast("Could not resolve issue.", false);
+        }
+    }
+
+    private async Task CloseIssue(int id)
+    {
+        var response = await Http.PostAsync($"api/issue/admin/{id}/close", null);
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadData();
+            ShowToast("Issue closed.", true);
+        }
+        else
+        {
+            ShowToast("Could not close issue.", false);
+        }
+    }
+
+    private async Task DeleteIssue(int id)
+    {
+        var response = await Http.DeleteAsync($"api/issue/admin/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadData();
+            ShowToast("Issue deleted.", true);
+        }
+        else
+        {
+            ShowToast("Could not delete issue.", false);
+        }
+    }
+
+    private void ShowToast(string message, bool success)
+    {
+        actionMessage = message;
+        actionSuccess = success;
+        toastTimer?.Dispose();
+        toastTimer = new System.Timers.Timer(3500);
+        toastTimer.Elapsed += (_, _) =>
+        {
+            actionMessage = "";
+            InvokeAsync(StateHasChanged);
+            toastTimer?.Dispose();
+        };
+        toastTimer.AutoReset = false;
+        toastTimer.Start();
+    }
+
+    /// <summary>
+    /// Extracts the human-readable AI summary line from AdminNotes written by the
+    /// from-conversation endpoint (format: "[AI Summary] …\n[Sentiment] …").
+    /// </summary>
+    private static string ParseAiSummary(string? adminNotes)
+    {
+        if (string.IsNullOrWhiteSpace(adminNotes)) return string.Empty;
+        var lines = adminNotes.Split('\n');
+        var summaryLine = lines.FirstOrDefault(l => l.StartsWith("[AI Summary]", StringComparison.Ordinal));
+        var sentimentLine = lines.FirstOrDefault(l => l.StartsWith("[Sentiment]", StringComparison.Ordinal));
+        var parts = new List<string>();
+        if (summaryLine != null) parts.Add(summaryLine.Replace("[AI Summary]", "Summary:", StringComparison.Ordinal).Trim());
+        if (sentimentLine != null) parts.Add(sentimentLine.Replace("[Sentiment]", "Sentiment:", StringComparison.Ordinal).Trim());
+        return string.Join(" · ", parts);
+    }
+}

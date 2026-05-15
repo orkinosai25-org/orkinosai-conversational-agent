@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SiteChatCMS.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SiteChatCMS.Infrastructure.Data;
 namespace PapaganCMS.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260514200000_AddConversationsTable")]
+    partial class AddConversationsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -272,11 +275,6 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
                     b.Property<string>("EmbedCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FallbackModel")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -296,16 +294,6 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
 
                     b.Property<string>("OrganizationId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PrimaryModel")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("RoutingMode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("SeatSlug")
                         .IsRequired()
@@ -650,17 +638,9 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AnswerQuality")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("BotId")
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Category")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -668,47 +648,19 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
                     b.Property<DateTime?>("EndedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("EscalationReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Intent")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
                     b.Property<bool>("IsResolved")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsTicketCreated")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("WasEscalated")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("LastActivityAtUtc")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Language")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("MetadataJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResolutionSource")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("SeatSlug")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Sentiment")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<double?>("SentimentScore")
-                        .HasColumnType("float");
 
                     b.Property<string>("SessionId")
                         .IsRequired()
@@ -718,17 +670,6 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
                     b.Property<string>("SourceUrl")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Summary")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("TenantId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int?>("TicketId")
                         .HasColumnType("int");
@@ -756,9 +697,6 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Conversations_SessionId");
 
-                    b.HasIndex("TenantId")
-                        .HasDatabaseName("IX_Conversations_TenantId");
-
                     b.HasIndex("TicketId")
                         .HasDatabaseName("IX_Conversations_TicketId");
 
@@ -773,9 +711,6 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<double?>("Confidence")
-                        .HasColumnType("float");
-
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(50000)
@@ -787,29 +722,13 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("MessageMetadataJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Model")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("SequenceNumber")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("TokensInput")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TokensOutput")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -821,9 +740,6 @@ namespace PapaganCMS.Infrastructure.Data.Migrations
 
                     b.HasIndex("Timestamp")
                         .HasDatabaseName("IX_ConversationMessages_Timestamp");
-
-                    b.HasIndex("ConversationId", "SequenceNumber")
-                        .HasDatabaseName("IX_ConversationMessages_ConversationId_SequenceNumber");
 
                     b.ToTable("ConversationMessages");
                 });
