@@ -2,10 +2,12 @@
 @page "/chat/{BotId}"
 @page "/c/{SeatSlug}"
 @using SiteChatCMS.Shared.DTOs.Bots
+@using SiteChatCMS.Shared.DTOs.Conversations
 @inject IJSRuntime JSRuntime
 @inject IHttpClientFactory HttpClientFactory
 @inject ILogger<ChatAgent> Logger
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
 <PageTitle>@(string.IsNullOrWhiteSpace(seatContextLabel) ? "Orkinosai Chat Agent" : $"Chat with {seatContextLabel} | Orkinosai")</PageTitle>
 
@@ -135,6 +137,7 @@
     private readonly IReadOnlyList<BotRoutingModeOptionDto> routingModes = BotRoutingCatalog.All;
     private HttpClient? httpClient;
     private string? seatId;
+    private string? resolvedSeatSlug;
     private string? allowedDomain;
     private string seatContextLabel = string.Empty;
     private bool isPublicMode = false;
@@ -146,6 +149,7 @@
     private string routingMode = BotRoutingCatalog.DefaultMode;
     private RoutingResponse? lastRouting;
     private decimal lastEstimatedCost;
+    private bool conversationStarted;
 
     private class ChatMessage
     {
@@ -159,6 +163,7 @@
         // Get HttpClient from factory
         httpClient = HttpClientFactory.CreateClient("ChatBackend");
         await LoadSeatContext();
+        await EnsureConversationStartedAsync();
         
         // Add welcome message
         messages.Add(new ChatMessage 
@@ -197,6 +202,9 @@
             }
 
             Logger.LogInformation("Sending chat message to backend");
+
+            await EnsureConversationStartedAsync();
+            await PersistConversationMessageAsync("user", message, messageMetadataJson: BuildUserMessageMetadataJson());
             
             // Call the Python backend chat API
             var response = await httpClient.PostAsJsonAsync("/chat", new
@@ -225,6 +233,8 @@
                     });
                     lastRouting = result.routing;
                     lastEstimatedCost = result.estimated_cost_usd;
+                    await PersistAssistantTurnAsync(result);
+                    await SyncConversationWorkflowAsync(result);
                     Logger.LogInformation("Received successful response from backend");
                 }
             }
@@ -269,6 +279,9 @@
     {
         messages.Clear();
         conversationId = BuildConversationId(seatId);
+        conversationStarted = false;
+        lastRouting = null;
+        lastEstimatedCost = 0;
         
         messages.Add(new ChatMessage 
         { 
@@ -298,9 +311,10 @@
         public string? conversation_id { get; set; }
         public string? user_message { get; set; }
         public string? assistant_message { get; set; }
-        public object? usage { get; set; }
+        public UsageResponse? usage { get; set; }
         public string? timestamp { get; set; }
         public RoutingResponse? routing { get; set; }
+        public ClassificationResponse? classification { get; set; }
         public decimal estimated_cost_usd { get; set; }
     }
 
@@ -309,6 +323,28 @@
         public string? mode { get; set; }
         public string? assigned_model { get; set; }
         public string? fallback_model { get; set; }
+        public bool create_issue { get; set; }
+        public bool escalate_to_human { get; set; }
+        public string? reason { get; set; }
+        public string? requested_model { get; set; }
+        public string? deployment_name { get; set; }
+    }
+
+    private class ClassificationResponse
+    {
+        public string? intent { get; set; }
+        public string? complexity { get; set; }
+        public double confidence { get; set; }
+        public string? sentiment { get; set; }
+        public string? language { get; set; }
+        public string? normalized_message { get; set; }
+    }
+
+    private class UsageResponse
+    {
+        public int prompt_tokens { get; set; }
+        public int completion_tokens { get; set; }
+        public int total_tokens { get; set; }
     }
 
     private async Task LoadSeatContext()
@@ -343,6 +379,7 @@
             }
 
             seatId = seat.Id;
+            resolvedSeatSlug = seat.SeatSlug;
             allowedDomain = GetDomainHost(seat.SiteUrl);
             seatContextLabel = allowedDomain ?? seat.Name;
             temperature = seat.Temperature;
@@ -364,6 +401,110 @@
         {
             Logger.LogWarning(ex, "Failed to load seat context");
             conversationId = BuildConversationId(null);
+        }
+    }
+
+    private async Task EnsureConversationStartedAsync()
+    {
+        if (conversationStarted)
+        {
+            return;
+        }
+
+        try
+        {
+            var dto = new StartConversationDto
+            {
+                SessionId = conversationId,
+                BotId = seatId,
+                SeatSlug = resolvedSeatSlug ?? SeatSlug,
+                SourceUrl = Navigation.Uri,
+                Language = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName,
+                MetadataJson = BuildConversationMetadataJson()
+            };
+
+            var response = await Http.PostAsJsonAsync("api/conversation/start", dto);
+            if (response.IsSuccessStatusCode)
+            {
+                conversationStarted = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to start persistent conversation {ConversationId}", conversationId);
+        }
+    }
+
+    private async Task PersistConversationMessageAsync(
+        string role,
+        string content,
+        string? model = null,
+        int? tokensInput = null,
+        int? tokensOutput = null,
+        double? confidence = null,
+        string? messageMetadataJson = null)
+    {
+        try
+        {
+            var dto = new AddMessageDto
+            {
+                Role = role,
+                Content = content,
+                Model = model,
+                TokensInput = tokensInput,
+                TokensOutput = tokensOutput,
+                Confidence = confidence,
+                MessageMetadataJson = messageMetadataJson
+            };
+
+            await Http.PostAsJsonAsync(
+                $"api/conversation/{conversationId}/messages?botId={Uri.EscapeDataString(seatId ?? string.Empty)}&seatSlug={Uri.EscapeDataString(resolvedSeatSlug ?? SeatSlug ?? string.Empty)}",
+                dto);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to persist {Role} message for conversation {ConversationId}", role, conversationId);
+        }
+    }
+
+    private async Task PersistAssistantTurnAsync(ChatResponse result)
+    {
+        await PersistConversationMessageAsync(
+            "assistant",
+            result.assistant_message ?? string.Empty,
+            model: result.routing?.assigned_model,
+            tokensInput: result.usage?.prompt_tokens,
+            tokensOutput: result.usage?.completion_tokens,
+            confidence: result.classification?.confidence,
+            messageMetadataJson: BuildAssistantMessageMetadataJson(result));
+    }
+
+    private async Task SyncConversationWorkflowAsync(ChatResponse result)
+    {
+        try
+        {
+            var metadataDto = new SetTrainingMetadataDto
+            {
+                Intent = result.classification?.intent,
+                EscalationReason = result.routing?.escalate_to_human == true ? result.routing?.reason : null,
+                ResolutionSource = result.routing?.escalate_to_human == true ? "Pending" : "AI",
+                MetadataJson = BuildConversationMetadataJson(result)
+            };
+
+            await Http.PostAsJsonAsync($"api/conversation/{conversationId}/metadata", metadataDto);
+
+            if (result.routing?.create_issue == true)
+            {
+                await Http.PostAsync($"api/conversation/{conversationId}/analyse?createTicket=true", null);
+            }
+            else if (result.routing?.escalate_to_human == true)
+            {
+                await Http.PostAsync($"api/conversation/{conversationId}/escalate", null);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to sync support workflow for conversation {ConversationId}", conversationId);
         }
     }
 
@@ -417,6 +558,45 @@
     }
 
     private BotModelOptionDto GetSelectedModel() => BotModelCatalog.Get(selectedModel);
+
+    private string BuildConversationMetadataJson(ChatResponse? result = null)
+    {
+        var payload = new
+        {
+            routing_mode = routingMode,
+            selected_model = selectedModel,
+            fallback_model = fallbackModel,
+            latest_routing = result?.routing,
+            latest_classification = result?.classification,
+            estimated_cost_usd = result?.estimated_cost_usd
+        };
+
+        return System.Text.Json.JsonSerializer.Serialize(payload);
+    }
+
+    private string BuildUserMessageMetadataJson()
+    {
+        var payload = new
+        {
+            requested_routing_mode = routingMode,
+            requested_model = selectedModel,
+            requested_fallback_model = fallbackModel
+        };
+
+        return System.Text.Json.JsonSerializer.Serialize(payload);
+    }
+
+    private static string BuildAssistantMessageMetadataJson(ChatResponse result)
+    {
+        var payload = new
+        {
+            routing = result.routing,
+            classification = result.classification,
+            estimated_cost_usd = result.estimated_cost_usd
+        };
+
+        return System.Text.Json.JsonSerializer.Serialize(payload);
+    }
 }
 
 <style>

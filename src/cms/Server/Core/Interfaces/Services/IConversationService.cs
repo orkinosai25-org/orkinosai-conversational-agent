@@ -23,7 +23,8 @@ public interface IConversationService
         string? sourceUrl = null,
         string? language = null,
         string? visitorName = null,
-        string? visitorEmail = null);
+        string? visitorEmail = null,
+        string? metadataJson = null);
 
     /// <summary>Retrieves a conversation by its external session ID, including messages ordered by SequenceNumber.</summary>
     Task<Conversation?> GetBySessionIdAsync(string sessionId);
@@ -47,7 +48,8 @@ public interface IConversationService
         string? model = null,
         int? tokensInput = null,
         int? tokensOutput = null,
-        double? confidence = null);
+        double? confidence = null,
+        string? messageMetadataJson = null);
 
     /// <summary>Returns all messages for a conversation, ordered by SequenceNumber then Timestamp.</summary>
     Task<IEnumerable<ConversationMessage>> GetMessagesAsync(string sessionId);
@@ -104,7 +106,8 @@ public interface IConversationService
         string? answerQuality = null,
         string? resolutionSource = null,
         string? escalationReason = null,
-        string? intent = null);
+        string? intent = null,
+        string? metadataJson = null);
 
     // ── Dataset export ────────────────────────────────────────────────────────
 

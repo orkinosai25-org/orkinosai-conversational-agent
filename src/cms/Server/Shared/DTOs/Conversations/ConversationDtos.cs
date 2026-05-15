@@ -40,6 +40,9 @@ public class StartConversationDto
     [MaxLength(254)]
     [EmailAddress]
     public string? VisitorEmail { get; set; }
+
+    /// <summary>Optional JSON metadata bag for routing or channel-level context.</summary>
+    public string? MetadataJson { get; set; }
 }
 
 /// <summary>Payload to append a message to an existing conversation.</summary>
@@ -67,6 +70,9 @@ public class AddMessageDto
 
     /// <summary>Model confidence score in the range 0.0 – 1.0.</summary>
     public double? Confidence { get; set; }
+
+    /// <summary>Optional JSON metadata bag for routing/classification details.</summary>
+    public string? MessageMetadataJson { get; set; }
 }
 
 /// <summary>Payload to record the outcome of a conversation.</summary>
@@ -108,6 +114,9 @@ public class ConversationMessageDto
 
     /// <summary>Confidence score 0.0 – 1.0 (if available).</summary>
     public double? Confidence { get; set; }
+
+    /// <summary>Optional JSON metadata bag for routing/classification details.</summary>
+    public string? MessageMetadataJson { get; set; }
 }
 
 /// <summary>Full conversation details including all messages.</summary>
@@ -131,6 +140,7 @@ public class ConversationDto
     public DateTime LastActivityAtUtc { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? EndedAt { get; set; }
+    public string? MetadataJson { get; set; }
     public List<ConversationMessageDto> Messages { get; set; } = new();
 }
 
@@ -156,6 +166,7 @@ public class ConversationSummaryDto
     public DateTime LastActivityAtUtc { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? EndedAt { get; set; }
+    public string? MetadataJson { get; set; }
 
     // ── Training labels (populated after analysis) ────────────────────────────
     public string? Summary { get; set; }
@@ -196,6 +207,9 @@ public class SetTrainingMetadataDto
     /// <summary>Override / refine the detected user intent.</summary>
     [MaxLength(200)]
     public string? Intent { get; set; }
+
+    /// <summary>Optional JSON metadata bag for routing/classification details.</summary>
+    public string? MetadataJson { get; set; }
 }
 
 /// <summary>
@@ -276,6 +290,10 @@ public class ConversationExportDto
     public string? EscalationReason { get; set; }
     public string? AnswerQuality { get; set; }
     public string? ResolutionSource { get; set; }
+
+    // ── Metadata bags ──────────────────────────────────────────────────────────
+    public string? MetadataJson { get; set; }
+    public List<ConversationMessageDto> Messages { get; set; } = new();
 
     // ── Transcript ───────────────────────────────────────────────────────────
     public string Transcript { get; set; } = string.Empty;
