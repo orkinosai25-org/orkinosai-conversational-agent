@@ -119,6 +119,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.VisitorName).HasMaxLength(200);
             entity.Property(e => e.VisitorEmail).HasMaxLength(254);
             entity.Property(e => e.Status).IsRequired();
+            entity.Property(e => e.Summary).HasMaxLength(1000);
+            entity.Property(e => e.Intent).HasMaxLength(200);
+            entity.Property(e => e.Sentiment).HasMaxLength(50);
+            entity.Property(e => e.Category).HasMaxLength(100);
+            entity.Property(e => e.EscalationReason).HasMaxLength(500);
+            entity.Property(e => e.AnswerQuality).HasMaxLength(50);
+            entity.Property(e => e.ResolutionSource).HasMaxLength(50);
             entity.HasIndex(e => e.SessionId).IsUnique();
             entity.HasIndex(e => e.SeatSlug);
             entity.HasIndex(e => e.TenantId);
